@@ -67,8 +67,10 @@ jobs:
       # Exchanges this run's OIDC token for a short-lived NuGet key. The trust is configured
       # on nuget.org against this repository and this workflow filename, so renaming the file
       # breaks publishing by design rather than silently publishing from somewhere else.
+      # Runs even on a dry run. Obtaining a short-lived key publishes nothing, and it is the
+      # only way to prove the trust configuration actually works before a real release
+      # depends on it.
       - name: Authenticate to NuGet
-        if: github.event_name == 'push' || !inputs.dry-run
         id: login
         uses: NuGet/login@v1
         with:
