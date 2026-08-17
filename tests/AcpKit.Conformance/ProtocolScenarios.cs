@@ -25,6 +25,7 @@ internal static class ProtocolScenarios
         runner.Add(Area, "a permission request reaches the client and its answer returns", PermissionRoundTrip);
         runner.Add(Area, "an unknown session update survives the round trip", UnknownUpdatePreserved);
         runner.Add(Area, "tool call patch fields distinguish omitted from cleared", PatchSemantics);
+        runner.Add(Area, "session/cancel ends the turn with stopReason cancelled", CancelEndsTheTurn);
     }
 
     /// <summary>Stand up both halves and hand back the client's connection.</summary>
@@ -145,6 +146,57 @@ internal static class ProtocolScenarios
             Expect.True(idle is not null, "the final state update is the idle variant");
             Expect.True(idle!.Value.StopReason.HasValue, "the idle update carries a stop reason");
             Expect.Equal("end_turn", idle.Value.StopReason.Value.Value, "stop reason");
+        }
+        finally
+        {
+            await stop();
+        }
+    }
+
+    /// <summary>
+    /// Cancellation is an ordinary ending, not an error.
+    /// </summary>
+    /// <remarks>
+    /// A client that treats <c>session/cancel</c> as terminating the conversation, or that
+    /// stops reading once it has sent one, misses the very update that confirms the agent
+    /// stopped. v2 requires the agent to flush pending updates and then report idle carrying
+    /// <c>stopReason: "cancelled"</c>, and that idle update is the only confirmation there is.
+    /// </remarks>
+    private static async Task CancelEndsTheTurn(CancellationToken ct)
+    {
+        var (client, agent, handler, stop) = await ConnectAsync();
+        try
+        {
+            agent.HoldTurnUntilCancelled = true;
+
+            await client.InitializeAsync(NewInitialize(), ct);
+            var session = await client.SessionNewAsync(new NewSessionRequest { Cwd = new AbsolutePath("/tmp") }, ct);
+
+            await client.SessionPromptAsync(
+                new PromptRequest
+                {
+                    SessionId = session.SessionId,
+                    Prompt = [new ContentBlockText { Value = new TextContent { Text = "work forever" } }],
+                },
+                ct);
+
+            // Wait until the turn is genuinely under way, so the cancel cannot race the start.
+            await handler.WaitForUpdatesAsync(2, ct);
+
+            await client.SessionCancelAsync(new CancelSessionNotification { SessionId = session.SessionId }, ct);
+
+            await handler.WaitForUpdatesAsync(3, ct);
+
+            var idle = handler.Updates
+                .Select(u => u.Update)
+                .OfType<SessionUpdateStateUpdate>()
+                .Select(u => u.Value)
+                .OfType<StateUpdateIdle>()
+                .LastOrDefault();
+
+            Expect.True(idle is not null, "the turn ended with an idle state update");
+            Expect.True(idle!.Value.StopReason.HasValue, "the idle update carries a stop reason");
+            Expect.Equal("cancelled", idle.Value.StopReason.Value.Value, "stop reason after cancelling");
         }
         finally
         {

@@ -53,16 +53,18 @@ internal static class UnionEmitter
                 continue;
             }
 
+            var value = variant.PayloadType is { } carried
+                ? "\n        /// <summary>The fields this variant carries, flattened alongside the discriminator on the wire.</summary>\n"
+                  + $"        public required {carried.Name} Value {{ get; init; }}\n"
+                : string.Empty;
+
             yield return parse($$"""
                 {{CSharpEmitter.DocsText(variant.Documentation, string.Empty)}}public sealed class {{variant.CsName}} : {{type.Name}}
                 {
                     /// <inheritdoc/>
                     [JsonIgnore]
                     public override string Discriminator => "{{variant.DiscriminatorValue}}";
-
-                    /// <summary>The fields this variant carries, flattened alongside the discriminator on the wire.</summary>
-                    public required {{variant.PayloadType.Name}} Value { get; init; }
-                }
+                {{value}}}
                 """);
         }
 
@@ -99,9 +101,15 @@ internal static class UnionEmitter
         foreach (var property in type.BaseProperties)
         {
             var local = Camel(property.CsName);
-            var call = property.Required ? "ReadRequired" : "ReadOptional";
+            // A patch field's three states are carried by Patch<T>, so the read has to produce
+            // one. Reading the bare T would collapse "absent" and "cleared" into the same thing,
+            // which is the distinction the whole update model rests on.
+            var call = property.ThreeState
+                ? $"AcpJson.ReadPatch<{property.Type.Name}>(root, \"{property.JsonName}\", options)"
+                : $"AcpJson.{(property.Required ? "ReadRequired" : "ReadOptional")}<{property.Type.Name}>(root, \"{property.JsonName}\", options)";
+
             reads.Append($"""
-                        var {local} = AcpJson.{call}<{property.Type.Name}>(root, "{property.JsonName}", options);
+                        var {local} = {call};
 
             """);
             assignments.Append($"{property.CsName} = {local}, ");
@@ -112,9 +120,12 @@ internal static class UnionEmitter
 
         foreach (var variant in type.Variants)
         {
-            var construct = variant.Inline
-                ? $"AcpJson.Read<{variant.PayloadType.Name}>(root, options)"
-                : $"new {variant.CsName} {{ {shared}Value = AcpJson.Read<{variant.PayloadType.Name}>(root, options) }}";
+            var construct = (variant.Inline, variant.PayloadType) switch
+            {
+                (true, { } inlined) => $"AcpJson.Read<{inlined.Name}>(root, options)",
+                (false, { } carried) => $"new {variant.CsName} {{ {shared}Value = AcpJson.Read<{carried.Name}>(root, options) }}",
+                _ => $"new {variant.CsName} {{ {shared.TrimEnd(' ', ',')} }}",
+            };
 
             cases.Append($$"""
                             "{{variant.DiscriminatorValue}}" => {{construct}},
@@ -125,13 +136,14 @@ internal static class UnionEmitter
         var writes = new StringBuilder();
         foreach (var variant in type.Variants)
         {
-            var payload = variant.Inline ? "typed" : "typed.Value";
-            var caseType = variant.Inline ? variant.PayloadType.Name : variant.CsName;
+            var caseType = variant.Inline ? variant.PayloadType!.Name : variant.CsName;
+            var splice = variant.PayloadType is null
+                ? "break;"
+                : $"AcpJson.WriteMembers(writer, {(variant.Inline ? "typed" : "typed.Value")}, options);\n                            break;";
 
             writes.Append($$"""
                             case {{caseType}} typed:
-                                AcpJson.WriteMembers(writer, {{payload}}, options);
-                                break;
+                                {{splice}}
 
             """);
         }
@@ -139,14 +151,20 @@ internal static class UnionEmitter
         var baseWrites = new StringBuilder();
         foreach (var property in type.BaseProperties)
         {
-            baseWrites.Append($$"""
-                        if (value.{{property.CsName}} is { } {{Camel(property.CsName)}}Value)
-                        {
-                            writer.WritePropertyName("{{property.JsonName}}");
-                            JsonSerializer.Serialize(writer, {{Camel(property.CsName)}}Value, options.GetTypeInfo(typeof({{property.Type.Name}})));
-                        }
+            var local = Camel(property.CsName) + "Written";
+            var write = property.ThreeState
+                ? $$"""
+                            AcpJson.WritePatch(writer, "{{property.JsonName}}", value.{{property.CsName}}, options);
+                """
+                : $$"""
+                            if (value.{{property.CsName}} is { } {{local}})
+                            {
+                                writer.WritePropertyName("{{property.JsonName}}");
+                                JsonSerializer.Serialize(writer, {{local}}, options.GetTypeInfo(typeof({{property.Type.Name}})));
+                            }
+                """;
 
-            """);
+            baseWrites.Append(write).Append('\n');
         }
 
         return $$"""

@@ -143,7 +143,8 @@ internal sealed class ModelBuilder(SchemaSet schema)
     {
         var usage = types.OfType<UnionType>()
             .SelectMany(u => u.Variants)
-            .GroupBy(v => v.PayloadType.Name, StringComparer.Ordinal)
+            .Where(v => v.PayloadType is not null)
+            .GroupBy(v => v.PayloadType!.Name, StringComparer.Ordinal)
             .ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
 
         var objects = types.OfType<ObjectType>().ToDictionary(o => o.Name, StringComparer.Ordinal);
@@ -158,9 +159,10 @@ internal sealed class ModelBuilder(SchemaSet schema)
             var updated = new List<UnionVariant>(union.Variants.Count);
             foreach (var variant in union.Variants)
             {
-                var inline = string.Equals(variant.CsName, variant.PayloadType.Name, StringComparison.Ordinal)
-                    && usage.GetValueOrDefault(variant.PayloadType.Name) == 1
-                    && objects.ContainsKey(variant.PayloadType.Name);
+                var inline = variant.PayloadType is { } payloadType
+                    && string.Equals(variant.CsName, payloadType.Name, StringComparison.Ordinal)
+                    && usage.GetValueOrDefault(payloadType.Name) == 1
+                    && objects.ContainsKey(payloadType.Name);
 
                 updated.Add(inline ? variant with { Inline = true } : variant);
 
@@ -169,14 +171,14 @@ internal sealed class ModelBuilder(SchemaSet schema)
                     continue;
                 }
 
-                var index = types.IndexOf(objects[variant.PayloadType.Name]);
-                var linked = objects[variant.PayloadType.Name] with
+                var index = types.IndexOf(objects[variant.PayloadType!.Name]);
+                var linked = objects[variant.PayloadType!.Name] with
                 {
                     UnionBase = union.Name,
                     DiscriminatorValue = variant.DiscriminatorValue,
                 };
                 types[index] = linked;
-                objects[variant.PayloadType.Name] = linked;
+                objects[variant.PayloadType!.Name] = linked;
             }
 
             types[i] = union with { Variants = updated };
@@ -290,9 +292,8 @@ internal sealed class ModelBuilder(SchemaSet schema)
             foreach (var (_, value, node) in discriminated)
             {
                 var payload = node.AllOfRefName() ?? node.RefName();
-                var payloadType = payload is not null
-                    ? new TypeRef(Naming.Type(payload), false)
-                    : new TypeRef(csName + Naming.EnumMember(value), false);
+                // No merged type means the arm is only its discriminator.
+                var payloadType = payload is not null ? new TypeRef(Naming.Type(payload), false) : null;
 
                 variants.Add(new UnionVariant(
                     csName + Naming.EnumMember(value),

@@ -1,0 +1,3019 @@
+{
+  "schema": "refs/tags/schema-v1.20.0",
+  "namespace": "AcpKit.Protocol.V1",
+  "methods": [
+    {
+      "path": "initialize",
+      "owner": "Agent",
+      "notification": false
+    },
+    {
+      "path": "authenticate",
+      "owner": "Agent",
+      "notification": false
+    },
+    {
+      "path": "session/new",
+      "owner": "Agent",
+      "notification": false
+    },
+    {
+      "path": "session/load",
+      "owner": "Agent",
+      "notification": false
+    },
+    {
+      "path": "session/set_mode",
+      "owner": "Agent",
+      "notification": false
+    },
+    {
+      "path": "session/set_config_option",
+      "owner": "Agent",
+      "notification": false
+    },
+    {
+      "path": "session/prompt",
+      "owner": "Agent",
+      "notification": false
+    },
+    {
+      "path": "session/cancel",
+      "owner": "Agent",
+      "notification": true
+    },
+    {
+      "path": "session/list",
+      "owner": "Agent",
+      "notification": false
+    },
+    {
+      "path": "session/delete",
+      "owner": "Agent",
+      "notification": false
+    },
+    {
+      "path": "session/resume",
+      "owner": "Agent",
+      "notification": false
+    },
+    {
+      "path": "session/close",
+      "owner": "Agent",
+      "notification": false
+    },
+    {
+      "path": "logout",
+      "owner": "Agent",
+      "notification": false
+    },
+    {
+      "path": "session/request_permission",
+      "owner": "Client",
+      "notification": false
+    },
+    {
+      "path": "session/update",
+      "owner": "Client",
+      "notification": true
+    },
+    {
+      "path": "fs/write_text_file",
+      "owner": "Client",
+      "notification": false
+    },
+    {
+      "path": "fs/read_text_file",
+      "owner": "Client",
+      "notification": false
+    },
+    {
+      "path": "terminal/create",
+      "owner": "Client",
+      "notification": false
+    },
+    {
+      "path": "terminal/output",
+      "owner": "Client",
+      "notification": false
+    },
+    {
+      "path": "terminal/release",
+      "owner": "Client",
+      "notification": false
+    },
+    {
+      "path": "terminal/wait_for_exit",
+      "owner": "Client",
+      "notification": false
+    },
+    {
+      "path": "terminal/kill",
+      "owner": "Client",
+      "notification": false
+    }
+  ],
+  "samples": [
+    {
+      "type": "AgentAuthCapabilities",
+      "label": "AgentAuthCapabilities",
+      "payload": {
+        "logout": {
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "AgentCapabilities",
+      "label": "AgentCapabilities",
+      "payload": {
+        "loadSession": true,
+        "promptCapabilities": {
+          "image": true,
+          "audio": true,
+          "embeddedContext": true,
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "mcpCapabilities": {
+          "http": true,
+          "sse": true,
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "sessionCapabilities": {
+          "list": {
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "delete": {
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "additionalDirectories": {
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "resume": {
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "close": {
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "auth": {
+          "logout": {
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "Annotations",
+      "label": "Annotations",
+      "payload": {
+        "audience": [
+          "assistant"
+        ],
+        "lastModified": "acpkit",
+        "priority": 1.5,
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "AudioContent",
+      "label": "AudioContent",
+      "payload": {
+        "annotations": {
+          "audience": [
+            "assistant"
+          ],
+          "lastModified": "acpkit",
+          "priority": 1.5,
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "data": "acpkit",
+        "mimeType": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "AuthMethod",
+      "label": "AuthMethod:AuthMethodAgent",
+      "payload": {
+        "id": "acpkit",
+        "name": "acpkit",
+        "description": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "AuthMethodAgent",
+      "label": "AuthMethodAgent",
+      "payload": {
+        "id": "acpkit",
+        "name": "acpkit",
+        "description": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "AuthMethodId",
+      "label": "AuthMethodId",
+      "payload": "acpkit"
+    },
+    {
+      "type": "AuthenticateRequest",
+      "label": "AuthenticateRequest",
+      "payload": {
+        "methodId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "AuthenticateResponse",
+      "label": "AuthenticateResponse",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "AvailableCommand",
+      "label": "AvailableCommand",
+      "payload": {
+        "name": "acpkit",
+        "description": "acpkit",
+        "input": {
+          "hint": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "AvailableCommandInput",
+      "label": "AvailableCommandInput:UnstructuredCommandInput",
+      "payload": {
+        "hint": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "AvailableCommandsUpdate",
+      "label": "AvailableCommandsUpdate",
+      "payload": {
+        "availableCommands": [
+          {
+            "name": "acpkit",
+            "description": "acpkit",
+            "input": {
+              "hint": "acpkit",
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "BlobResourceContents",
+      "label": "BlobResourceContents",
+      "payload": {
+        "blob": "acpkit",
+        "mimeType": "acpkit",
+        "uri": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "BooleanConfigOptionCapabilities",
+      "label": "BooleanConfigOptionCapabilities",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "CancelNotification",
+      "label": "CancelNotification",
+      "payload": {
+        "sessionId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "CancelRequestNotification",
+      "label": "CancelRequestNotification",
+      "payload": {
+        "requestId": 1,
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ClientCapabilities",
+      "label": "ClientCapabilities",
+      "payload": {
+        "fs": {
+          "readTextFile": true,
+          "writeTextFile": true,
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "terminal": true,
+        "session": {
+          "configOptions": {
+            "boolean": {
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ClientSessionCapabilities",
+      "label": "ClientSessionCapabilities",
+      "payload": {
+        "configOptions": {
+          "boolean": {
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "CloseSessionRequest",
+      "label": "CloseSessionRequest",
+      "payload": {
+        "sessionId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "CloseSessionResponse",
+      "label": "CloseSessionResponse",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ConfigOptionUpdate",
+      "label": "ConfigOptionUpdate",
+      "payload": {
+        "configOptions": [
+          {
+            "currentValue": "acpkit",
+            "options": [
+              {
+                "value": "acpkit",
+                "name": "acpkit",
+                "description": "acpkit",
+                "_meta": {
+                  "probe": "meta"
+                }
+              }
+            ],
+            "type": "select",
+            "id": "acpkit",
+            "name": "acpkit",
+            "description": "acpkit",
+            "category": "mode",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "Content",
+      "label": "Content",
+      "payload": {
+        "content": {
+          "annotations": {
+            "audience": [
+              "assistant"
+            ],
+            "lastModified": "acpkit",
+            "priority": 1.5,
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "text": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          },
+          "type": "text"
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ContentBlock",
+      "label": "ContentBlock:text",
+      "payload": {
+        "annotations": {
+          "audience": [
+            "assistant"
+          ],
+          "lastModified": "acpkit",
+          "priority": 1.5,
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "text": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "text"
+      }
+    },
+    {
+      "type": "ContentBlock",
+      "label": "ContentBlock:image",
+      "payload": {
+        "annotations": {
+          "audience": [
+            "assistant"
+          ],
+          "lastModified": "acpkit",
+          "priority": 1.5,
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "data": "acpkit",
+        "mimeType": "acpkit",
+        "uri": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "image"
+      }
+    },
+    {
+      "type": "ContentBlock",
+      "label": "ContentBlock:audio",
+      "payload": {
+        "annotations": {
+          "audience": [
+            "assistant"
+          ],
+          "lastModified": "acpkit",
+          "priority": 1.5,
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "data": "acpkit",
+        "mimeType": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "audio"
+      }
+    },
+    {
+      "type": "ContentBlock",
+      "label": "ContentBlock:resource_link",
+      "payload": {
+        "annotations": {
+          "audience": [
+            "assistant"
+          ],
+          "lastModified": "acpkit",
+          "priority": 1.5,
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "description": "acpkit",
+        "mimeType": "acpkit",
+        "name": "acpkit",
+        "size": 1,
+        "title": "acpkit",
+        "uri": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "resource_link"
+      }
+    },
+    {
+      "type": "ContentBlock",
+      "label": "ContentBlock:resource",
+      "payload": {
+        "annotations": {
+          "audience": [
+            "assistant"
+          ],
+          "lastModified": "acpkit",
+          "priority": 1.5,
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "resource": {
+          "mimeType": "acpkit",
+          "text": "acpkit",
+          "uri": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "resource"
+      }
+    },
+    {
+      "type": "ContentChunk",
+      "label": "ContentChunk",
+      "payload": {
+        "content": {
+          "annotations": {
+            "audience": [
+              "assistant"
+            ],
+            "lastModified": "acpkit",
+            "priority": 1.5,
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "text": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          },
+          "type": "text"
+        },
+        "messageId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "Cost",
+      "label": "Cost",
+      "payload": {
+        "amount": 1.5,
+        "currency": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "CreateTerminalRequest",
+      "label": "CreateTerminalRequest",
+      "payload": {
+        "sessionId": "acpkit",
+        "command": "acpkit",
+        "args": [
+          "acpkit"
+        ],
+        "env": [
+          {
+            "name": "acpkit",
+            "value": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "cwd": "acpkit",
+        "outputByteLimit": 1,
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "CreateTerminalResponse",
+      "label": "CreateTerminalResponse",
+      "payload": {
+        "terminalId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "CurrentModeUpdate",
+      "label": "CurrentModeUpdate",
+      "payload": {
+        "currentModeId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "DeleteSessionRequest",
+      "label": "DeleteSessionRequest",
+      "payload": {
+        "sessionId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "DeleteSessionResponse",
+      "label": "DeleteSessionResponse",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "Diff",
+      "label": "Diff",
+      "payload": {
+        "path": "acpkit",
+        "oldText": "acpkit",
+        "newText": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "EmbeddedResource",
+      "label": "EmbeddedResource",
+      "payload": {
+        "annotations": {
+          "audience": [
+            "assistant"
+          ],
+          "lastModified": "acpkit",
+          "priority": 1.5,
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "resource": {
+          "mimeType": "acpkit",
+          "text": "acpkit",
+          "uri": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "EmbeddedResourceResource",
+      "label": "EmbeddedResourceResource:TextResourceContents",
+      "payload": {
+        "mimeType": "acpkit",
+        "text": "acpkit",
+        "uri": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "EmbeddedResourceResource",
+      "label": "EmbeddedResourceResource:BlobResourceContents",
+      "payload": {
+        "blob": "acpkit",
+        "mimeType": "acpkit",
+        "uri": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "EnvVariable",
+      "label": "EnvVariable",
+      "payload": {
+        "name": "acpkit",
+        "value": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "Error",
+      "label": "Error",
+      "payload": {
+        "code": "-32700",
+        "message": "acpkit",
+        "data": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ErrorCode",
+      "label": "ErrorCode:-32700",
+      "payload": "-32700"
+    },
+    {
+      "type": "ErrorCode",
+      "label": "ErrorCode:-32600",
+      "payload": "-32600"
+    },
+    {
+      "type": "ErrorCode",
+      "label": "ErrorCode:-32601",
+      "payload": "-32601"
+    },
+    {
+      "type": "ErrorCode",
+      "label": "ErrorCode:-32602",
+      "payload": "-32602"
+    },
+    {
+      "type": "ErrorCode",
+      "label": "ErrorCode:-32603",
+      "payload": "-32603"
+    },
+    {
+      "type": "ErrorCode",
+      "label": "ErrorCode:-32800",
+      "payload": "-32800"
+    },
+    {
+      "type": "ErrorCode",
+      "label": "ErrorCode:-32000",
+      "payload": "-32000"
+    },
+    {
+      "type": "ErrorCode",
+      "label": "ErrorCode:-32002",
+      "payload": "-32002"
+    },
+    {
+      "type": "ErrorCode",
+      "label": "ErrorCode:_extension",
+      "payload": "_acpkit_probe"
+    },
+    {
+      "type": "FileSystemCapabilities",
+      "label": "FileSystemCapabilities",
+      "payload": {
+        "readTextFile": true,
+        "writeTextFile": true,
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "HttpHeader",
+      "label": "HttpHeader",
+      "payload": {
+        "name": "acpkit",
+        "value": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ImageContent",
+      "label": "ImageContent",
+      "payload": {
+        "annotations": {
+          "audience": [
+            "assistant"
+          ],
+          "lastModified": "acpkit",
+          "priority": 1.5,
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "data": "acpkit",
+        "mimeType": "acpkit",
+        "uri": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "Implementation",
+      "label": "Implementation",
+      "payload": {
+        "name": "acpkit",
+        "title": "acpkit",
+        "version": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "InitializeRequest",
+      "label": "InitializeRequest",
+      "payload": {
+        "protocolVersion": 1,
+        "clientCapabilities": {
+          "fs": {
+            "readTextFile": true,
+            "writeTextFile": true,
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "terminal": true,
+          "session": {
+            "configOptions": {
+              "boolean": {
+                "_meta": {
+                  "probe": "meta"
+                }
+              },
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "clientInfo": {
+          "name": "acpkit",
+          "title": "acpkit",
+          "version": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "InitializeResponse",
+      "label": "InitializeResponse",
+      "payload": {
+        "protocolVersion": 1,
+        "agentCapabilities": {
+          "loadSession": true,
+          "promptCapabilities": {
+            "image": true,
+            "audio": true,
+            "embeddedContext": true,
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "mcpCapabilities": {
+            "http": true,
+            "sse": true,
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "sessionCapabilities": {
+            "list": {
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "delete": {
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "additionalDirectories": {
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "resume": {
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "close": {
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "auth": {
+            "logout": {
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "authMethods": [
+          {
+            "id": "acpkit",
+            "name": "acpkit",
+            "description": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "agentInfo": {
+          "name": "acpkit",
+          "title": "acpkit",
+          "version": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "KillTerminalRequest",
+      "label": "KillTerminalRequest",
+      "payload": {
+        "sessionId": "acpkit",
+        "terminalId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "KillTerminalResponse",
+      "label": "KillTerminalResponse",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ListSessionsRequest",
+      "label": "ListSessionsRequest",
+      "payload": {
+        "cwd": "acpkit",
+        "cursor": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ListSessionsResponse",
+      "label": "ListSessionsResponse",
+      "payload": {
+        "sessions": [
+          {
+            "sessionId": "acpkit",
+            "cwd": "acpkit",
+            "additionalDirectories": [
+              "acpkit"
+            ],
+            "title": "acpkit",
+            "updatedAt": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "nextCursor": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "LoadSessionRequest",
+      "label": "LoadSessionRequest",
+      "payload": {
+        "mcpServers": [
+          {
+            "name": "acpkit",
+            "url": "acpkit",
+            "headers": [
+              {
+                "name": "acpkit",
+                "value": "acpkit",
+                "_meta": {
+                  "probe": "meta"
+                }
+              }
+            ],
+            "_meta": {
+              "probe": "meta"
+            },
+            "type": "http"
+          }
+        ],
+        "cwd": "acpkit",
+        "additionalDirectories": [
+          "acpkit"
+        ],
+        "sessionId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "LoadSessionResponse",
+      "label": "LoadSessionResponse",
+      "payload": {
+        "modes": {
+          "currentModeId": "acpkit",
+          "availableModes": [
+            {
+              "id": "acpkit",
+              "name": "acpkit",
+              "description": "acpkit",
+              "_meta": {
+                "probe": "meta"
+              }
+            }
+          ],
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "configOptions": [
+          {
+            "currentValue": "acpkit",
+            "options": [
+              {
+                "value": "acpkit",
+                "name": "acpkit",
+                "description": "acpkit",
+                "_meta": {
+                  "probe": "meta"
+                }
+              }
+            ],
+            "type": "select",
+            "id": "acpkit",
+            "name": "acpkit",
+            "description": "acpkit",
+            "category": "mode",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "LogoutCapabilities",
+      "label": "LogoutCapabilities",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "LogoutRequest",
+      "label": "LogoutRequest",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "LogoutResponse",
+      "label": "LogoutResponse",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "McpCapabilities",
+      "label": "McpCapabilities",
+      "payload": {
+        "http": true,
+        "sse": true,
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "McpServer",
+      "label": "McpServer:http",
+      "payload": {
+        "name": "acpkit",
+        "url": "acpkit",
+        "headers": [
+          {
+            "name": "acpkit",
+            "value": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "http"
+      }
+    },
+    {
+      "type": "McpServer",
+      "label": "McpServer:sse",
+      "payload": {
+        "name": "acpkit",
+        "url": "acpkit",
+        "headers": [
+          {
+            "name": "acpkit",
+            "value": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "sse"
+      }
+    },
+    {
+      "type": "McpServerHttp",
+      "label": "McpServerHttp",
+      "payload": {
+        "name": "acpkit",
+        "url": "acpkit",
+        "headers": [
+          {
+            "name": "acpkit",
+            "value": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "McpServerSse",
+      "label": "McpServerSse",
+      "payload": {
+        "name": "acpkit",
+        "url": "acpkit",
+        "headers": [
+          {
+            "name": "acpkit",
+            "value": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "McpServerStdio",
+      "label": "McpServerStdio",
+      "payload": {
+        "name": "acpkit",
+        "command": "acpkit",
+        "args": [
+          "acpkit"
+        ],
+        "env": [
+          {
+            "name": "acpkit",
+            "value": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "MessageId",
+      "label": "MessageId",
+      "payload": "acpkit"
+    },
+    {
+      "type": "NewSessionRequest",
+      "label": "NewSessionRequest",
+      "payload": {
+        "cwd": "acpkit",
+        "additionalDirectories": [
+          "acpkit"
+        ],
+        "mcpServers": [
+          {
+            "name": "acpkit",
+            "url": "acpkit",
+            "headers": [
+              {
+                "name": "acpkit",
+                "value": "acpkit",
+                "_meta": {
+                  "probe": "meta"
+                }
+              }
+            ],
+            "_meta": {
+              "probe": "meta"
+            },
+            "type": "http"
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "NewSessionResponse",
+      "label": "NewSessionResponse",
+      "payload": {
+        "sessionId": "acpkit",
+        "modes": {
+          "currentModeId": "acpkit",
+          "availableModes": [
+            {
+              "id": "acpkit",
+              "name": "acpkit",
+              "description": "acpkit",
+              "_meta": {
+                "probe": "meta"
+              }
+            }
+          ],
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "configOptions": [
+          {
+            "currentValue": "acpkit",
+            "options": [
+              {
+                "value": "acpkit",
+                "name": "acpkit",
+                "description": "acpkit",
+                "_meta": {
+                  "probe": "meta"
+                }
+              }
+            ],
+            "type": "select",
+            "id": "acpkit",
+            "name": "acpkit",
+            "description": "acpkit",
+            "category": "mode",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "PermissionOption",
+      "label": "PermissionOption",
+      "payload": {
+        "optionId": "acpkit",
+        "name": "acpkit",
+        "kind": "allow_once",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "PermissionOptionId",
+      "label": "PermissionOptionId",
+      "payload": "acpkit"
+    },
+    {
+      "type": "PermissionOptionKind",
+      "label": "PermissionOptionKind:allow_once",
+      "payload": "allow_once"
+    },
+    {
+      "type": "PermissionOptionKind",
+      "label": "PermissionOptionKind:allow_always",
+      "payload": "allow_always"
+    },
+    {
+      "type": "PermissionOptionKind",
+      "label": "PermissionOptionKind:reject_once",
+      "payload": "reject_once"
+    },
+    {
+      "type": "PermissionOptionKind",
+      "label": "PermissionOptionKind:reject_always",
+      "payload": "reject_always"
+    },
+    {
+      "type": "PermissionOptionKind",
+      "label": "PermissionOptionKind:_extension",
+      "payload": "_acpkit_probe"
+    },
+    {
+      "type": "Plan",
+      "label": "Plan",
+      "payload": {
+        "entries": [
+          {
+            "content": "acpkit",
+            "priority": "high",
+            "status": "pending",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "PlanEntry",
+      "label": "PlanEntry",
+      "payload": {
+        "content": "acpkit",
+        "priority": "high",
+        "status": "pending",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "PlanEntryPriority",
+      "label": "PlanEntryPriority:high",
+      "payload": "high"
+    },
+    {
+      "type": "PlanEntryPriority",
+      "label": "PlanEntryPriority:medium",
+      "payload": "medium"
+    },
+    {
+      "type": "PlanEntryPriority",
+      "label": "PlanEntryPriority:low",
+      "payload": "low"
+    },
+    {
+      "type": "PlanEntryPriority",
+      "label": "PlanEntryPriority:_extension",
+      "payload": "_acpkit_probe"
+    },
+    {
+      "type": "PlanEntryStatus",
+      "label": "PlanEntryStatus:pending",
+      "payload": "pending"
+    },
+    {
+      "type": "PlanEntryStatus",
+      "label": "PlanEntryStatus:in_progress",
+      "payload": "in_progress"
+    },
+    {
+      "type": "PlanEntryStatus",
+      "label": "PlanEntryStatus:completed",
+      "payload": "completed"
+    },
+    {
+      "type": "PlanEntryStatus",
+      "label": "PlanEntryStatus:_extension",
+      "payload": "_acpkit_probe"
+    },
+    {
+      "type": "PromptCapabilities",
+      "label": "PromptCapabilities",
+      "payload": {
+        "image": true,
+        "audio": true,
+        "embeddedContext": true,
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "PromptRequest",
+      "label": "PromptRequest",
+      "payload": {
+        "sessionId": "acpkit",
+        "prompt": [
+          {
+            "annotations": {
+              "audience": [
+                "assistant"
+              ],
+              "lastModified": "acpkit",
+              "priority": 1.5,
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "text": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            },
+            "type": "text"
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "PromptResponse",
+      "label": "PromptResponse",
+      "payload": {
+        "stopReason": "end_turn",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ProtocolVersion",
+      "label": "ProtocolVersion",
+      "payload": 1
+    },
+    {
+      "type": "ReadTextFileRequest",
+      "label": "ReadTextFileRequest",
+      "payload": {
+        "sessionId": "acpkit",
+        "path": "acpkit",
+        "line": 1,
+        "limit": 1,
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ReadTextFileResponse",
+      "label": "ReadTextFileResponse",
+      "payload": {
+        "content": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ReleaseTerminalRequest",
+      "label": "ReleaseTerminalRequest",
+      "payload": {
+        "sessionId": "acpkit",
+        "terminalId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ReleaseTerminalResponse",
+      "label": "ReleaseTerminalResponse",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "RequestId",
+      "label": "RequestId",
+      "payload": 1
+    },
+    {
+      "type": "RequestPermissionOutcome",
+      "label": "RequestPermissionOutcome:cancelled",
+      "payload": {
+        "outcome": "cancelled"
+      }
+    },
+    {
+      "type": "RequestPermissionOutcome",
+      "label": "RequestPermissionOutcome:selected",
+      "payload": {
+        "optionId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        },
+        "outcome": "selected"
+      }
+    },
+    {
+      "type": "RequestPermissionRequest",
+      "label": "RequestPermissionRequest",
+      "payload": {
+        "sessionId": "acpkit",
+        "toolCall": {
+          "toolCallId": "acpkit",
+          "kind": "read",
+          "status": "pending",
+          "title": "acpkit",
+          "content": [
+            {
+              "content": {
+                "annotations": {
+                  "audience": [
+                    "assistant"
+                  ],
+                  "lastModified": "acpkit",
+                  "priority": 1.5,
+                  "_meta": {
+                    "probe": "meta"
+                  }
+                },
+                "text": "acpkit",
+                "_meta": {
+                  "probe": "meta"
+                },
+                "type": "text"
+              },
+              "_meta": {
+                "probe": "meta"
+              },
+              "type": "content"
+            }
+          ],
+          "locations": [
+            {
+              "path": "acpkit",
+              "line": 1,
+              "_meta": {
+                "probe": "meta"
+              }
+            }
+          ],
+          "rawInput": {
+            "probe": "meta"
+          },
+          "rawOutput": {
+            "probe": "meta"
+          },
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "options": [
+          {
+            "optionId": "acpkit",
+            "name": "acpkit",
+            "kind": "allow_once",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "RequestPermissionResponse",
+      "label": "RequestPermissionResponse",
+      "payload": {
+        "outcome": {
+          "outcome": "cancelled"
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ResourceLink",
+      "label": "ResourceLink",
+      "payload": {
+        "annotations": {
+          "audience": [
+            "assistant"
+          ],
+          "lastModified": "acpkit",
+          "priority": 1.5,
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "description": "acpkit",
+        "mimeType": "acpkit",
+        "name": "acpkit",
+        "size": 1,
+        "title": "acpkit",
+        "uri": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ResumeSessionRequest",
+      "label": "ResumeSessionRequest",
+      "payload": {
+        "sessionId": "acpkit",
+        "cwd": "acpkit",
+        "additionalDirectories": [
+          "acpkit"
+        ],
+        "mcpServers": [
+          {
+            "name": "acpkit",
+            "url": "acpkit",
+            "headers": [
+              {
+                "name": "acpkit",
+                "value": "acpkit",
+                "_meta": {
+                  "probe": "meta"
+                }
+              }
+            ],
+            "_meta": {
+              "probe": "meta"
+            },
+            "type": "http"
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ResumeSessionResponse",
+      "label": "ResumeSessionResponse",
+      "payload": {
+        "modes": {
+          "currentModeId": "acpkit",
+          "availableModes": [
+            {
+              "id": "acpkit",
+              "name": "acpkit",
+              "description": "acpkit",
+              "_meta": {
+                "probe": "meta"
+              }
+            }
+          ],
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "configOptions": [
+          {
+            "currentValue": "acpkit",
+            "options": [
+              {
+                "value": "acpkit",
+                "name": "acpkit",
+                "description": "acpkit",
+                "_meta": {
+                  "probe": "meta"
+                }
+              }
+            ],
+            "type": "select",
+            "id": "acpkit",
+            "name": "acpkit",
+            "description": "acpkit",
+            "category": "mode",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "Role",
+      "label": "Role:assistant",
+      "payload": "assistant"
+    },
+    {
+      "type": "Role",
+      "label": "Role:user",
+      "payload": "user"
+    },
+    {
+      "type": "Role",
+      "label": "Role:_extension",
+      "payload": "_acpkit_probe"
+    },
+    {
+      "type": "SelectedPermissionOutcome",
+      "label": "SelectedPermissionOutcome",
+      "payload": {
+        "optionId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionAdditionalDirectoriesCapabilities",
+      "label": "SessionAdditionalDirectoriesCapabilities",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionCapabilities",
+      "label": "SessionCapabilities",
+      "payload": {
+        "list": {
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "delete": {
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "additionalDirectories": {
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "resume": {
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "close": {
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionCloseCapabilities",
+      "label": "SessionCloseCapabilities",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionConfigBoolean",
+      "label": "SessionConfigBoolean",
+      "payload": {
+        "currentValue": true
+      }
+    },
+    {
+      "type": "SessionConfigGroupId",
+      "label": "SessionConfigGroupId",
+      "payload": "acpkit"
+    },
+    {
+      "type": "SessionConfigId",
+      "label": "SessionConfigId",
+      "payload": "acpkit"
+    },
+    {
+      "type": "SessionConfigOption",
+      "label": "SessionConfigOption:select",
+      "payload": {
+        "currentValue": "acpkit",
+        "options": [
+          {
+            "value": "acpkit",
+            "name": "acpkit",
+            "description": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "type": "select",
+        "id": "acpkit",
+        "name": "acpkit",
+        "description": "acpkit",
+        "category": "mode",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionConfigOption",
+      "label": "SessionConfigOption:boolean",
+      "payload": {
+        "currentValue": true,
+        "type": "boolean",
+        "id": "acpkit",
+        "name": "acpkit",
+        "description": "acpkit",
+        "category": "mode",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionConfigOptionCategory",
+      "label": "SessionConfigOptionCategory:mode",
+      "payload": "mode"
+    },
+    {
+      "type": "SessionConfigOptionCategory",
+      "label": "SessionConfigOptionCategory:model",
+      "payload": "model"
+    },
+    {
+      "type": "SessionConfigOptionCategory",
+      "label": "SessionConfigOptionCategory:model_config",
+      "payload": "model_config"
+    },
+    {
+      "type": "SessionConfigOptionCategory",
+      "label": "SessionConfigOptionCategory:thought_level",
+      "payload": "thought_level"
+    },
+    {
+      "type": "SessionConfigOptionCategory",
+      "label": "SessionConfigOptionCategory:_extension",
+      "payload": "_acpkit_probe"
+    },
+    {
+      "type": "SessionConfigOptionsCapabilities",
+      "label": "SessionConfigOptionsCapabilities",
+      "payload": {
+        "boolean": {
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionConfigSelect",
+      "label": "SessionConfigSelect",
+      "payload": {
+        "currentValue": "acpkit",
+        "options": [
+          {
+            "value": "acpkit",
+            "name": "acpkit",
+            "description": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "SessionConfigSelectGroup",
+      "label": "SessionConfigSelectGroup",
+      "payload": {
+        "group": "acpkit",
+        "name": "acpkit",
+        "options": [
+          {
+            "value": "acpkit",
+            "name": "acpkit",
+            "description": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionConfigSelectOption",
+      "label": "SessionConfigSelectOption",
+      "payload": {
+        "value": "acpkit",
+        "name": "acpkit",
+        "description": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionConfigSelectOptions",
+      "label": "SessionConfigSelectOptions",
+      "payload": [
+        {
+          "value": "acpkit",
+          "name": "acpkit",
+          "description": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          }
+        }
+      ]
+    },
+    {
+      "type": "SessionConfigValueId",
+      "label": "SessionConfigValueId",
+      "payload": "acpkit"
+    },
+    {
+      "type": "SessionDeleteCapabilities",
+      "label": "SessionDeleteCapabilities",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionId",
+      "label": "SessionId",
+      "payload": "acpkit"
+    },
+    {
+      "type": "SessionInfo",
+      "label": "SessionInfo",
+      "payload": {
+        "sessionId": "acpkit",
+        "cwd": "acpkit",
+        "additionalDirectories": [
+          "acpkit"
+        ],
+        "title": "acpkit",
+        "updatedAt": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionInfoUpdate",
+      "label": "SessionInfoUpdate",
+      "payload": {
+        "title": "acpkit",
+        "updatedAt": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionListCapabilities",
+      "label": "SessionListCapabilities",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionMode",
+      "label": "SessionMode",
+      "payload": {
+        "id": "acpkit",
+        "name": "acpkit",
+        "description": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionModeId",
+      "label": "SessionModeId",
+      "payload": "acpkit"
+    },
+    {
+      "type": "SessionModeState",
+      "label": "SessionModeState",
+      "payload": {
+        "currentModeId": "acpkit",
+        "availableModes": [
+          {
+            "id": "acpkit",
+            "name": "acpkit",
+            "description": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionNotification",
+      "label": "SessionNotification",
+      "payload": {
+        "sessionId": "acpkit",
+        "update": {
+          "content": {
+            "annotations": {
+              "audience": [
+                "assistant"
+              ],
+              "lastModified": "acpkit",
+              "priority": 1.5,
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "text": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            },
+            "type": "text"
+          },
+          "messageId": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          },
+          "sessionUpdate": "user_message_chunk"
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionResumeCapabilities",
+      "label": "SessionResumeCapabilities",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SessionUpdate",
+      "label": "SessionUpdate:user_message_chunk",
+      "payload": {
+        "content": {
+          "annotations": {
+            "audience": [
+              "assistant"
+            ],
+            "lastModified": "acpkit",
+            "priority": 1.5,
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "text": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          },
+          "type": "text"
+        },
+        "messageId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        },
+        "sessionUpdate": "user_message_chunk"
+      }
+    },
+    {
+      "type": "SessionUpdate",
+      "label": "SessionUpdate:agent_message_chunk",
+      "payload": {
+        "content": {
+          "annotations": {
+            "audience": [
+              "assistant"
+            ],
+            "lastModified": "acpkit",
+            "priority": 1.5,
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "text": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          },
+          "type": "text"
+        },
+        "messageId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        },
+        "sessionUpdate": "agent_message_chunk"
+      }
+    },
+    {
+      "type": "SessionUpdate",
+      "label": "SessionUpdate:agent_thought_chunk",
+      "payload": {
+        "content": {
+          "annotations": {
+            "audience": [
+              "assistant"
+            ],
+            "lastModified": "acpkit",
+            "priority": 1.5,
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "text": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          },
+          "type": "text"
+        },
+        "messageId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        },
+        "sessionUpdate": "agent_thought_chunk"
+      }
+    },
+    {
+      "type": "SessionUpdate",
+      "label": "SessionUpdate:tool_call",
+      "payload": {
+        "toolCallId": "acpkit",
+        "title": "acpkit",
+        "kind": "read",
+        "status": "pending",
+        "content": [
+          {
+            "content": {
+              "annotations": {
+                "audience": [
+                  "assistant"
+                ],
+                "lastModified": "acpkit",
+                "priority": 1.5,
+                "_meta": {
+                  "probe": "meta"
+                }
+              },
+              "text": "acpkit",
+              "_meta": {
+                "probe": "meta"
+              },
+              "type": "text"
+            },
+            "_meta": {
+              "probe": "meta"
+            },
+            "type": "content"
+          }
+        ],
+        "locations": [
+          {
+            "path": "acpkit",
+            "line": 1,
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "rawInput": {
+          "probe": "meta"
+        },
+        "rawOutput": {
+          "probe": "meta"
+        },
+        "_meta": {
+          "probe": "meta"
+        },
+        "sessionUpdate": "tool_call"
+      }
+    },
+    {
+      "type": "SessionUpdate",
+      "label": "SessionUpdate:tool_call_update",
+      "payload": {
+        "toolCallId": "acpkit",
+        "kind": "read",
+        "status": "pending",
+        "title": "acpkit",
+        "content": [
+          {
+            "content": {
+              "annotations": {
+                "audience": [
+                  "assistant"
+                ],
+                "lastModified": "acpkit",
+                "priority": 1.5,
+                "_meta": {
+                  "probe": "meta"
+                }
+              },
+              "text": "acpkit",
+              "_meta": {
+                "probe": "meta"
+              },
+              "type": "text"
+            },
+            "_meta": {
+              "probe": "meta"
+            },
+            "type": "content"
+          }
+        ],
+        "locations": [
+          {
+            "path": "acpkit",
+            "line": 1,
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "rawInput": {
+          "probe": "meta"
+        },
+        "rawOutput": {
+          "probe": "meta"
+        },
+        "_meta": {
+          "probe": "meta"
+        },
+        "sessionUpdate": "tool_call_update"
+      }
+    },
+    {
+      "type": "SessionUpdate",
+      "label": "SessionUpdate:plan",
+      "payload": {
+        "entries": [
+          {
+            "content": "acpkit",
+            "priority": "high",
+            "status": "pending",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        },
+        "sessionUpdate": "plan"
+      }
+    },
+    {
+      "type": "SessionUpdate",
+      "label": "SessionUpdate:available_commands_update",
+      "payload": {
+        "availableCommands": [
+          {
+            "name": "acpkit",
+            "description": "acpkit",
+            "input": {
+              "hint": "acpkit",
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        },
+        "sessionUpdate": "available_commands_update"
+      }
+    },
+    {
+      "type": "SessionUpdate",
+      "label": "SessionUpdate:current_mode_update",
+      "payload": {
+        "currentModeId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        },
+        "sessionUpdate": "current_mode_update"
+      }
+    },
+    {
+      "type": "SessionUpdate",
+      "label": "SessionUpdate:config_option_update",
+      "payload": {
+        "configOptions": [
+          {
+            "currentValue": "acpkit",
+            "options": [
+              {
+                "value": "acpkit",
+                "name": "acpkit",
+                "description": "acpkit",
+                "_meta": {
+                  "probe": "meta"
+                }
+              }
+            ],
+            "type": "select",
+            "id": "acpkit",
+            "name": "acpkit",
+            "description": "acpkit",
+            "category": "mode",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        },
+        "sessionUpdate": "config_option_update"
+      }
+    },
+    {
+      "type": "SessionUpdate",
+      "label": "SessionUpdate:session_info_update",
+      "payload": {
+        "title": "acpkit",
+        "updatedAt": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        },
+        "sessionUpdate": "session_info_update"
+      }
+    },
+    {
+      "type": "SessionUpdate",
+      "label": "SessionUpdate:usage_update",
+      "payload": {
+        "used": 1,
+        "size": 1,
+        "cost": {
+          "amount": 1.5,
+          "currency": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        },
+        "sessionUpdate": "usage_update"
+      }
+    },
+    {
+      "type": "SetSessionConfigOptionRequest",
+      "label": "SetSessionConfigOptionRequest:boolean",
+      "payload": {
+        "type": "boolean",
+        "sessionId": "acpkit",
+        "configId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SetSessionConfigOptionResponse",
+      "label": "SetSessionConfigOptionResponse",
+      "payload": {
+        "configOptions": [
+          {
+            "currentValue": "acpkit",
+            "options": [
+              {
+                "value": "acpkit",
+                "name": "acpkit",
+                "description": "acpkit",
+                "_meta": {
+                  "probe": "meta"
+                }
+              }
+            ],
+            "type": "select",
+            "id": "acpkit",
+            "name": "acpkit",
+            "description": "acpkit",
+            "category": "mode",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SetSessionModeRequest",
+      "label": "SetSessionModeRequest",
+      "payload": {
+        "sessionId": "acpkit",
+        "modeId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "SetSessionModeResponse",
+      "label": "SetSessionModeResponse",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "StopReason",
+      "label": "StopReason:end_turn",
+      "payload": "end_turn"
+    },
+    {
+      "type": "StopReason",
+      "label": "StopReason:max_tokens",
+      "payload": "max_tokens"
+    },
+    {
+      "type": "StopReason",
+      "label": "StopReason:max_turn_requests",
+      "payload": "max_turn_requests"
+    },
+    {
+      "type": "StopReason",
+      "label": "StopReason:refusal",
+      "payload": "refusal"
+    },
+    {
+      "type": "StopReason",
+      "label": "StopReason:cancelled",
+      "payload": "cancelled"
+    },
+    {
+      "type": "StopReason",
+      "label": "StopReason:_extension",
+      "payload": "_acpkit_probe"
+    },
+    {
+      "type": "Terminal",
+      "label": "Terminal",
+      "payload": {
+        "terminalId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "TerminalExitStatus",
+      "label": "TerminalExitStatus",
+      "payload": {
+        "exitCode": 1,
+        "signal": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "TerminalId",
+      "label": "TerminalId",
+      "payload": "acpkit"
+    },
+    {
+      "type": "TerminalOutputRequest",
+      "label": "TerminalOutputRequest",
+      "payload": {
+        "sessionId": "acpkit",
+        "terminalId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "TerminalOutputResponse",
+      "label": "TerminalOutputResponse",
+      "payload": {
+        "output": "acpkit",
+        "truncated": true,
+        "exitStatus": {
+          "exitCode": 1,
+          "signal": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "TextContent",
+      "label": "TextContent",
+      "payload": {
+        "annotations": {
+          "audience": [
+            "assistant"
+          ],
+          "lastModified": "acpkit",
+          "priority": 1.5,
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "text": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "TextResourceContents",
+      "label": "TextResourceContents",
+      "payload": {
+        "mimeType": "acpkit",
+        "text": "acpkit",
+        "uri": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ToolCall",
+      "label": "ToolCall",
+      "payload": {
+        "toolCallId": "acpkit",
+        "title": "acpkit",
+        "kind": "read",
+        "status": "pending",
+        "content": [
+          {
+            "content": {
+              "annotations": {
+                "audience": [
+                  "assistant"
+                ],
+                "lastModified": "acpkit",
+                "priority": 1.5,
+                "_meta": {
+                  "probe": "meta"
+                }
+              },
+              "text": "acpkit",
+              "_meta": {
+                "probe": "meta"
+              },
+              "type": "text"
+            },
+            "_meta": {
+              "probe": "meta"
+            },
+            "type": "content"
+          }
+        ],
+        "locations": [
+          {
+            "path": "acpkit",
+            "line": 1,
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "rawInput": {
+          "probe": "meta"
+        },
+        "rawOutput": {
+          "probe": "meta"
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ToolCallContent",
+      "label": "ToolCallContent:content",
+      "payload": {
+        "content": {
+          "annotations": {
+            "audience": [
+              "assistant"
+            ],
+            "lastModified": "acpkit",
+            "priority": 1.5,
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "text": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          },
+          "type": "text"
+        },
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "content"
+      }
+    },
+    {
+      "type": "ToolCallContent",
+      "label": "ToolCallContent:diff",
+      "payload": {
+        "path": "acpkit",
+        "oldText": "acpkit",
+        "newText": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "diff"
+      }
+    },
+    {
+      "type": "ToolCallContent",
+      "label": "ToolCallContent:terminal",
+      "payload": {
+        "terminalId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "terminal"
+      }
+    },
+    {
+      "type": "ToolCallId",
+      "label": "ToolCallId",
+      "payload": "acpkit"
+    },
+    {
+      "type": "ToolCallLocation",
+      "label": "ToolCallLocation",
+      "payload": {
+        "path": "acpkit",
+        "line": 1,
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ToolCallStatus",
+      "label": "ToolCallStatus:pending",
+      "payload": "pending"
+    },
+    {
+      "type": "ToolCallStatus",
+      "label": "ToolCallStatus:in_progress",
+      "payload": "in_progress"
+    },
+    {
+      "type": "ToolCallStatus",
+      "label": "ToolCallStatus:completed",
+      "payload": "completed"
+    },
+    {
+      "type": "ToolCallStatus",
+      "label": "ToolCallStatus:failed",
+      "payload": "failed"
+    },
+    {
+      "type": "ToolCallStatus",
+      "label": "ToolCallStatus:_extension",
+      "payload": "_acpkit_probe"
+    },
+    {
+      "type": "ToolCallUpdate",
+      "label": "ToolCallUpdate",
+      "payload": {
+        "toolCallId": "acpkit",
+        "kind": "read",
+        "status": "pending",
+        "title": "acpkit",
+        "content": [
+          {
+            "content": {
+              "annotations": {
+                "audience": [
+                  "assistant"
+                ],
+                "lastModified": "acpkit",
+                "priority": 1.5,
+                "_meta": {
+                  "probe": "meta"
+                }
+              },
+              "text": "acpkit",
+              "_meta": {
+                "probe": "meta"
+              },
+              "type": "text"
+            },
+            "_meta": {
+              "probe": "meta"
+            },
+            "type": "content"
+          }
+        ],
+        "locations": [
+          {
+            "path": "acpkit",
+            "line": 1,
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "rawInput": {
+          "probe": "meta"
+        },
+        "rawOutput": {
+          "probe": "meta"
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ToolKind",
+      "label": "ToolKind:read",
+      "payload": "read"
+    },
+    {
+      "type": "ToolKind",
+      "label": "ToolKind:edit",
+      "payload": "edit"
+    },
+    {
+      "type": "ToolKind",
+      "label": "ToolKind:delete",
+      "payload": "delete"
+    },
+    {
+      "type": "ToolKind",
+      "label": "ToolKind:move",
+      "payload": "move"
+    },
+    {
+      "type": "ToolKind",
+      "label": "ToolKind:search",
+      "payload": "search"
+    },
+    {
+      "type": "ToolKind",
+      "label": "ToolKind:execute",
+      "payload": "execute"
+    },
+    {
+      "type": "ToolKind",
+      "label": "ToolKind:think",
+      "payload": "think"
+    },
+    {
+      "type": "ToolKind",
+      "label": "ToolKind:fetch",
+      "payload": "fetch"
+    },
+    {
+      "type": "ToolKind",
+      "label": "ToolKind:switch_mode",
+      "payload": "switch_mode"
+    },
+    {
+      "type": "ToolKind",
+      "label": "ToolKind:other",
+      "payload": "other"
+    },
+    {
+      "type": "ToolKind",
+      "label": "ToolKind:_extension",
+      "payload": "_acpkit_probe"
+    },
+    {
+      "type": "UnstructuredCommandInput",
+      "label": "UnstructuredCommandInput",
+      "payload": {
+        "hint": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "UsageUpdate",
+      "label": "UsageUpdate",
+      "payload": {
+        "used": 1,
+        "size": 1,
+        "cost": {
+          "amount": 1.5,
+          "currency": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "WaitForTerminalExitRequest",
+      "label": "WaitForTerminalExitRequest",
+      "payload": {
+        "sessionId": "acpkit",
+        "terminalId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "WaitForTerminalExitResponse",
+      "label": "WaitForTerminalExitResponse",
+      "payload": {
+        "exitCode": 1,
+        "signal": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "WriteTextFileRequest",
+      "label": "WriteTextFileRequest",
+      "payload": {
+        "sessionId": "acpkit",
+        "path": "acpkit",
+        "content": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "WriteTextFileResponse",
+      "label": "WriteTextFileResponse",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    }
+  ]
+}

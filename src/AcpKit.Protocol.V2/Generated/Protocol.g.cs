@@ -6,6 +6,7 @@
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace AcpKit.Protocol.V2;
 /// <summary>
@@ -1322,9 +1323,9 @@ internal sealed class DiffChangeConverter : JsonConverter<DiffChange>
         using var document = JsonDocument.ParseValue(ref reader);
         var root = document.RootElement;
         var kind = root.TryGetProperty("operation", out var marker) && marker.ValueKind == JsonValueKind.String ? marker.GetString() : null;
-        var fileType = AcpJson.ReadOptional<DiffFileType>(root, "fileType", options);
-        var mimeType = AcpJson.ReadOptional<MediaType>(root, "mimeType", options);
-        var meta = AcpJson.ReadOptional<System.Text.Json.JsonElement>(root, "_meta", options);
+        var fileType = AcpJson.ReadPatch<DiffFileType>(root, "fileType", options);
+        var mimeType = AcpJson.ReadPatch<MediaType>(root, "mimeType", options);
+        var meta = AcpJson.ReadPatch<System.Text.Json.JsonElement>(root, "_meta", options);
         return kind switch
         {
             "add" => new DiffChangeAdd
@@ -1384,24 +1385,9 @@ internal sealed class DiffChangeConverter : JsonConverter<DiffChange>
 
         writer.WriteStartObject();
         writer.WriteString("operation", value.Discriminator);
-        if (value.FileType is { } fileTypeValue)
-        {
-            writer.WritePropertyName("fileType");
-            JsonSerializer.Serialize(writer, fileTypeValue, options.GetTypeInfo(typeof(DiffFileType)));
-        }
-
-        if (value.MimeType is { } mimeTypeValue)
-        {
-            writer.WritePropertyName("mimeType");
-            JsonSerializer.Serialize(writer, mimeTypeValue, options.GetTypeInfo(typeof(MediaType)));
-        }
-
-        if (value.Meta is { } metaValue)
-        {
-            writer.WritePropertyName("_meta");
-            JsonSerializer.Serialize(writer, metaValue, options.GetTypeInfo(typeof(System.Text.Json.JsonElement)));
-        }
-
+        AcpJson.WritePatch(writer, "fileType", value.FileType, options);
+        AcpJson.WritePatch(writer, "mimeType", value.MimeType, options);
+        AcpJson.WritePatch(writer, "_meta", value.Meta, options);
         switch (value)
         {
             case DiffChangeAdd typed:
@@ -3572,8 +3558,6 @@ public sealed class RequestPermissionOutcomeCancelled : RequestPermissionOutcome
     /// <inheritdoc/>
     [JsonIgnore]
     public override string Discriminator => "cancelled";
-    /// <summary>The fields this variant carries, flattened alongside the discriminator on the wire.</summary>
-    public required RequestPermissionOutcomeCancelled Value { get; init; }
 }
 
 /// <summary>
@@ -3619,7 +3603,6 @@ internal sealed class RequestPermissionOutcomeConverter : JsonConverter<RequestP
         {
             "cancelled" => new RequestPermissionOutcomeCancelled
             {
-                Value = AcpJson.Read<RequestPermissionOutcomeCancelled>(root, options)
             },
             "selected" => new RequestPermissionOutcomeSelected
             {
@@ -3647,7 +3630,6 @@ internal sealed class RequestPermissionOutcomeConverter : JsonConverter<RequestP
         switch (value)
         {
             case RequestPermissionOutcomeCancelled typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
                 break;
             case RequestPermissionOutcomeSelected typed:
                 AcpJson.WriteMembers(writer, typed.Value, options);
@@ -4425,9 +4407,9 @@ internal sealed class SessionConfigOptionConverter : JsonConverter<SessionConfig
         var kind = root.TryGetProperty("type", out var marker) && marker.ValueKind == JsonValueKind.String ? marker.GetString() : null;
         var configId = AcpJson.ReadRequired<SessionConfigId>(root, "configId", options);
         var name = AcpJson.ReadRequired<string>(root, "name", options);
-        var description = AcpJson.ReadOptional<string>(root, "description", options);
-        var category = AcpJson.ReadOptional<SessionConfigOptionCategory>(root, "category", options);
-        var meta = AcpJson.ReadOptional<System.Text.Json.JsonElement>(root, "_meta", options);
+        var description = AcpJson.ReadPatch<string>(root, "description", options);
+        var category = AcpJson.ReadPatch<SessionConfigOptionCategory>(root, "category", options);
+        var meta = AcpJson.ReadPatch<System.Text.Json.JsonElement>(root, "_meta", options);
         return kind switch
         {
             "select" => new SessionConfigOptionSelect
@@ -4472,36 +4454,21 @@ internal sealed class SessionConfigOptionConverter : JsonConverter<SessionConfig
 
         writer.WriteStartObject();
         writer.WriteString("type", value.Discriminator);
-        if (value.ConfigId is { } configIdValue)
+        if (value.ConfigId is { } configIdWritten)
         {
             writer.WritePropertyName("configId");
-            JsonSerializer.Serialize(writer, configIdValue, options.GetTypeInfo(typeof(SessionConfigId)));
+            JsonSerializer.Serialize(writer, configIdWritten, options.GetTypeInfo(typeof(SessionConfigId)));
         }
 
-        if (value.Name is { } nameValue)
+        if (value.Name is { } nameWritten)
         {
             writer.WritePropertyName("name");
-            JsonSerializer.Serialize(writer, nameValue, options.GetTypeInfo(typeof(string)));
+            JsonSerializer.Serialize(writer, nameWritten, options.GetTypeInfo(typeof(string)));
         }
 
-        if (value.Description is { } descriptionValue)
-        {
-            writer.WritePropertyName("description");
-            JsonSerializer.Serialize(writer, descriptionValue, options.GetTypeInfo(typeof(string)));
-        }
-
-        if (value.Category is { } categoryValue)
-        {
-            writer.WritePropertyName("category");
-            JsonSerializer.Serialize(writer, categoryValue, options.GetTypeInfo(typeof(SessionConfigOptionCategory)));
-        }
-
-        if (value.Meta is { } metaValue)
-        {
-            writer.WritePropertyName("_meta");
-            JsonSerializer.Serialize(writer, metaValue, options.GetTypeInfo(typeof(System.Text.Json.JsonElement)));
-        }
-
+        AcpJson.WritePatch(writer, "description", value.Description, options);
+        AcpJson.WritePatch(writer, "category", value.Category, options);
+        AcpJson.WritePatch(writer, "_meta", value.Meta, options);
         switch (value)
         {
             case SessionConfigOptionSelect typed:
@@ -5375,8 +5342,6 @@ public sealed class SetSessionConfigOptionRequestId : SetSessionConfigOptionRequ
     /// <inheritdoc/>
     [JsonIgnore]
     public override string Discriminator => "id";
-    /// <summary>The fields this variant carries, flattened alongside the discriminator on the wire.</summary>
-    public required SetSessionConfigOptionRequestId Value { get; init; }
 }
 
 /// <summary>
@@ -5387,8 +5352,6 @@ public sealed class SetSessionConfigOptionRequestBoolean : SetSessionConfigOptio
     /// <inheritdoc/>
     [JsonIgnore]
     public override string Discriminator => "boolean";
-    /// <summary>The fields this variant carries, flattened alongside the discriminator on the wire.</summary>
-    public required SetSessionConfigOptionRequestBoolean Value { get; init; }
 }
 
 /// <summary>
@@ -5420,22 +5383,20 @@ internal sealed class SetSessionConfigOptionRequestConverter : JsonConverter<Set
         var kind = root.TryGetProperty("type", out var marker) && marker.ValueKind == JsonValueKind.String ? marker.GetString() : null;
         var sessionId = AcpJson.ReadRequired<SessionId>(root, "sessionId", options);
         var configId = AcpJson.ReadRequired<SessionConfigId>(root, "configId", options);
-        var meta = AcpJson.ReadOptional<System.Text.Json.JsonElement>(root, "_meta", options);
+        var meta = AcpJson.ReadPatch<System.Text.Json.JsonElement>(root, "_meta", options);
         return kind switch
         {
             "id" => new SetSessionConfigOptionRequestId
             {
                 SessionId = sessionId,
                 ConfigId = configId,
-                Meta = meta,
-                Value = AcpJson.Read<SetSessionConfigOptionRequestId>(root, options)
+                Meta = meta
             },
             "boolean" => new SetSessionConfigOptionRequestBoolean
             {
                 SessionId = sessionId,
                 ConfigId = configId,
-                Meta = meta,
-                Value = AcpJson.Read<SetSessionConfigOptionRequestBoolean>(root, options)
+                Meta = meta
             },
             _ => new SetSessionConfigOptionRequestUnknown
             {
@@ -5459,31 +5420,24 @@ internal sealed class SetSessionConfigOptionRequestConverter : JsonConverter<Set
 
         writer.WriteStartObject();
         writer.WriteString("type", value.Discriminator);
-        if (value.SessionId is { } sessionIdValue)
+        if (value.SessionId is { } sessionIdWritten)
         {
             writer.WritePropertyName("sessionId");
-            JsonSerializer.Serialize(writer, sessionIdValue, options.GetTypeInfo(typeof(SessionId)));
+            JsonSerializer.Serialize(writer, sessionIdWritten, options.GetTypeInfo(typeof(SessionId)));
         }
 
-        if (value.ConfigId is { } configIdValue)
+        if (value.ConfigId is { } configIdWritten)
         {
             writer.WritePropertyName("configId");
-            JsonSerializer.Serialize(writer, configIdValue, options.GetTypeInfo(typeof(SessionConfigId)));
+            JsonSerializer.Serialize(writer, configIdWritten, options.GetTypeInfo(typeof(SessionConfigId)));
         }
 
-        if (value.Meta is { } metaValue)
-        {
-            writer.WritePropertyName("_meta");
-            JsonSerializer.Serialize(writer, metaValue, options.GetTypeInfo(typeof(System.Text.Json.JsonElement)));
-        }
-
+        AcpJson.WritePatch(writer, "_meta", value.Meta, options);
         switch (value)
         {
             case SetSessionConfigOptionRequestId typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
                 break;
             case SetSessionConfigOptionRequestBoolean typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
                 break;
             default:
                 break;
@@ -6904,4 +6858,152 @@ public static class AcpMethods
 [JsonSerializable(typeof(ulong))]
 public sealed partial class AcpJsonContext : JsonSerializerContext
 {
+}
+
+/// <summary>Every type this protocol version defines, by name.</summary>
+public static class ProtocolTypes
+{
+    /// <summary>The names of every type, for coverage checks.</summary>
+    public static readonly string[] Names = ["AbsolutePath", "AgentAuthCapabilities", "AgentCapabilities", "AgentMessage", "AgentThought", "Annotations", "AudioContent", "AuthMethod", "AuthMethodAgent", "AuthMethodId", "AvailableCommand", "AvailableCommandInput", "AvailableCommandsUpdate", "BlobResourceContents", "CancelRequestNotification", "CancelSessionNotification", "ClientCapabilities", "CloseSessionRequest", "CloseSessionResponse", "CommandPermissionSubject", "ConfigOptionUpdate", "Content", "ContentBlock", "ContentChunk", "Cost", "DeleteSessionRequest", "DeleteSessionResponse", "Diff", "DiffChange", "DiffFileType", "DiffPatch", "DiffPatchFormat", "DiffPathChange", "DiffPathPairChange", "EmbeddedResource", "EmbeddedResourceResource", "EnvVariable", "Error", "ErrorCode", "HttpHeader", "Icon", "IconTheme", "IdleStateUpdate", "ImageContent", "Implementation", "InitializeRequest", "InitializeResponse", "ListSessionsRequest", "ListSessionsResponse", "LoginAuthRequest", "LoginAuthResponse", "LogoutAuthRequest", "LogoutAuthResponse", "McpCapabilities", "McpHttpCapabilities", "McpServer", "McpServerHttp", "McpServerStdio", "McpStdioCapabilities", "MediaType", "MessageId", "NewSessionRequest", "NewSessionResponse", "PermissionOption", "PermissionOptionId", "PermissionOptionKind", "PlanEntry", "PlanEntryPriority", "PlanEntryStatus", "PlanId", "PlanItems", "PlanUpdate", "PlanUpdateContent", "PromptAudioCapabilities", "PromptCapabilities", "PromptEmbeddedContextCapabilities", "PromptImageCapabilities", "PromptRequest", "PromptResponse", "ProtocolVersion", "ReplayFrom", "ReplayFromStart", "RequestId", "RequestPermissionOutcome", "RequestPermissionRequest", "RequestPermissionResponse", "RequestPermissionSubject", "RequiresActionStateUpdate", "ResourceLink", "ResumeSessionRequest", "ResumeSessionResponse", "Role", "RunningStateUpdate", "SelectedPermissionOutcome", "SessionAdditionalDirectoriesCapabilities", "SessionCapabilities", "SessionConfigBoolean", "SessionConfigGroupId", "SessionConfigId", "SessionConfigOption", "SessionConfigOptionCategory", "SessionConfigSelect", "SessionConfigSelectGroup", "SessionConfigSelectOption", "SessionConfigSelectOptions", "SessionConfigValueId", "SessionDeleteCapabilities", "SessionId", "SessionInfo", "SessionInfoUpdate", "SessionListCursor", "SessionUpdate", "SetSessionConfigOptionRequest", "SetSessionConfigOptionResponse", "StateUpdate", "StopReason", "Terminal", "TerminalExitStatus", "TerminalId", "TerminalOutput", "TerminalOutputChunk", "TerminalUpdate", "TextCommandInput", "TextContent", "TextResourceContents", "ToolCallContent", "ToolCallContentChunk", "ToolCallId", "ToolCallLocation", "ToolCallPermissionSubject", "ToolCallStatus", "ToolCallUpdate", "ToolKind", "UpdateSessionNotification", "UsageUpdate", "UserMessage"];
+    /// <summary>The serialization contract for a named type, or null if unknown.</summary>
+    public static JsonTypeInfo? Find(string name) => name switch
+    {
+        "AbsolutePath" => AcpJsonContext.Default.AbsolutePath,
+        "AgentAuthCapabilities" => AcpJsonContext.Default.AgentAuthCapabilities,
+        "AgentCapabilities" => AcpJsonContext.Default.AgentCapabilities,
+        "AgentMessage" => AcpJsonContext.Default.AgentMessage,
+        "AgentThought" => AcpJsonContext.Default.AgentThought,
+        "Annotations" => AcpJsonContext.Default.Annotations,
+        "AudioContent" => AcpJsonContext.Default.AudioContent,
+        "AuthMethod" => AcpJsonContext.Default.AuthMethod,
+        "AuthMethodAgent" => AcpJsonContext.Default.AuthMethodAgent,
+        "AuthMethodId" => AcpJsonContext.Default.AuthMethodId,
+        "AvailableCommand" => AcpJsonContext.Default.AvailableCommand,
+        "AvailableCommandInput" => AcpJsonContext.Default.AvailableCommandInput,
+        "AvailableCommandsUpdate" => AcpJsonContext.Default.AvailableCommandsUpdate,
+        "BlobResourceContents" => AcpJsonContext.Default.BlobResourceContents,
+        "CancelRequestNotification" => AcpJsonContext.Default.CancelRequestNotification,
+        "CancelSessionNotification" => AcpJsonContext.Default.CancelSessionNotification,
+        "ClientCapabilities" => AcpJsonContext.Default.ClientCapabilities,
+        "CloseSessionRequest" => AcpJsonContext.Default.CloseSessionRequest,
+        "CloseSessionResponse" => AcpJsonContext.Default.CloseSessionResponse,
+        "CommandPermissionSubject" => AcpJsonContext.Default.CommandPermissionSubject,
+        "ConfigOptionUpdate" => AcpJsonContext.Default.ConfigOptionUpdate,
+        "Content" => AcpJsonContext.Default.Content,
+        "ContentBlock" => AcpJsonContext.Default.ContentBlock,
+        "ContentChunk" => AcpJsonContext.Default.ContentChunk,
+        "Cost" => AcpJsonContext.Default.Cost,
+        "DeleteSessionRequest" => AcpJsonContext.Default.DeleteSessionRequest,
+        "DeleteSessionResponse" => AcpJsonContext.Default.DeleteSessionResponse,
+        "Diff" => AcpJsonContext.Default.Diff,
+        "DiffChange" => AcpJsonContext.Default.DiffChange,
+        "DiffFileType" => AcpJsonContext.Default.DiffFileType,
+        "DiffPatch" => AcpJsonContext.Default.DiffPatch,
+        "DiffPatchFormat" => AcpJsonContext.Default.DiffPatchFormat,
+        "DiffPathChange" => AcpJsonContext.Default.DiffPathChange,
+        "DiffPathPairChange" => AcpJsonContext.Default.DiffPathPairChange,
+        "EmbeddedResource" => AcpJsonContext.Default.EmbeddedResource,
+        "EmbeddedResourceResource" => AcpJsonContext.Default.EmbeddedResourceResource,
+        "EnvVariable" => AcpJsonContext.Default.EnvVariable,
+        "Error" => AcpJsonContext.Default.Error,
+        "ErrorCode" => AcpJsonContext.Default.ErrorCode,
+        "HttpHeader" => AcpJsonContext.Default.HttpHeader,
+        "Icon" => AcpJsonContext.Default.Icon,
+        "IconTheme" => AcpJsonContext.Default.IconTheme,
+        "IdleStateUpdate" => AcpJsonContext.Default.IdleStateUpdate,
+        "ImageContent" => AcpJsonContext.Default.ImageContent,
+        "Implementation" => AcpJsonContext.Default.Implementation,
+        "InitializeRequest" => AcpJsonContext.Default.InitializeRequest,
+        "InitializeResponse" => AcpJsonContext.Default.InitializeResponse,
+        "ListSessionsRequest" => AcpJsonContext.Default.ListSessionsRequest,
+        "ListSessionsResponse" => AcpJsonContext.Default.ListSessionsResponse,
+        "LoginAuthRequest" => AcpJsonContext.Default.LoginAuthRequest,
+        "LoginAuthResponse" => AcpJsonContext.Default.LoginAuthResponse,
+        "LogoutAuthRequest" => AcpJsonContext.Default.LogoutAuthRequest,
+        "LogoutAuthResponse" => AcpJsonContext.Default.LogoutAuthResponse,
+        "McpCapabilities" => AcpJsonContext.Default.McpCapabilities,
+        "McpHttpCapabilities" => AcpJsonContext.Default.McpHttpCapabilities,
+        "McpServer" => AcpJsonContext.Default.McpServer,
+        "McpServerHttp" => AcpJsonContext.Default.McpServerHttp,
+        "McpServerStdio" => AcpJsonContext.Default.McpServerStdio,
+        "McpStdioCapabilities" => AcpJsonContext.Default.McpStdioCapabilities,
+        "MediaType" => AcpJsonContext.Default.MediaType,
+        "MessageId" => AcpJsonContext.Default.MessageId,
+        "NewSessionRequest" => AcpJsonContext.Default.NewSessionRequest,
+        "NewSessionResponse" => AcpJsonContext.Default.NewSessionResponse,
+        "PermissionOption" => AcpJsonContext.Default.PermissionOption,
+        "PermissionOptionId" => AcpJsonContext.Default.PermissionOptionId,
+        "PermissionOptionKind" => AcpJsonContext.Default.PermissionOptionKind,
+        "PlanEntry" => AcpJsonContext.Default.PlanEntry,
+        "PlanEntryPriority" => AcpJsonContext.Default.PlanEntryPriority,
+        "PlanEntryStatus" => AcpJsonContext.Default.PlanEntryStatus,
+        "PlanId" => AcpJsonContext.Default.PlanId,
+        "PlanItems" => AcpJsonContext.Default.PlanItems,
+        "PlanUpdate" => AcpJsonContext.Default.PlanUpdate,
+        "PlanUpdateContent" => AcpJsonContext.Default.PlanUpdateContent,
+        "PromptAudioCapabilities" => AcpJsonContext.Default.PromptAudioCapabilities,
+        "PromptCapabilities" => AcpJsonContext.Default.PromptCapabilities,
+        "PromptEmbeddedContextCapabilities" => AcpJsonContext.Default.PromptEmbeddedContextCapabilities,
+        "PromptImageCapabilities" => AcpJsonContext.Default.PromptImageCapabilities,
+        "PromptRequest" => AcpJsonContext.Default.PromptRequest,
+        "PromptResponse" => AcpJsonContext.Default.PromptResponse,
+        "ProtocolVersion" => AcpJsonContext.Default.ProtocolVersion,
+        "ReplayFrom" => AcpJsonContext.Default.ReplayFrom,
+        "ReplayFromStart" => AcpJsonContext.Default.ReplayFromStart,
+        "RequestId" => AcpJsonContext.Default.RequestId,
+        "RequestPermissionOutcome" => AcpJsonContext.Default.RequestPermissionOutcome,
+        "RequestPermissionRequest" => AcpJsonContext.Default.RequestPermissionRequest,
+        "RequestPermissionResponse" => AcpJsonContext.Default.RequestPermissionResponse,
+        "RequestPermissionSubject" => AcpJsonContext.Default.RequestPermissionSubject,
+        "RequiresActionStateUpdate" => AcpJsonContext.Default.RequiresActionStateUpdate,
+        "ResourceLink" => AcpJsonContext.Default.ResourceLink,
+        "ResumeSessionRequest" => AcpJsonContext.Default.ResumeSessionRequest,
+        "ResumeSessionResponse" => AcpJsonContext.Default.ResumeSessionResponse,
+        "Role" => AcpJsonContext.Default.Role,
+        "RunningStateUpdate" => AcpJsonContext.Default.RunningStateUpdate,
+        "SelectedPermissionOutcome" => AcpJsonContext.Default.SelectedPermissionOutcome,
+        "SessionAdditionalDirectoriesCapabilities" => AcpJsonContext.Default.SessionAdditionalDirectoriesCapabilities,
+        "SessionCapabilities" => AcpJsonContext.Default.SessionCapabilities,
+        "SessionConfigBoolean" => AcpJsonContext.Default.SessionConfigBoolean,
+        "SessionConfigGroupId" => AcpJsonContext.Default.SessionConfigGroupId,
+        "SessionConfigId" => AcpJsonContext.Default.SessionConfigId,
+        "SessionConfigOption" => AcpJsonContext.Default.SessionConfigOption,
+        "SessionConfigOptionCategory" => AcpJsonContext.Default.SessionConfigOptionCategory,
+        "SessionConfigSelect" => AcpJsonContext.Default.SessionConfigSelect,
+        "SessionConfigSelectGroup" => AcpJsonContext.Default.SessionConfigSelectGroup,
+        "SessionConfigSelectOption" => AcpJsonContext.Default.SessionConfigSelectOption,
+        "SessionConfigSelectOptions" => AcpJsonContext.Default.SessionConfigSelectOptions,
+        "SessionConfigValueId" => AcpJsonContext.Default.SessionConfigValueId,
+        "SessionDeleteCapabilities" => AcpJsonContext.Default.SessionDeleteCapabilities,
+        "SessionId" => AcpJsonContext.Default.SessionId,
+        "SessionInfo" => AcpJsonContext.Default.SessionInfo,
+        "SessionInfoUpdate" => AcpJsonContext.Default.SessionInfoUpdate,
+        "SessionListCursor" => AcpJsonContext.Default.SessionListCursor,
+        "SessionUpdate" => AcpJsonContext.Default.SessionUpdate,
+        "SetSessionConfigOptionRequest" => AcpJsonContext.Default.SetSessionConfigOptionRequest,
+        "SetSessionConfigOptionResponse" => AcpJsonContext.Default.SetSessionConfigOptionResponse,
+        "StateUpdate" => AcpJsonContext.Default.StateUpdate,
+        "StopReason" => AcpJsonContext.Default.StopReason,
+        "Terminal" => AcpJsonContext.Default.Terminal,
+        "TerminalExitStatus" => AcpJsonContext.Default.TerminalExitStatus,
+        "TerminalId" => AcpJsonContext.Default.TerminalId,
+        "TerminalOutput" => AcpJsonContext.Default.TerminalOutput,
+        "TerminalOutputChunk" => AcpJsonContext.Default.TerminalOutputChunk,
+        "TerminalUpdate" => AcpJsonContext.Default.TerminalUpdate,
+        "TextCommandInput" => AcpJsonContext.Default.TextCommandInput,
+        "TextContent" => AcpJsonContext.Default.TextContent,
+        "TextResourceContents" => AcpJsonContext.Default.TextResourceContents,
+        "ToolCallContent" => AcpJsonContext.Default.ToolCallContent,
+        "ToolCallContentChunk" => AcpJsonContext.Default.ToolCallContentChunk,
+        "ToolCallId" => AcpJsonContext.Default.ToolCallId,
+        "ToolCallLocation" => AcpJsonContext.Default.ToolCallLocation,
+        "ToolCallPermissionSubject" => AcpJsonContext.Default.ToolCallPermissionSubject,
+        "ToolCallStatus" => AcpJsonContext.Default.ToolCallStatus,
+        "ToolCallUpdate" => AcpJsonContext.Default.ToolCallUpdate,
+        "ToolKind" => AcpJsonContext.Default.ToolKind,
+        "UpdateSessionNotification" => AcpJsonContext.Default.UpdateSessionNotification,
+        "UsageUpdate" => AcpJsonContext.Default.UsageUpdate,
+        "UserMessage" => AcpJsonContext.Default.UserMessage,
+        _ => null,
+    };
 }

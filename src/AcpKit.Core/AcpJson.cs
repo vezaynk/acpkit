@@ -110,6 +110,55 @@ public static class AcpJson
         }
     }
 
+    /// <summary>
+    /// Read a named member as a three-state patch: absent, cleared, or set.
+    /// </summary>
+    /// <remarks>
+    /// The distinction is the whole of ACP v2's update model, and it can only be made here —
+    /// once a value has been read as a plain nullable, "the sender omitted this" and "the
+    /// sender cleared this" are indistinguishable.
+    /// </remarks>
+    public static Patch<T> ReadPatch<T>(JsonElement parent, string name, JsonSerializerOptions options)
+    {
+        if (!parent.TryGetProperty(name, out var member))
+        {
+            return Patch<T>.Unset;
+        }
+
+        if (member.ValueKind == JsonValueKind.Null)
+        {
+            return Patch<T>.Cleared;
+        }
+
+        return Patch<T>.Set(Read<T>(member, options));
+    }
+
+    /// <summary>
+    /// Write a patch, omitting the property entirely when it is unset.
+    /// </summary>
+    /// <remarks>
+    /// Omission has to be the absence of the property, not a null: sending null would tell the
+    /// far side to clear a field the sender never touched.
+    /// </remarks>
+    public static void WritePatch<T>(Utf8JsonWriter writer, string name, Patch<T> value, JsonSerializerOptions options)
+    {
+        if (value.IsUnset)
+        {
+            return;
+        }
+
+        writer.WritePropertyName(name);
+
+        if (value.TryGetValue(out var inner))
+        {
+            JsonSerializer.Serialize(writer, inner, TypeInfo<T>(options));
+        }
+        else
+        {
+            writer.WriteNullValue();
+        }
+    }
+
     private static JsonTypeInfo<T> TypeInfo<T>(JsonSerializerOptions options) =>
         (JsonTypeInfo<T>)options.GetTypeInfo(typeof(T));
 }

@@ -6,6 +6,7 @@
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace AcpKit.Protocol.V1.Unstable;
 /// <summary>
@@ -1679,16 +1680,16 @@ internal sealed class CreateElicitationRequestConverter : JsonConverter<CreateEl
 
         writer.WriteStartObject();
         writer.WriteString("mode", value.Discriminator);
-        if (value.Message is { } messageValue)
+        if (value.Message is { } messageWritten)
         {
             writer.WritePropertyName("message");
-            JsonSerializer.Serialize(writer, messageValue, options.GetTypeInfo(typeof(string)));
+            JsonSerializer.Serialize(writer, messageWritten, options.GetTypeInfo(typeof(string)));
         }
 
-        if (value.Meta is { } metaValue)
+        if (value.Meta is { } metaWritten)
         {
             writer.WritePropertyName("_meta");
-            JsonSerializer.Serialize(writer, metaValue, options.GetTypeInfo(typeof(System.Text.Json.JsonElement)));
+            JsonSerializer.Serialize(writer, metaWritten, options.GetTypeInfo(typeof(System.Text.Json.JsonElement)));
         }
 
         switch (value)
@@ -1753,8 +1754,6 @@ public sealed class CreateElicitationResponseDecline : CreateElicitationResponse
     /// <inheritdoc/>
     [JsonIgnore]
     public override string Discriminator => "decline";
-    /// <summary>The fields this variant carries, flattened alongside the discriminator on the wire.</summary>
-    public required CreateElicitationResponseDecline Value { get; init; }
 }
 
 /// <summary>
@@ -1765,8 +1764,6 @@ public sealed class CreateElicitationResponseCancel : CreateElicitationResponse
     /// <inheritdoc/>
     [JsonIgnore]
     public override string Discriminator => "cancel";
-    /// <summary>The fields this variant carries, flattened alongside the discriminator on the wire.</summary>
-    public required CreateElicitationResponseCancel Value { get; init; }
 }
 
 /// <summary>
@@ -1806,13 +1803,11 @@ internal sealed class CreateElicitationResponseConverter : JsonConverter<CreateE
             },
             "decline" => new CreateElicitationResponseDecline
             {
-                Meta = meta,
-                Value = AcpJson.Read<CreateElicitationResponseDecline>(root, options)
+                Meta = meta
             },
             "cancel" => new CreateElicitationResponseCancel
             {
-                Meta = meta,
-                Value = AcpJson.Read<CreateElicitationResponseCancel>(root, options)
+                Meta = meta
             },
             _ => new CreateElicitationResponseUnknown
             {
@@ -1834,10 +1829,10 @@ internal sealed class CreateElicitationResponseConverter : JsonConverter<CreateE
 
         writer.WriteStartObject();
         writer.WriteString("action", value.Discriminator);
-        if (value.Meta is { } metaValue)
+        if (value.Meta is { } metaWritten)
         {
             writer.WritePropertyName("_meta");
-            JsonSerializer.Serialize(writer, metaValue, options.GetTypeInfo(typeof(System.Text.Json.JsonElement)));
+            JsonSerializer.Serialize(writer, metaWritten, options.GetTypeInfo(typeof(System.Text.Json.JsonElement)));
         }
 
         switch (value)
@@ -1846,10 +1841,8 @@ internal sealed class CreateElicitationResponseConverter : JsonConverter<CreateE
                 AcpJson.WriteMembers(writer, typed.Value, options);
                 break;
             case CreateElicitationResponseDecline typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
                 break;
             case CreateElicitationResponseCancel typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
                 break;
             default:
                 break;
@@ -7356,8 +7349,6 @@ public sealed class RequestPermissionOutcomeCancelled : RequestPermissionOutcome
     /// <inheritdoc/>
     [JsonIgnore]
     public override string Discriminator => "cancelled";
-    /// <summary>The fields this variant carries, flattened alongside the discriminator on the wire.</summary>
-    public required RequestPermissionOutcomeCancelled Value { get; init; }
 }
 
 /// <summary>
@@ -7403,7 +7394,6 @@ internal sealed class RequestPermissionOutcomeConverter : JsonConverter<RequestP
         {
             "cancelled" => new RequestPermissionOutcomeCancelled
             {
-                Value = AcpJson.Read<RequestPermissionOutcomeCancelled>(root, options)
             },
             "selected" => new RequestPermissionOutcomeSelected
             {
@@ -7431,7 +7421,6 @@ internal sealed class RequestPermissionOutcomeConverter : JsonConverter<RequestP
         switch (value)
         {
             case RequestPermissionOutcomeCancelled typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
                 break;
             case RequestPermissionOutcomeSelected typed:
                 AcpJson.WriteMembers(writer, typed.Value, options);
@@ -8097,34 +8086,34 @@ internal sealed class SessionConfigOptionConverter : JsonConverter<SessionConfig
 
         writer.WriteStartObject();
         writer.WriteString("type", value.Discriminator);
-        if (value.Id is { } idValue)
+        if (value.Id is { } idWritten)
         {
             writer.WritePropertyName("id");
-            JsonSerializer.Serialize(writer, idValue, options.GetTypeInfo(typeof(SessionConfigId)));
+            JsonSerializer.Serialize(writer, idWritten, options.GetTypeInfo(typeof(SessionConfigId)));
         }
 
-        if (value.Name is { } nameValue)
+        if (value.Name is { } nameWritten)
         {
             writer.WritePropertyName("name");
-            JsonSerializer.Serialize(writer, nameValue, options.GetTypeInfo(typeof(string)));
+            JsonSerializer.Serialize(writer, nameWritten, options.GetTypeInfo(typeof(string)));
         }
 
-        if (value.Description is { } descriptionValue)
+        if (value.Description is { } descriptionWritten)
         {
             writer.WritePropertyName("description");
-            JsonSerializer.Serialize(writer, descriptionValue, options.GetTypeInfo(typeof(string)));
+            JsonSerializer.Serialize(writer, descriptionWritten, options.GetTypeInfo(typeof(string)));
         }
 
-        if (value.Category is { } categoryValue)
+        if (value.Category is { } categoryWritten)
         {
             writer.WritePropertyName("category");
-            JsonSerializer.Serialize(writer, categoryValue, options.GetTypeInfo(typeof(SessionConfigOptionCategory)));
+            JsonSerializer.Serialize(writer, categoryWritten, options.GetTypeInfo(typeof(SessionConfigOptionCategory)));
         }
 
-        if (value.Meta is { } metaValue)
+        if (value.Meta is { } metaWritten)
         {
             writer.WritePropertyName("_meta");
-            JsonSerializer.Serialize(writer, metaValue, options.GetTypeInfo(typeof(System.Text.Json.JsonElement)));
+            JsonSerializer.Serialize(writer, metaWritten, options.GetTypeInfo(typeof(System.Text.Json.JsonElement)));
         }
 
         switch (value)
@@ -9187,8 +9176,6 @@ public sealed class SetSessionConfigOptionRequestBoolean : SetSessionConfigOptio
     /// <inheritdoc/>
     [JsonIgnore]
     public override string Discriminator => "boolean";
-    /// <summary>The fields this variant carries, flattened alongside the discriminator on the wire.</summary>
-    public required SetSessionConfigOptionRequestBoolean Value { get; init; }
 }
 
 /// <summary>
@@ -9227,8 +9214,7 @@ internal sealed class SetSessionConfigOptionRequestConverter : JsonConverter<Set
             {
                 SessionId = sessionId,
                 ConfigId = configId,
-                Meta = meta,
-                Value = AcpJson.Read<SetSessionConfigOptionRequestBoolean>(root, options)
+                Meta = meta
             },
             _ => new SetSessionConfigOptionRequestUnknown
             {
@@ -9252,28 +9238,27 @@ internal sealed class SetSessionConfigOptionRequestConverter : JsonConverter<Set
 
         writer.WriteStartObject();
         writer.WriteString("type", value.Discriminator);
-        if (value.SessionId is { } sessionIdValue)
+        if (value.SessionId is { } sessionIdWritten)
         {
             writer.WritePropertyName("sessionId");
-            JsonSerializer.Serialize(writer, sessionIdValue, options.GetTypeInfo(typeof(SessionId)));
+            JsonSerializer.Serialize(writer, sessionIdWritten, options.GetTypeInfo(typeof(SessionId)));
         }
 
-        if (value.ConfigId is { } configIdValue)
+        if (value.ConfigId is { } configIdWritten)
         {
             writer.WritePropertyName("configId");
-            JsonSerializer.Serialize(writer, configIdValue, options.GetTypeInfo(typeof(SessionConfigId)));
+            JsonSerializer.Serialize(writer, configIdWritten, options.GetTypeInfo(typeof(SessionConfigId)));
         }
 
-        if (value.Meta is { } metaValue)
+        if (value.Meta is { } metaWritten)
         {
             writer.WritePropertyName("_meta");
-            JsonSerializer.Serialize(writer, metaValue, options.GetTypeInfo(typeof(System.Text.Json.JsonElement)));
+            JsonSerializer.Serialize(writer, metaWritten, options.GetTypeInfo(typeof(System.Text.Json.JsonElement)));
         }
 
         switch (value)
         {
             case SetSessionConfigOptionRequestBoolean typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
                 break;
             default:
                 break;
@@ -11265,4 +11250,268 @@ public static class AcpMethods
 [JsonSerializable(typeof(ulong))]
 public sealed partial class AcpUnstableJsonContext : JsonSerializerContext
 {
+}
+
+/// <summary>Every type this protocol version defines, by name.</summary>
+public static class ProtocolTypes
+{
+    /// <summary>The names of every type, for coverage checks.</summary>
+    public static readonly string[] Names = ["AcceptNesNotification", "AgentAuthCapabilities", "AgentCapabilities", "Annotations", "AudioContent", "AuthCapabilities", "AuthEnvVar", "AuthMethod", "AuthMethodAgent", "AuthMethodEnvVar", "AuthMethodId", "AuthMethodTerminal", "AuthenticateRequest", "AuthenticateResponse", "AvailableCommand", "AvailableCommandInput", "AvailableCommandsUpdate", "BlobResourceContents", "BooleanConfigOptionCapabilities", "BooleanPropertySchema", "CancelNotification", "CancelRequestNotification", "ClientCapabilities", "ClientNesCapabilities", "ClientSessionCapabilities", "CloseNesRequest", "CloseNesResponse", "CloseSessionRequest", "CloseSessionResponse", "CompleteElicitationNotification", "ConfigOptionUpdate", "ConnectMcpRequest", "ConnectMcpResponse", "Content", "ContentBlock", "ContentChunk", "Cost", "CreateElicitationRequest", "CreateElicitationResponse", "CreateTerminalRequest", "CreateTerminalResponse", "CurrentModeUpdate", "DeleteSessionRequest", "DeleteSessionResponse", "DidChangeDocumentNotification", "DidCloseDocumentNotification", "DidFocusDocumentNotification", "DidOpenDocumentNotification", "DidSaveDocumentNotification", "Diff", "DisableProviderRequest", "DisableProviderResponse", "DisconnectMcpRequest", "DisconnectMcpResponse", "ElicitationAcceptAction", "ElicitationCapabilities", "ElicitationContentValue", "ElicitationFormCapabilities", "ElicitationFormMode", "ElicitationId", "ElicitationPropertySchema", "ElicitationRequestScope", "ElicitationSchema", "ElicitationSchemaType", "ElicitationSessionScope", "ElicitationUrlCapabilities", "ElicitationUrlMode", "EmbeddedResource", "EmbeddedResourceResource", "EnumOption", "EnvVariable", "Error", "ErrorCode", "FileSystemCapabilities", "ForkSessionRequest", "ForkSessionResponse", "HttpHeader", "ImageContent", "Implementation", "InitializeRequest", "InitializeResponse", "IntegerPropertySchema", "KillTerminalRequest", "KillTerminalResponse", "ListProvidersRequest", "ListProvidersResponse", "ListSessionsRequest", "ListSessionsResponse", "LlmProtocol", "LoadSessionRequest", "LoadSessionResponse", "LogoutCapabilities", "LogoutRequest", "LogoutResponse", "McpCapabilities", "McpConnectionId", "McpServer", "McpServerAcp", "McpServerAcpId", "McpServerHttp", "McpServerSse", "McpServerStdio", "MessageId", "MessageMcpNotification", "MessageMcpRequest", "MultiSelectItems", "MultiSelectPropertySchema", "NesCapabilities", "NesContextCapabilities", "NesDiagnostic", "NesDiagnosticSeverity", "NesDiagnosticsCapabilities", "NesDocumentDidChangeCapabilities", "NesDocumentDidCloseCapabilities", "NesDocumentDidFocusCapabilities", "NesDocumentDidOpenCapabilities", "NesDocumentDidSaveCapabilities", "NesDocumentEventCapabilities", "NesEditHistoryCapabilities", "NesEditHistoryEntry", "NesEditSuggestion", "NesEventCapabilities", "NesExcerpt", "NesJumpCapabilities", "NesJumpSuggestion", "NesOpenFile", "NesOpenFilesCapabilities", "NesRecentFile", "NesRecentFilesCapabilities", "NesRejectReason", "NesRelatedSnippet", "NesRelatedSnippetsCapabilities", "NesRenameCapabilities", "NesRenameSuggestion", "NesRepository", "NesSearchAndReplaceCapabilities", "NesSearchAndReplaceSuggestion", "NesSuggestContext", "NesSuggestion", "NesSuggestionId", "NesTextEdit", "NesTriggerKind", "NesUserAction", "NesUserActionsCapabilities", "NewSessionRequest", "NewSessionResponse", "NumberPropertySchema", "PermissionOption", "PermissionOptionId", "PermissionOptionKind", "Plan", "PlanCapabilities", "PlanEntry", "PlanEntryPriority", "PlanEntryStatus", "PlanFile", "PlanId", "PlanItems", "PlanMarkdown", "PlanRemoved", "PlanUpdate", "PlanUpdateContent", "Position", "PositionEncodingKind", "PromptCapabilities", "PromptRequest", "PromptResponse", "ProtocolVersion", "ProviderCurrentConfig", "ProviderId", "ProviderInfo", "ProvidersCapabilities", "Range", "ReadTextFileRequest", "ReadTextFileResponse", "RejectNesNotification", "ReleaseTerminalRequest", "ReleaseTerminalResponse", "RequestId", "RequestPermissionOutcome", "RequestPermissionRequest", "RequestPermissionResponse", "ResourceLink", "ResumeSessionRequest", "ResumeSessionResponse", "Role", "SelectedPermissionOutcome", "SessionAdditionalDirectoriesCapabilities", "SessionCapabilities", "SessionCloseCapabilities", "SessionConfigBoolean", "SessionConfigGroupId", "SessionConfigId", "SessionConfigOption", "SessionConfigOptionCategory", "SessionConfigOptionsCapabilities", "SessionConfigSelect", "SessionConfigSelectGroup", "SessionConfigSelectOption", "SessionConfigSelectOptions", "SessionConfigValueId", "SessionDeleteCapabilities", "SessionForkCapabilities", "SessionId", "SessionInfo", "SessionInfoUpdate", "SessionListCapabilities", "SessionMode", "SessionModeId", "SessionModeState", "SessionNotification", "SessionResumeCapabilities", "SessionUpdate", "SetProviderRequest", "SetProviderResponse", "SetSessionConfigOptionRequest", "SetSessionConfigOptionResponse", "SetSessionModeRequest", "SetSessionModeResponse", "StartNesRequest", "StartNesResponse", "StopReason", "StringFormat", "StringMultiSelectItems", "StringPropertySchema", "SuggestNesRequest", "SuggestNesResponse", "Terminal", "TerminalExitStatus", "TerminalId", "TerminalOutputRequest", "TerminalOutputResponse", "TextContent", "TextDocumentContentChangeEvent", "TextDocumentSyncKind", "TextResourceContents", "TitledMultiSelectItems", "ToolCall", "ToolCallContent", "ToolCallId", "ToolCallLocation", "ToolCallStatus", "ToolCallUpdate", "ToolKind", "UnstructuredCommandInput", "Usage", "UsageUpdate", "WaitForTerminalExitRequest", "WaitForTerminalExitResponse", "WorkspaceFolder", "WriteTextFileRequest", "WriteTextFileResponse"];
+    /// <summary>The serialization contract for a named type, or null if unknown.</summary>
+    public static JsonTypeInfo? Find(string name) => name switch
+    {
+        "AcceptNesNotification" => AcpUnstableJsonContext.Default.AcceptNesNotification,
+        "AgentAuthCapabilities" => AcpUnstableJsonContext.Default.AgentAuthCapabilities,
+        "AgentCapabilities" => AcpUnstableJsonContext.Default.AgentCapabilities,
+        "Annotations" => AcpUnstableJsonContext.Default.Annotations,
+        "AudioContent" => AcpUnstableJsonContext.Default.AudioContent,
+        "AuthCapabilities" => AcpUnstableJsonContext.Default.AuthCapabilities,
+        "AuthEnvVar" => AcpUnstableJsonContext.Default.AuthEnvVar,
+        "AuthMethod" => AcpUnstableJsonContext.Default.AuthMethod,
+        "AuthMethodAgent" => AcpUnstableJsonContext.Default.AuthMethodAgent,
+        "AuthMethodEnvVar" => AcpUnstableJsonContext.Default.AuthMethodEnvVar,
+        "AuthMethodId" => AcpUnstableJsonContext.Default.AuthMethodId,
+        "AuthMethodTerminal" => AcpUnstableJsonContext.Default.AuthMethodTerminal,
+        "AuthenticateRequest" => AcpUnstableJsonContext.Default.AuthenticateRequest,
+        "AuthenticateResponse" => AcpUnstableJsonContext.Default.AuthenticateResponse,
+        "AvailableCommand" => AcpUnstableJsonContext.Default.AvailableCommand,
+        "AvailableCommandInput" => AcpUnstableJsonContext.Default.AvailableCommandInput,
+        "AvailableCommandsUpdate" => AcpUnstableJsonContext.Default.AvailableCommandsUpdate,
+        "BlobResourceContents" => AcpUnstableJsonContext.Default.BlobResourceContents,
+        "BooleanConfigOptionCapabilities" => AcpUnstableJsonContext.Default.BooleanConfigOptionCapabilities,
+        "BooleanPropertySchema" => AcpUnstableJsonContext.Default.BooleanPropertySchema,
+        "CancelNotification" => AcpUnstableJsonContext.Default.CancelNotification,
+        "CancelRequestNotification" => AcpUnstableJsonContext.Default.CancelRequestNotification,
+        "ClientCapabilities" => AcpUnstableJsonContext.Default.ClientCapabilities,
+        "ClientNesCapabilities" => AcpUnstableJsonContext.Default.ClientNesCapabilities,
+        "ClientSessionCapabilities" => AcpUnstableJsonContext.Default.ClientSessionCapabilities,
+        "CloseNesRequest" => AcpUnstableJsonContext.Default.CloseNesRequest,
+        "CloseNesResponse" => AcpUnstableJsonContext.Default.CloseNesResponse,
+        "CloseSessionRequest" => AcpUnstableJsonContext.Default.CloseSessionRequest,
+        "CloseSessionResponse" => AcpUnstableJsonContext.Default.CloseSessionResponse,
+        "CompleteElicitationNotification" => AcpUnstableJsonContext.Default.CompleteElicitationNotification,
+        "ConfigOptionUpdate" => AcpUnstableJsonContext.Default.ConfigOptionUpdate,
+        "ConnectMcpRequest" => AcpUnstableJsonContext.Default.ConnectMcpRequest,
+        "ConnectMcpResponse" => AcpUnstableJsonContext.Default.ConnectMcpResponse,
+        "Content" => AcpUnstableJsonContext.Default.Content,
+        "ContentBlock" => AcpUnstableJsonContext.Default.ContentBlock,
+        "ContentChunk" => AcpUnstableJsonContext.Default.ContentChunk,
+        "Cost" => AcpUnstableJsonContext.Default.Cost,
+        "CreateElicitationRequest" => AcpUnstableJsonContext.Default.CreateElicitationRequest,
+        "CreateElicitationResponse" => AcpUnstableJsonContext.Default.CreateElicitationResponse,
+        "CreateTerminalRequest" => AcpUnstableJsonContext.Default.CreateTerminalRequest,
+        "CreateTerminalResponse" => AcpUnstableJsonContext.Default.CreateTerminalResponse,
+        "CurrentModeUpdate" => AcpUnstableJsonContext.Default.CurrentModeUpdate,
+        "DeleteSessionRequest" => AcpUnstableJsonContext.Default.DeleteSessionRequest,
+        "DeleteSessionResponse" => AcpUnstableJsonContext.Default.DeleteSessionResponse,
+        "DidChangeDocumentNotification" => AcpUnstableJsonContext.Default.DidChangeDocumentNotification,
+        "DidCloseDocumentNotification" => AcpUnstableJsonContext.Default.DidCloseDocumentNotification,
+        "DidFocusDocumentNotification" => AcpUnstableJsonContext.Default.DidFocusDocumentNotification,
+        "DidOpenDocumentNotification" => AcpUnstableJsonContext.Default.DidOpenDocumentNotification,
+        "DidSaveDocumentNotification" => AcpUnstableJsonContext.Default.DidSaveDocumentNotification,
+        "Diff" => AcpUnstableJsonContext.Default.Diff,
+        "DisableProviderRequest" => AcpUnstableJsonContext.Default.DisableProviderRequest,
+        "DisableProviderResponse" => AcpUnstableJsonContext.Default.DisableProviderResponse,
+        "DisconnectMcpRequest" => AcpUnstableJsonContext.Default.DisconnectMcpRequest,
+        "DisconnectMcpResponse" => AcpUnstableJsonContext.Default.DisconnectMcpResponse,
+        "ElicitationAcceptAction" => AcpUnstableJsonContext.Default.ElicitationAcceptAction,
+        "ElicitationCapabilities" => AcpUnstableJsonContext.Default.ElicitationCapabilities,
+        "ElicitationContentValue" => AcpUnstableJsonContext.Default.ElicitationContentValue,
+        "ElicitationFormCapabilities" => AcpUnstableJsonContext.Default.ElicitationFormCapabilities,
+        "ElicitationFormMode" => AcpUnstableJsonContext.Default.ElicitationFormMode,
+        "ElicitationId" => AcpUnstableJsonContext.Default.ElicitationId,
+        "ElicitationPropertySchema" => AcpUnstableJsonContext.Default.ElicitationPropertySchema,
+        "ElicitationRequestScope" => AcpUnstableJsonContext.Default.ElicitationRequestScope,
+        "ElicitationSchema" => AcpUnstableJsonContext.Default.ElicitationSchema,
+        "ElicitationSchemaType" => AcpUnstableJsonContext.Default.ElicitationSchemaType,
+        "ElicitationSessionScope" => AcpUnstableJsonContext.Default.ElicitationSessionScope,
+        "ElicitationUrlCapabilities" => AcpUnstableJsonContext.Default.ElicitationUrlCapabilities,
+        "ElicitationUrlMode" => AcpUnstableJsonContext.Default.ElicitationUrlMode,
+        "EmbeddedResource" => AcpUnstableJsonContext.Default.EmbeddedResource,
+        "EmbeddedResourceResource" => AcpUnstableJsonContext.Default.EmbeddedResourceResource,
+        "EnumOption" => AcpUnstableJsonContext.Default.EnumOption,
+        "EnvVariable" => AcpUnstableJsonContext.Default.EnvVariable,
+        "Error" => AcpUnstableJsonContext.Default.Error,
+        "ErrorCode" => AcpUnstableJsonContext.Default.ErrorCode,
+        "FileSystemCapabilities" => AcpUnstableJsonContext.Default.FileSystemCapabilities,
+        "ForkSessionRequest" => AcpUnstableJsonContext.Default.ForkSessionRequest,
+        "ForkSessionResponse" => AcpUnstableJsonContext.Default.ForkSessionResponse,
+        "HttpHeader" => AcpUnstableJsonContext.Default.HttpHeader,
+        "ImageContent" => AcpUnstableJsonContext.Default.ImageContent,
+        "Implementation" => AcpUnstableJsonContext.Default.Implementation,
+        "InitializeRequest" => AcpUnstableJsonContext.Default.InitializeRequest,
+        "InitializeResponse" => AcpUnstableJsonContext.Default.InitializeResponse,
+        "IntegerPropertySchema" => AcpUnstableJsonContext.Default.IntegerPropertySchema,
+        "KillTerminalRequest" => AcpUnstableJsonContext.Default.KillTerminalRequest,
+        "KillTerminalResponse" => AcpUnstableJsonContext.Default.KillTerminalResponse,
+        "ListProvidersRequest" => AcpUnstableJsonContext.Default.ListProvidersRequest,
+        "ListProvidersResponse" => AcpUnstableJsonContext.Default.ListProvidersResponse,
+        "ListSessionsRequest" => AcpUnstableJsonContext.Default.ListSessionsRequest,
+        "ListSessionsResponse" => AcpUnstableJsonContext.Default.ListSessionsResponse,
+        "LlmProtocol" => AcpUnstableJsonContext.Default.LlmProtocol,
+        "LoadSessionRequest" => AcpUnstableJsonContext.Default.LoadSessionRequest,
+        "LoadSessionResponse" => AcpUnstableJsonContext.Default.LoadSessionResponse,
+        "LogoutCapabilities" => AcpUnstableJsonContext.Default.LogoutCapabilities,
+        "LogoutRequest" => AcpUnstableJsonContext.Default.LogoutRequest,
+        "LogoutResponse" => AcpUnstableJsonContext.Default.LogoutResponse,
+        "McpCapabilities" => AcpUnstableJsonContext.Default.McpCapabilities,
+        "McpConnectionId" => AcpUnstableJsonContext.Default.McpConnectionId,
+        "McpServer" => AcpUnstableJsonContext.Default.McpServer,
+        "McpServerAcp" => AcpUnstableJsonContext.Default.McpServerAcp,
+        "McpServerAcpId" => AcpUnstableJsonContext.Default.McpServerAcpId,
+        "McpServerHttp" => AcpUnstableJsonContext.Default.McpServerHttp,
+        "McpServerSse" => AcpUnstableJsonContext.Default.McpServerSse,
+        "McpServerStdio" => AcpUnstableJsonContext.Default.McpServerStdio,
+        "MessageId" => AcpUnstableJsonContext.Default.MessageId,
+        "MessageMcpNotification" => AcpUnstableJsonContext.Default.MessageMcpNotification,
+        "MessageMcpRequest" => AcpUnstableJsonContext.Default.MessageMcpRequest,
+        "MultiSelectItems" => AcpUnstableJsonContext.Default.MultiSelectItems,
+        "MultiSelectPropertySchema" => AcpUnstableJsonContext.Default.MultiSelectPropertySchema,
+        "NesCapabilities" => AcpUnstableJsonContext.Default.NesCapabilities,
+        "NesContextCapabilities" => AcpUnstableJsonContext.Default.NesContextCapabilities,
+        "NesDiagnostic" => AcpUnstableJsonContext.Default.NesDiagnostic,
+        "NesDiagnosticSeverity" => AcpUnstableJsonContext.Default.NesDiagnosticSeverity,
+        "NesDiagnosticsCapabilities" => AcpUnstableJsonContext.Default.NesDiagnosticsCapabilities,
+        "NesDocumentDidChangeCapabilities" => AcpUnstableJsonContext.Default.NesDocumentDidChangeCapabilities,
+        "NesDocumentDidCloseCapabilities" => AcpUnstableJsonContext.Default.NesDocumentDidCloseCapabilities,
+        "NesDocumentDidFocusCapabilities" => AcpUnstableJsonContext.Default.NesDocumentDidFocusCapabilities,
+        "NesDocumentDidOpenCapabilities" => AcpUnstableJsonContext.Default.NesDocumentDidOpenCapabilities,
+        "NesDocumentDidSaveCapabilities" => AcpUnstableJsonContext.Default.NesDocumentDidSaveCapabilities,
+        "NesDocumentEventCapabilities" => AcpUnstableJsonContext.Default.NesDocumentEventCapabilities,
+        "NesEditHistoryCapabilities" => AcpUnstableJsonContext.Default.NesEditHistoryCapabilities,
+        "NesEditHistoryEntry" => AcpUnstableJsonContext.Default.NesEditHistoryEntry,
+        "NesEditSuggestion" => AcpUnstableJsonContext.Default.NesEditSuggestion,
+        "NesEventCapabilities" => AcpUnstableJsonContext.Default.NesEventCapabilities,
+        "NesExcerpt" => AcpUnstableJsonContext.Default.NesExcerpt,
+        "NesJumpCapabilities" => AcpUnstableJsonContext.Default.NesJumpCapabilities,
+        "NesJumpSuggestion" => AcpUnstableJsonContext.Default.NesJumpSuggestion,
+        "NesOpenFile" => AcpUnstableJsonContext.Default.NesOpenFile,
+        "NesOpenFilesCapabilities" => AcpUnstableJsonContext.Default.NesOpenFilesCapabilities,
+        "NesRecentFile" => AcpUnstableJsonContext.Default.NesRecentFile,
+        "NesRecentFilesCapabilities" => AcpUnstableJsonContext.Default.NesRecentFilesCapabilities,
+        "NesRejectReason" => AcpUnstableJsonContext.Default.NesRejectReason,
+        "NesRelatedSnippet" => AcpUnstableJsonContext.Default.NesRelatedSnippet,
+        "NesRelatedSnippetsCapabilities" => AcpUnstableJsonContext.Default.NesRelatedSnippetsCapabilities,
+        "NesRenameCapabilities" => AcpUnstableJsonContext.Default.NesRenameCapabilities,
+        "NesRenameSuggestion" => AcpUnstableJsonContext.Default.NesRenameSuggestion,
+        "NesRepository" => AcpUnstableJsonContext.Default.NesRepository,
+        "NesSearchAndReplaceCapabilities" => AcpUnstableJsonContext.Default.NesSearchAndReplaceCapabilities,
+        "NesSearchAndReplaceSuggestion" => AcpUnstableJsonContext.Default.NesSearchAndReplaceSuggestion,
+        "NesSuggestContext" => AcpUnstableJsonContext.Default.NesSuggestContext,
+        "NesSuggestion" => AcpUnstableJsonContext.Default.NesSuggestion,
+        "NesSuggestionId" => AcpUnstableJsonContext.Default.NesSuggestionId,
+        "NesTextEdit" => AcpUnstableJsonContext.Default.NesTextEdit,
+        "NesTriggerKind" => AcpUnstableJsonContext.Default.NesTriggerKind,
+        "NesUserAction" => AcpUnstableJsonContext.Default.NesUserAction,
+        "NesUserActionsCapabilities" => AcpUnstableJsonContext.Default.NesUserActionsCapabilities,
+        "NewSessionRequest" => AcpUnstableJsonContext.Default.NewSessionRequest,
+        "NewSessionResponse" => AcpUnstableJsonContext.Default.NewSessionResponse,
+        "NumberPropertySchema" => AcpUnstableJsonContext.Default.NumberPropertySchema,
+        "PermissionOption" => AcpUnstableJsonContext.Default.PermissionOption,
+        "PermissionOptionId" => AcpUnstableJsonContext.Default.PermissionOptionId,
+        "PermissionOptionKind" => AcpUnstableJsonContext.Default.PermissionOptionKind,
+        "Plan" => AcpUnstableJsonContext.Default.Plan,
+        "PlanCapabilities" => AcpUnstableJsonContext.Default.PlanCapabilities,
+        "PlanEntry" => AcpUnstableJsonContext.Default.PlanEntry,
+        "PlanEntryPriority" => AcpUnstableJsonContext.Default.PlanEntryPriority,
+        "PlanEntryStatus" => AcpUnstableJsonContext.Default.PlanEntryStatus,
+        "PlanFile" => AcpUnstableJsonContext.Default.PlanFile,
+        "PlanId" => AcpUnstableJsonContext.Default.PlanId,
+        "PlanItems" => AcpUnstableJsonContext.Default.PlanItems,
+        "PlanMarkdown" => AcpUnstableJsonContext.Default.PlanMarkdown,
+        "PlanRemoved" => AcpUnstableJsonContext.Default.PlanRemoved,
+        "PlanUpdate" => AcpUnstableJsonContext.Default.PlanUpdate,
+        "PlanUpdateContent" => AcpUnstableJsonContext.Default.PlanUpdateContent,
+        "Position" => AcpUnstableJsonContext.Default.Position,
+        "PositionEncodingKind" => AcpUnstableJsonContext.Default.PositionEncodingKind,
+        "PromptCapabilities" => AcpUnstableJsonContext.Default.PromptCapabilities,
+        "PromptRequest" => AcpUnstableJsonContext.Default.PromptRequest,
+        "PromptResponse" => AcpUnstableJsonContext.Default.PromptResponse,
+        "ProtocolVersion" => AcpUnstableJsonContext.Default.ProtocolVersion,
+        "ProviderCurrentConfig" => AcpUnstableJsonContext.Default.ProviderCurrentConfig,
+        "ProviderId" => AcpUnstableJsonContext.Default.ProviderId,
+        "ProviderInfo" => AcpUnstableJsonContext.Default.ProviderInfo,
+        "ProvidersCapabilities" => AcpUnstableJsonContext.Default.ProvidersCapabilities,
+        "Range" => AcpUnstableJsonContext.Default.Range,
+        "ReadTextFileRequest" => AcpUnstableJsonContext.Default.ReadTextFileRequest,
+        "ReadTextFileResponse" => AcpUnstableJsonContext.Default.ReadTextFileResponse,
+        "RejectNesNotification" => AcpUnstableJsonContext.Default.RejectNesNotification,
+        "ReleaseTerminalRequest" => AcpUnstableJsonContext.Default.ReleaseTerminalRequest,
+        "ReleaseTerminalResponse" => AcpUnstableJsonContext.Default.ReleaseTerminalResponse,
+        "RequestId" => AcpUnstableJsonContext.Default.RequestId,
+        "RequestPermissionOutcome" => AcpUnstableJsonContext.Default.RequestPermissionOutcome,
+        "RequestPermissionRequest" => AcpUnstableJsonContext.Default.RequestPermissionRequest,
+        "RequestPermissionResponse" => AcpUnstableJsonContext.Default.RequestPermissionResponse,
+        "ResourceLink" => AcpUnstableJsonContext.Default.ResourceLink,
+        "ResumeSessionRequest" => AcpUnstableJsonContext.Default.ResumeSessionRequest,
+        "ResumeSessionResponse" => AcpUnstableJsonContext.Default.ResumeSessionResponse,
+        "Role" => AcpUnstableJsonContext.Default.Role,
+        "SelectedPermissionOutcome" => AcpUnstableJsonContext.Default.SelectedPermissionOutcome,
+        "SessionAdditionalDirectoriesCapabilities" => AcpUnstableJsonContext.Default.SessionAdditionalDirectoriesCapabilities,
+        "SessionCapabilities" => AcpUnstableJsonContext.Default.SessionCapabilities,
+        "SessionCloseCapabilities" => AcpUnstableJsonContext.Default.SessionCloseCapabilities,
+        "SessionConfigBoolean" => AcpUnstableJsonContext.Default.SessionConfigBoolean,
+        "SessionConfigGroupId" => AcpUnstableJsonContext.Default.SessionConfigGroupId,
+        "SessionConfigId" => AcpUnstableJsonContext.Default.SessionConfigId,
+        "SessionConfigOption" => AcpUnstableJsonContext.Default.SessionConfigOption,
+        "SessionConfigOptionCategory" => AcpUnstableJsonContext.Default.SessionConfigOptionCategory,
+        "SessionConfigOptionsCapabilities" => AcpUnstableJsonContext.Default.SessionConfigOptionsCapabilities,
+        "SessionConfigSelect" => AcpUnstableJsonContext.Default.SessionConfigSelect,
+        "SessionConfigSelectGroup" => AcpUnstableJsonContext.Default.SessionConfigSelectGroup,
+        "SessionConfigSelectOption" => AcpUnstableJsonContext.Default.SessionConfigSelectOption,
+        "SessionConfigSelectOptions" => AcpUnstableJsonContext.Default.SessionConfigSelectOptions,
+        "SessionConfigValueId" => AcpUnstableJsonContext.Default.SessionConfigValueId,
+        "SessionDeleteCapabilities" => AcpUnstableJsonContext.Default.SessionDeleteCapabilities,
+        "SessionForkCapabilities" => AcpUnstableJsonContext.Default.SessionForkCapabilities,
+        "SessionId" => AcpUnstableJsonContext.Default.SessionId,
+        "SessionInfo" => AcpUnstableJsonContext.Default.SessionInfo,
+        "SessionInfoUpdate" => AcpUnstableJsonContext.Default.SessionInfoUpdate,
+        "SessionListCapabilities" => AcpUnstableJsonContext.Default.SessionListCapabilities,
+        "SessionMode" => AcpUnstableJsonContext.Default.SessionMode,
+        "SessionModeId" => AcpUnstableJsonContext.Default.SessionModeId,
+        "SessionModeState" => AcpUnstableJsonContext.Default.SessionModeState,
+        "SessionNotification" => AcpUnstableJsonContext.Default.SessionNotification,
+        "SessionResumeCapabilities" => AcpUnstableJsonContext.Default.SessionResumeCapabilities,
+        "SessionUpdate" => AcpUnstableJsonContext.Default.SessionUpdate,
+        "SetProviderRequest" => AcpUnstableJsonContext.Default.SetProviderRequest,
+        "SetProviderResponse" => AcpUnstableJsonContext.Default.SetProviderResponse,
+        "SetSessionConfigOptionRequest" => AcpUnstableJsonContext.Default.SetSessionConfigOptionRequest,
+        "SetSessionConfigOptionResponse" => AcpUnstableJsonContext.Default.SetSessionConfigOptionResponse,
+        "SetSessionModeRequest" => AcpUnstableJsonContext.Default.SetSessionModeRequest,
+        "SetSessionModeResponse" => AcpUnstableJsonContext.Default.SetSessionModeResponse,
+        "StartNesRequest" => AcpUnstableJsonContext.Default.StartNesRequest,
+        "StartNesResponse" => AcpUnstableJsonContext.Default.StartNesResponse,
+        "StopReason" => AcpUnstableJsonContext.Default.StopReason,
+        "StringFormat" => AcpUnstableJsonContext.Default.StringFormat,
+        "StringMultiSelectItems" => AcpUnstableJsonContext.Default.StringMultiSelectItems,
+        "StringPropertySchema" => AcpUnstableJsonContext.Default.StringPropertySchema,
+        "SuggestNesRequest" => AcpUnstableJsonContext.Default.SuggestNesRequest,
+        "SuggestNesResponse" => AcpUnstableJsonContext.Default.SuggestNesResponse,
+        "Terminal" => AcpUnstableJsonContext.Default.Terminal,
+        "TerminalExitStatus" => AcpUnstableJsonContext.Default.TerminalExitStatus,
+        "TerminalId" => AcpUnstableJsonContext.Default.TerminalId,
+        "TerminalOutputRequest" => AcpUnstableJsonContext.Default.TerminalOutputRequest,
+        "TerminalOutputResponse" => AcpUnstableJsonContext.Default.TerminalOutputResponse,
+        "TextContent" => AcpUnstableJsonContext.Default.TextContent,
+        "TextDocumentContentChangeEvent" => AcpUnstableJsonContext.Default.TextDocumentContentChangeEvent,
+        "TextDocumentSyncKind" => AcpUnstableJsonContext.Default.TextDocumentSyncKind,
+        "TextResourceContents" => AcpUnstableJsonContext.Default.TextResourceContents,
+        "TitledMultiSelectItems" => AcpUnstableJsonContext.Default.TitledMultiSelectItems,
+        "ToolCall" => AcpUnstableJsonContext.Default.ToolCall,
+        "ToolCallContent" => AcpUnstableJsonContext.Default.ToolCallContent,
+        "ToolCallId" => AcpUnstableJsonContext.Default.ToolCallId,
+        "ToolCallLocation" => AcpUnstableJsonContext.Default.ToolCallLocation,
+        "ToolCallStatus" => AcpUnstableJsonContext.Default.ToolCallStatus,
+        "ToolCallUpdate" => AcpUnstableJsonContext.Default.ToolCallUpdate,
+        "ToolKind" => AcpUnstableJsonContext.Default.ToolKind,
+        "UnstructuredCommandInput" => AcpUnstableJsonContext.Default.UnstructuredCommandInput,
+        "Usage" => AcpUnstableJsonContext.Default.Usage,
+        "UsageUpdate" => AcpUnstableJsonContext.Default.UsageUpdate,
+        "WaitForTerminalExitRequest" => AcpUnstableJsonContext.Default.WaitForTerminalExitRequest,
+        "WaitForTerminalExitResponse" => AcpUnstableJsonContext.Default.WaitForTerminalExitResponse,
+        "WorkspaceFolder" => AcpUnstableJsonContext.Default.WorkspaceFolder,
+        "WriteTextFileRequest" => AcpUnstableJsonContext.Default.WriteTextFileRequest,
+        "WriteTextFileResponse" => AcpUnstableJsonContext.Default.WriteTextFileResponse,
+        _ => null,
+    };
 }

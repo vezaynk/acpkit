@@ -9,6 +9,30 @@ var runner = new Runner();
 TransportScenarios.Register(runner);
 ProtocolScenarios.Register(runner);
 
+// One catalog per generated assembly. Naming them here rather than discovering them keeps the
+// whole path reflection-free, which is the same discipline the library itself is held to.
+CorpusScenarios.Register(
+    runner,
+    [
+        new CorpusScenarios.Catalog(
+            "v1-stable",
+            AcpKit.Protocol.V1.ProtocolTypes.Names,
+            AcpKit.Protocol.V1.ProtocolTypes.Find),
+        new CorpusScenarios.Catalog(
+            "v1-unstable",
+            AcpKit.Protocol.V1.Unstable.ProtocolTypes.Names,
+            AcpKit.Protocol.V1.Unstable.ProtocolTypes.Find),
+        new CorpusScenarios.Catalog(
+            "v2-stable",
+            AcpKit.Protocol.V2.ProtocolTypes.Names,
+            AcpKit.Protocol.V2.ProtocolTypes.Find),
+        new CorpusScenarios.Catalog(
+            "v2-unstable",
+            AcpKit.Protocol.V2.Unstable.ProtocolTypes.Names,
+            AcpKit.Protocol.V2.Unstable.ProtocolTypes.Find),
+    ],
+    Path.Combine(AppContext.BaseDirectory, "Corpus"));
+
 return await runner.RunAllAsync(TimeSpan.FromSeconds(20)).ConfigureAwait(false);
 
 namespace AcpKit.Conformance

@@ -13,6 +13,13 @@
     <ProjectReference Include="../../src/AcpKit.Core/AcpKit.Core.csproj" />
     <ProjectReference Include="../../src/AcpKit.Client.V2/AcpKit.Client.V2.csproj" />
     <ProjectReference Include="../../src/AcpKit.Agent.V2/AcpKit.Agent.V2.csproj" />
+    <!-- Both lines, so the corpus gate covers all four schema sets rather than the one in use. -->
+    <ProjectReference Include="../../src/AcpKit.Protocol.V1/AcpKit.Protocol.V1.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The corpus is generated alongside the sources it exercises; it travels with the binary. -->
+    <None Include="Corpus/*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

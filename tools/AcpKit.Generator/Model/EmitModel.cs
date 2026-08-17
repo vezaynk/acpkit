@@ -63,10 +63,15 @@ internal sealed record PropertyModel(
 /// name already matches. Such a payload derives from the union directly instead of being
 /// wrapped, which removes a pointless <c>.Value</c> hop from the public API.
 /// </param>
+/// <param name="PayloadType">
+/// The type carrying the arm's fields, or null when the arm is nothing but its discriminator.
+/// <c>{"outcome": "cancelled"}</c> is a whole message in ACP; giving it a payload property
+/// would demand a field the wire never carries.
+/// </param>
 internal sealed record UnionVariant(
     string CsName,
     string DiscriminatorValue,
-    TypeRef PayloadType,
+    TypeRef? PayloadType,
     string? Documentation,
     bool Inline = false);
 

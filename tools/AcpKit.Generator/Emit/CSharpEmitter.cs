@@ -39,6 +39,7 @@ internal sealed class CSharpEmitter(EmitPlan plan)
 
         members.Add(EmitMethodTable());
         members.Add(EmitSerializerContext());
+        members.Add(EmitTypeCatalog());
 
         var @namespace = FileScopedNamespaceDeclaration(ParseName(plan.Namespace))
             .WithMembers(List(members));
@@ -49,6 +50,7 @@ internal sealed class CSharpEmitter(EmitPlan plan)
                 UsingDirective(ParseName("System")),
                 UsingDirective(ParseName("System.Text.Json")),
                 UsingDirective(ParseName("System.Text.Json.Serialization")),
+                UsingDirective(ParseName("System.Text.Json.Serialization.Metadata")),
             }))
             .WithMembers(SingletonList<MemberDeclarationSyntax>(@namespace))
             .WithLeadingTrivia(ParseLeadingTrivia(Header()));
@@ -344,6 +346,67 @@ internal sealed class CSharpEmitter(EmitPlan plan)
     }
 
     /// <summary>
+    /// A name-to-contract lookup over every type this protocol version defines.
+    /// </summary>
+    /// <remarks>
+    /// A generated switch, so it stays on the source-generated path and adds no reflection.
+    /// Its purpose is conformance: the harness reads a sample payload labelled with a type
+    /// name and needs the matching contract to round-trip it. Without a lookup it could only
+    /// exercise types someone had remembered to name in a test, which is precisely the
+    /// coverage gap this library cannot afford.
+    /// </remarks>
+    private MemberDeclarationSyntax EmitTypeCatalog()
+    {
+        // Protocol types only. Primitives are registered in the context under their CLR names
+        // (Int64, not ulong) and are not what a conformance corpus is checking anyway.
+        var names = plan.Types
+            .Where(IsDeclared)
+            .Select(t => t.Name)
+            .Order(StringComparer.Ordinal)
+            .ToList();
+
+        var cases = new StringBuilder();
+        foreach (var name in names)
+        {
+            cases.Append($"            \"{name}\" => {plan.ContextName}.Default.{CatalogMember(name)},\n");
+        }
+
+        var listed = string.Join(",\n            ", names.Select(n => $"\"{n}\""));
+
+        return Parse($$"""
+            /// <summary>Every type this protocol version defines, by name.</summary>
+            public static class ProtocolTypes
+            {
+                /// <summary>The names of every type, for coverage checks.</summary>
+                public static readonly string[] Names =
+                [
+                    {{listed}}
+                ];
+
+                /// <summary>The serialization contract for a named type, or null if unknown.</summary>
+                public static JsonTypeInfo? Find(string name) => name switch
+                {
+            {{cases}}            _ => null,
+                };
+            }
+            """);
+    }
+
+    /// <summary>
+    /// Whether a model type results in a declared C# type. Aliases over raw JSON, and over
+    /// class types, emit nothing of their own.
+    /// </summary>
+    private static bool IsDeclared(EmittedType type) => type switch
+    {
+        AliasType alias => alias.Underlying.Name != TypeRef.Object.Name
+            && (alias.Underlying.IsValueType || alias.Underlying.Name == "string"),
+        _ => true,
+    };
+
+    /// <summary>The property System.Text.Json's generator creates for a type.</summary>
+    private static string CatalogMember(string typeName) => typeName;
+
+    /// <summary>
     /// Every type name the context must know, including the closed <c>Patch&lt;T&gt;</c>
     /// instantiations that properties reference.
     /// </summary>
@@ -384,7 +447,11 @@ internal sealed class CSharpEmitter(EmitPlan plan)
                     names.Add(union.Name);
                     foreach (var variant in union.Variants)
                     {
-                        names.Add(variant.PayloadType.Name);
+                        if (variant.PayloadType is { } payload)
+                        {
+                            names.Add(payload.Name);
+                        }
+
                         if (!variant.Inline)
                         {
                             names.Add(variant.CsName);

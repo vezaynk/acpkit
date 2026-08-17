@@ -181,12 +181,17 @@ internal sealed class LoopbackStream : Stream
 
     public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
     {
+        MethodTap.Observe(Encoding.UTF8.GetString(buffer.Span));
         _chunks.Writer.TryWrite(buffer.ToArray());
         return ValueTask.CompletedTask;
     }
 
     /// <summary>Write raw text, for scenarios that need to speak to a peer by hand.</summary>
-    public void WriteRaw(string text) => _chunks.Writer.TryWrite(Encoding.UTF8.GetBytes(text));
+    public void WriteRaw(string text)
+    {
+        MethodTap.Observe(text);
+        _chunks.Writer.TryWrite(Encoding.UTF8.GetBytes(text));
+    }
 
     public override int Read(byte[] buffer, int offset, int count) =>
         ReadAsync(buffer.AsMemory(offset, count), CancellationToken.None).AsTask().GetAwaiter().GetResult();
@@ -294,5 +299,58 @@ internal sealed class Link : IAsyncDisposable
         }
 
         _shutdown.Dispose();
+    }
+}
+
+
+/// <summary>
+/// Records every JSON-RPC method that actually crosses a wire during the run.
+/// </summary>
+/// <remarks>
+/// Observed rather than declared. A scenario that says it covers <c>session/prompt</c> proves
+/// nothing; a <c>session/prompt</c> seen on the wire does. Sniffing the bytes also means the
+/// library needs no test-only hook in its public API to make coverage measurable.
+/// </remarks>
+internal static class MethodTap
+{
+    private static readonly HashSet<string> Seen = new(StringComparer.Ordinal);
+
+    public static IReadOnlySet<string> Methods
+    {
+        get
+        {
+            lock (Seen)
+            {
+                return new HashSet<string>(Seen, StringComparer.Ordinal);
+            }
+        }
+    }
+
+    public static void Observe(string text)
+    {
+        const string marker = "\"method\":";
+        var index = 0;
+
+        while ((index = text.IndexOf(marker, index, StringComparison.Ordinal)) >= 0)
+        {
+            var open = text.IndexOf('"', index + marker.Length);
+            if (open < 0)
+            {
+                return;
+            }
+
+            var close = text.IndexOf('"', open + 1);
+            if (close < 0)
+            {
+                return;
+            }
+
+            lock (Seen)
+            {
+                Seen.Add(text[(open + 1)..close]);
+            }
+
+            index = close;
+        }
     }
 }

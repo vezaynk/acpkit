@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using AcpKit.Generator.Analysis;
 using AcpKit.Generator.Emit;
 using AcpKit.Generator.Verify;
@@ -208,6 +210,7 @@ internal static class Program
                 Write(repoRoot, Path.Combine(roleProject, $"{stem}.g.cs"), ConnectionEmitter.Render(plan, owner));
             }
 
+            WriteSamples(repoRoot, line, variant, plan);
             schema.Dispose();
         }
 
@@ -219,6 +222,42 @@ internal static class Program
     {
         File.WriteAllText(path, content);
         Console.WriteLine($"  {Path.GetRelativePath(repoRoot, path),-58} {content.Count(c => c == '\n'),6} lines");
+    }
+
+    /// <summary>
+    /// Write the conformance corpus: one payload per type, and one per union arm.
+    /// </summary>
+    /// <remarks>
+    /// Checked in alongside the generated sources so a schema bump shows both the new types and
+    /// the payloads that will exercise them in the same reviewable diff.
+    /// </remarks>
+    private static void WriteSamples(string repoRoot, ProtocolLine line, SchemaVariant variant, EmitPlan plan)
+    {
+        var samples = new SampleBuilder(plan).Build();
+        var document = new JsonObject
+        {
+            ["schema"] = plan.SchemaVersion,
+            ["namespace"] = plan.Namespace,
+            ["methods"] = new JsonArray(plan.Callable.Select(m => (JsonNode)new JsonObject
+            {
+                ["path"] = m.Path,
+                ["owner"] = m.Owner.ToString(),
+                ["notification"] = m.IsNotification,
+            }).ToArray()),
+            ["samples"] = new JsonArray(samples.Select(s => (JsonNode)new JsonObject
+            {
+                ["type"] = s.TypeName,
+                ["label"] = s.Label,
+                ["payload"] = s.Payload,
+            }).ToArray()),
+        };
+
+        var directory = Path.Combine(repoRoot, "tests", "AcpKit.Conformance", "Corpus");
+        Directory.CreateDirectory(directory);
+        var path = Path.Combine(directory, $"{line}-{variant}.json".ToLowerInvariant());
+        File.WriteAllText(path, document.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n");
+
+        Console.WriteLine($"      {samples.Count} samples -> {Path.GetRelativePath(repoRoot, path)}");
     }
 
     /// <summary>Print how one named definition classified, for spot-checking the analysis.</summary>
@@ -247,7 +286,7 @@ internal static class Program
                     Console.WriteLine($"  {name}: union on \"{union.DiscriminatorJsonName}\", {union.Variants.Count} variants, {union.BaseProperties.Count} shared properties");
                     foreach (var v in union.Variants.Take(8))
                     {
-                        Console.WriteLine($"      \"{v.DiscriminatorValue}\" -> {v.PayloadType.Name}");
+                        Console.WriteLine($"      \"{v.DiscriminatorValue}\" -> {v.PayloadType?.Name ?? "(no payload)"}");
                     }
 
                     break;

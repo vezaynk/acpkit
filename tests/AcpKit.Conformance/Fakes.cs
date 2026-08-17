@@ -16,6 +16,13 @@ internal sealed class FakeAgent : IAcpAgent
 {
     private ClientConnection? _client;
     private int _sessions;
+    private TaskCompletionSource _cancelled = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    /// <summary>
+    /// When set, a turn runs until cancelled rather than finishing on its own, so a scenario
+    /// can observe what cancellation actually does to the state sequence.
+    /// </summary>
+    public bool HoldTurnUntilCancelled { get; set; }
 
     public void Attach(ClientConnection client) => _client = client;
 
@@ -56,6 +63,24 @@ internal sealed class FakeAgent : IAcpAgent
         {
             Value = new StateUpdateRunning { Value = new RunningStateUpdate() },
         });
+
+        if (HoldTurnUntilCancelled)
+        {
+            // v2 is explicit about this: after session/cancel the agent flushes what it has and
+            // then reports idle with stopReason "cancelled". Cancellation is not an error and
+            // not a separate state — it is how the turn ends.
+            await _cancelled.Task;
+
+            await Notify(session, new SessionUpdateStateUpdate
+            {
+                Value = new StateUpdateIdle
+                {
+                    Value = new IdleStateUpdate { StopReason = Patch<StopReason>.Set(StopReason.Cancelled) },
+                },
+            });
+
+            return;
+        }
 
         await Notify(session, new SessionUpdateAgentMessageChunk
         {
@@ -117,8 +142,11 @@ internal sealed class FakeAgent : IAcpAgent
     public Task<SetSessionConfigOptionResponse> SessionSetConfigOptionAsync(SetSessionConfigOptionRequest request, CancellationToken cancellationToken) =>
         Task.FromResult(new SetSessionConfigOptionResponse { ConfigOptions = [] });
 
-    public Task SessionCancelAsync(CancelSessionNotification request, CancellationToken cancellationToken) =>
-        Task.CompletedTask;
+    public Task SessionCancelAsync(CancelSessionNotification request, CancellationToken cancellationToken)
+    {
+        _cancelled.TrySetResult();
+        return Task.CompletedTask;
+    }
 
     public Task<ListSessionsResponse> SessionListAsync(ListSessionsRequest request, CancellationToken cancellationToken) =>
         Task.FromResult(new ListSessionsResponse { Sessions = [] });
