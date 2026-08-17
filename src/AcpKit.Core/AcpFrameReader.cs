@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.IO.Pipelines;
 
 namespace AcpKit;
 
@@ -13,130 +14,127 @@ namespace AcpKit;
 /// break when the protocol grows a construct the forwarder has never seen.
 /// </para>
 /// <para>
-/// Deliberately hand-rolled rather than layered on <c>StreamReader</c> or
-/// <c>System.IO.Pipelines</c>: the former decodes eagerly and hides byte boundaries, and the
-/// latter is a package dependency this assembly does not otherwise need. What is left is
-/// small — find a <c>\n</c>, hand back everything before it.
+/// Built on <see cref="PipeReader"/>, which owns the buffering. That matters more than the
+/// lines it saves: a frame is handed back as a slice of the pipe's own memory whenever it
+/// arrived contiguously, so the common case copies nothing, and the awkward cases — a frame
+/// split across reads, or one larger than any single buffer — become the pipe's problem
+/// rather than hand-written index arithmetic.
 /// </para>
 /// <para>
-/// Two properties matter for talking to real agents. There is no line-length ceiling: a
-/// single <c>session/update</c> carrying a large diff or a base64 terminal snapshot can run
-/// to megabytes, and a fixed buffer would truncate it into a parse error. And the reader
-/// returns raw UTF-8 rather than a decoded string, because <c>Utf8JsonReader</c> wants bytes
-/// and transcoding to UTF-16 and back is pure waste on the hot path.
+/// There is deliberately no ceiling on frame size. A single <c>session/update</c> carrying a
+/// diff or a base64 terminal snapshot runs to megabytes, and a reader that capped its buffer
+/// would turn a legitimate message into a parse error. Frames are raw UTF-8 rather than
+/// decoded strings, because <c>Utf8JsonReader</c> wants bytes and transcoding to UTF-16 and
+/// back is pure waste on the hot path.
 /// </para>
 /// </remarks>
 public sealed class AcpFrameReader : IDisposable
 {
-    private const int InitialCapacity = 8 * 1024;
+    private readonly PipeReader _reader;
+    private readonly bool _ownsReader;
 
-    private readonly Stream _stream;
-    private byte[] _buffer;
-    private int _start;
-    private int _length;
+    private SequencePosition? _unconsumed;
+    private byte[]? _joined;
     private bool _disposed;
 
     /// <summary>Read frames from <paramref name="stream"/>.</summary>
     public AcpFrameReader(Stream stream)
+        : this(PipeReader.Create(stream ?? throw new ArgumentNullException(nameof(stream))), ownsReader: true)
     {
-        _stream = stream;
-        _buffer = ArrayPool<byte>.Shared.Rent(InitialCapacity);
+    }
+
+    /// <summary>
+    /// Read frames from an existing <see cref="PipeReader"/>, which the caller continues to
+    /// own. Use this to sit on a pipeline something else already established.
+    /// </summary>
+    public AcpFrameReader(PipeReader reader)
+        : this(reader ?? throw new ArgumentNullException(nameof(reader)), ownsReader: false)
+    {
+    }
+
+    private AcpFrameReader(PipeReader reader, bool ownsReader)
+    {
+        _reader = reader;
+        _ownsReader = ownsReader;
     }
 
     /// <summary>
     /// The next frame, without its terminator, or null at end of stream.
     /// </summary>
     /// <remarks>
-    /// The returned memory points into an internal buffer and is valid only until the next
-    /// call. Callers that keep it must copy.
+    /// The returned memory is valid only until the next call: it usually points into the
+    /// pipe's buffer, which is released as soon as reading resumes. Callers keeping a frame
+    /// must copy it.
     /// </remarks>
-    public async ValueTask<ReadOnlyMemory<byte>?> ReadFrameAsync(CancellationToken cancellationToken)
+    public async ValueTask<ReadOnlyMemory<byte>?> ReadFrameAsync(CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
         while (true)
         {
-            var newline = FindNewline();
-            if (newline >= 0)
+            // Releasing the previous frame happens here rather than before returning it, which
+            // is what lets a caller borrow the pipe's memory instead of being handed a copy.
+            if (_unconsumed is { } position)
             {
-                var line = new ReadOnlyMemory<byte>(_buffer, _start, newline - _start);
-                _length -= newline - _start + 1;
-                _start = newline + 1;
-                return Trim(line);
+                _reader.AdvanceTo(position);
+                _unconsumed = null;
             }
 
-            if (!await FillAsync(cancellationToken).ConfigureAwait(false))
+            var result = await _reader.ReadAsync(cancellationToken).ConfigureAwait(false);
+            var buffer = result.Buffer;
+
+            if (buffer.PositionOf((byte)'\n') is { } newline)
             {
-                // End of stream. Anything buffered is a final line with no terminator, which
-                // is legal NDJSON and is what a process that exits mid-write leaves behind.
-                if (_length == 0)
+                var frame = buffer.Slice(0, newline);
+                _unconsumed = buffer.GetPosition(1, newline);
+                return Trim(Contiguous(frame));
+            }
+
+            if (result.IsCompleted)
+            {
+                if (buffer.IsEmpty)
                 {
+                    _reader.AdvanceTo(buffer.Start);
                     return null;
                 }
 
-                var tail = new ReadOnlyMemory<byte>(_buffer, _start, _length);
-                _start += _length;
-                _length = 0;
-                return Trim(tail);
+                // A final frame with no terminator: legal NDJSON, and what a process that
+                // exits mid-write leaves behind.
+                _unconsumed = buffer.End;
+                return Trim(Contiguous(buffer));
             }
+
+            // Nothing complete yet. Consuming nothing while marking everything examined is
+            // what tells the pipe to wait for more instead of handing back the same bytes.
+            _reader.AdvanceTo(buffer.Start, buffer.End);
         }
     }
 
-    private int FindNewline()
+    /// <summary>
+    /// A frame as one span of memory, borrowing the pipe's buffer when it already is one.
+    /// </summary>
+    private ReadOnlyMemory<byte> Contiguous(ReadOnlySequence<byte> frame)
     {
-        var span = new ReadOnlySpan<byte>(_buffer, _start, _length);
-        var index = span.IndexOf((byte)'\n');
-        return index < 0 ? -1 : _start + index;
+        if (frame.IsSingleSegment)
+        {
+            return frame.First;
+        }
+
+        // Split across pipe segments, so it has to be joined. The scratch array is reused and
+        // only grows, which keeps a stream of large frames from churning allocations.
+        var length = checked((int)frame.Length);
+        if (_joined is null || _joined.Length < length)
+        {
+            _joined = new byte[Math.Max(length, (_joined?.Length ?? 4096) * 2)];
+        }
+
+        frame.CopyTo(_joined);
+        return _joined.AsMemory(0, length);
     }
 
     /// <summary>Strip a trailing CR, so CRLF-terminated streams behave identically.</summary>
-    private static ReadOnlyMemory<byte> Trim(ReadOnlyMemory<byte> line) =>
-        line.Length > 0 && line.Span[^1] == (byte)'\r' ? line[..^1] : line;
-
-    private async ValueTask<bool> FillAsync(CancellationToken cancellationToken)
-    {
-        Compact();
-
-        if (_start + _length == _buffer.Length)
-        {
-            Grow();
-        }
-
-        var read = await _stream
-            .ReadAsync(_buffer.AsMemory(_start + _length), cancellationToken)
-            .ConfigureAwait(false);
-
-        if (read == 0)
-        {
-            return false;
-        }
-
-        _length += read;
-        return true;
-    }
-
-    /// <summary>Slide unread bytes to the front so the tail of the buffer is usable again.</summary>
-    private void Compact()
-    {
-        if (_start == 0)
-        {
-            return;
-        }
-
-        if (_length > 0)
-        {
-            Array.Copy(_buffer, _start, _buffer, 0, _length);
-        }
-
-        _start = 0;
-    }
-
-    private void Grow()
-    {
-        var larger = ArrayPool<byte>.Shared.Rent(_buffer.Length * 2);
-        Array.Copy(_buffer, _start, larger, 0, _length);
-        ArrayPool<byte>.Shared.Return(_buffer);
-        _buffer = larger;
-        _start = 0;
-    }
+    private static ReadOnlyMemory<byte> Trim(ReadOnlyMemory<byte> frame) =>
+        frame.Length > 0 && frame.Span[^1] == (byte)'\r' ? frame[..^1] : frame;
 
     /// <inheritdoc/>
     public void Dispose()
@@ -147,7 +145,11 @@ public sealed class AcpFrameReader : IDisposable
         }
 
         _disposed = true;
-        ArrayPool<byte>.Shared.Return(_buffer);
-        _buffer = [];
+        _joined = null;
+
+        if (_ownsReader)
+        {
+            _reader.Complete();
+        }
     }
 }

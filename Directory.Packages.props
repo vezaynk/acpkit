@@ -6,11 +6,15 @@
   </PropertyGroup>
 
   <!--
-    The shipped libraries take no package dependencies at all: System.Text.Json and its
-    source generator are in the shared framework for every target here. Everything below
-    is build-time or test-time only.
+    System.Text.Json and its source generator are in the shared framework for every target
+    here, so the only runtime dependency the shipped libraries carry is Pipelines, which owns
+    the framing in AcpKit.Core. It is first-party, AOT-safe, and pulls nothing in behind it.
   -->
   <ItemGroup>
+    <PackageVersion Include="System.IO.Pipelines" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Build-time only">
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
   </ItemGroup>
