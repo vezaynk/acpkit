@@ -13,5 +13,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/AcpKit.Conformance/AcpKit.Conformance.csproj" />
+    <Project Path="tests/AcpKit.Live/AcpKit.Live.csproj" />
   </Folder>
 </Solution>

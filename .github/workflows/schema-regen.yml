@@ -1,0 +1,138 @@
+name: schema-regen
+
+# Tracks the upstream schema. Both ACP lines move independently, and v2 is still tagged
+# 2.0.0-alpha, so this is the mechanism that keeps the checked-in output honest about which
+# upstream commit produced it.
+
+on:
+  schedule:
+    # Monday morning UTC, so a surprise lands at the start of a week rather than the end of one.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Regenerate even when the pinned tags have not moved'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Resolve the newest tag on each line
+        id: tags
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          repo=agentclientprotocol/agent-client-protocol
+          changed=0
+
+          for line in v1 v2; do
+            tag=$(gh api "repos/$repo/git/refs/tags" --jq '.[].ref' \
+              | grep "refs/tags/schema-$line\." \
+              | sed 's|refs/tags/||' \
+              | sort -V | tail -1)
+            echo "$line=$tag" >> "$GITHUB_OUTPUT"
+            echo "$line -> $tag"
+
+            for variant in stable unstable; do
+              pinned=$(cat "schema/$line/$variant/VERSION" 2>/dev/null || echo none)
+              if [ "$pinned" != "refs/tags/$tag" ]; then
+                changed=1
+              fi
+            done
+          done
+
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch the schemas
+        if: steps.tags.outputs.changed == '1' || inputs.force
+        run: |
+          set -euo pipefail
+          repo=agentclientprotocol/agent-client-protocol
+          declare -A tag=( [v1]='${{ steps.tags.outputs.v1 }}' [v2]='${{ steps.tags.outputs.v2 }}' )
+
+          for line in v1 v2; do
+            for variant in stable unstable; do
+              dir="schema/$line/$variant"
+              mkdir -p "$dir"
+              if [ "$variant" = stable ]; then
+                s=schema.json; m=meta.json
+              else
+                s=schema.unstable.json; m=meta.unstable.json
+              fi
+              base="https://raw.githubusercontent.com/$repo/refs/tags/${tag[$line]}/schema/$line"
+              curl -fsSL "$base/$s" -o "$dir/schema.json"
+              curl -fsSL "$base/$m" -o "$dir/meta.json"
+              printf 'refs/tags/%s\n' "${tag[$line]}" > "$dir/VERSION"
+            done
+          done
+
+      - name: Regenerate
+        if: steps.tags.outputs.changed == '1' || inputs.force
+        run: dotnet run --project tools/AcpKit.Generator -- generate
+
+      # A schema the generator cannot classify, or output that no longer compiles, is the whole
+      # reason this job exists. Better to fail here than to open a pull request that hides it.
+      - name: Verify
+        if: steps.tags.outputs.changed == '1' || inputs.force
+        run: |
+          dotnet run --project tools/AcpKit.Generator -- inspect
+          dotnet build acpkit.slnx -c Release
+          dotnet run --project tests/AcpKit.Conformance -c Release
+
+      - name: Summarise the drift
+        if: steps.tags.outputs.changed == '1' || inputs.force
+        id: drift
+        run: |
+          {
+            echo 'body<<PRBODY'
+            echo "Upstream tags: \`${{ steps.tags.outputs.v1 }}\`, \`${{ steps.tags.outputs.v2 }}\`."
+            echo
+            echo '### What moved'
+            echo
+            echo '```'
+            git --no-pager diff --stat -- schema src tests/AcpKit.Conformance/Corpus | tail -30
+            echo '```'
+            echo
+            echo '### Analysis'
+            echo
+            echo '```'
+            dotnet run --project tools/AcpKit.Generator -- inspect 2>&1 | tail -60
+            echo '```'
+            echo
+            echo 'Generated output compiles and the conformance corpus round-trips. The `run-e2e`'
+            echo 'label triggers the live tier against a real agent, which is the only check that'
+            echo 'can catch a shape the schema describes differently from how agents send it.'
+            echo PRBODY
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open a pull request
+        if: steps.tags.outputs.changed == '1' || inputs.force
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: schema/bump-${{ steps.tags.outputs.v1 }}-${{ steps.tags.outputs.v2 }}
+          title: 'Track ${{ steps.tags.outputs.v1 }} and ${{ steps.tags.outputs.v2 }}'
+          body: ${{ steps.drift.outputs.body }}
+          labels: |
+            schema-bump
+            run-e2e
+          commit-message: |
+            Regenerate from ${{ steps.tags.outputs.v1 }} and ${{ steps.tags.outputs.v2 }}
+
+            Produced by the schema-regen workflow.
+
+      - name: Nothing to do
+        if: steps.tags.outputs.changed != '1' && !inputs.force
+        run: echo "Pinned tags are current; no regeneration needed."

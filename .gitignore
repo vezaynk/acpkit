@@ -1,3 +1,9 @@
+# Credentials never belong in the repository. The live harness reads them from the
+# environment, and CI reads them from repository secrets.
+.env
+.env.*
+!.env.example
+
 bin/
 obj/
 artifacts/

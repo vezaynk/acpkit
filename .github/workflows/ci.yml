@@ -1,0 +1,69 @@
+name: ci
+
+# Everything that can be checked without spending money or holding a credential.
+# The live tier lives in live.yml and is gated separately.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore acpkit.slnx
+
+      - name: Build
+        run: dotnet build acpkit.slnx --no-restore -c Release
+
+      # The generated sources are checked in. If regenerating changes them, the commit is out
+      # of date with the schema it claims to come from, and the diff says exactly how.
+      - name: Generated sources are up to date
+        run: |
+          dotnet run --project tools/AcpKit.Generator -c Release -- generate
+          if ! git diff --quiet; then
+            echo "::error::Generated output does not match the checked-in files. Run 'dotnet run --project tools/AcpKit.Generator -- generate' and commit the result."
+            git --no-pager diff --stat
+            exit 1
+          fi
+
+      - name: Conformance
+        run: dotnet run --project tests/AcpKit.Conformance -c Release
+
+  aot:
+    # The whole point of the library is that it survives trimming and native compilation, so
+    # this is a correctness check rather than a nicety. Any IL2xxx or IL3xxx warning fails it.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish native AOT
+        run: |
+          dotnet publish tests/AcpKit.Conformance \
+            -c Release -r linux-x64 \
+            -p:PublishAot=true \
+            -p:TrimmerSingleWarn=false \
+            -warnaserror
+
+      - name: Run the native binary
+        run: ./artifacts/publish/AcpKit.Conformance/release_linux-x64/acpkit-conformance
