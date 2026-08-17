@@ -67,7 +67,7 @@ internal static class ConnectionEmitter
 
                 """));
 
-        return unit.NormalizeWhitespace(eol: "\n").ToFullString().TrimStart() + "\n";
+        return SourceText.Render(unit);
     }
 
     private static string EmitInterface(string self, List<MethodModel> answered)
@@ -76,8 +76,8 @@ internal static class ConnectionEmitter
 
         foreach (var method in answered)
         {
-            body.Append(CSharpEmitter.DocsText(method.Documentation, "    "));
-            body.Append($"    {Signature(method)};\n\n");
+            body.Append(CSharpEmitter.DocsText(method.Documentation));
+            body.Append($"{Signature(method)};\n\n");
         }
 
         return $$"""
@@ -96,7 +96,7 @@ internal static class ConnectionEmitter
 
         foreach (var method in called)
         {
-            body.Append(CSharpEmitter.DocsText(method.Documentation, "    "));
+            body.Append(CSharpEmitter.DocsText(method.Documentation));
 
             var parameters = method.RequestType is null
                 ? "CancellationToken cancellationToken = default"

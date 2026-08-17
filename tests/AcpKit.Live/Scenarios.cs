@@ -14,7 +14,7 @@ internal static class Scenarios
     public static IReadOnlyList<Scenario> All =>
     [
         new("initialize returns capabilities this client can read", Initialize),
-        new("the negotiated version is not trusted over the payload shape", VersionIsAdvisory),
+        new("the line is detected from the payload shape, not the version", ShapeBeatsVersion),
         new("a session opens", OpenSession),
         new("a prompt turn completes with a stop reason", PromptTurn),
         new("cancelling a turn is accepted", CancelTurn),
@@ -45,34 +45,45 @@ internal static class Scenarios
     }
 
     /// <summary>
-    /// The version in the response tells you less than it appears to.
+    /// Which line the agent speaks is read off the response shape, not the version it reports.
     /// </summary>
     /// <remarks>
-    /// goose echoes whatever <c>protocolVersion</c> it is sent — 1, 2, or 99 — while always
-    /// replying with v1-shaped fields. A client that switched wire format on the returned
-    /// number would therefore parse a v1 body as v2 and fail on the first field it could not
-    /// find. What actually identifies the version is the shape of the body, so this asserts
-    /// the number is present and otherwise treats it as advisory.
+    /// goose answers whatever <c>protocolVersion</c> it is sent while always replying in v1
+    /// field names, so this asks for 2 on purpose. A client that believed the number would
+    /// build a v2 connection and fail on the first field it could not find; AcpHandshake reads
+    /// the field names instead and gets it right.
     /// </remarks>
-    private static async Task<string> VersionIsAdvisory(Harness harness, CancellationToken ct)
+    private static async Task<string> ShapeBeatsVersion(Harness harness, CancellationToken ct)
     {
         await using var session = await harness.ConnectAsync(ct);
 
-        var response = await session.Connection.InitializeAsync(
+        var parameters = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(
             new InitializeRequest
             {
-                ProtocolVersion = new ProtocolVersion(1),
+                // Deliberately optimistic: ask for v2 and see what comes back.
+                ProtocolVersion = new ProtocolVersion(2),
                 ClientInfo = new Implementation { Name = "acpkit-live", Version = "0.1.0" },
             },
-            ct);
+            AcpJsonContext.Default.InitializeRequest);
 
-        var negotiated = (ushort)response.ProtocolVersion.Value;
-        if (negotiated > 1)
+        using var result = await session.Connection.Peer.SendRawRequestAsync(
+            AcpHandshake.InitializeMethod, parameters, ct);
+
+        var declared = AcpHandshake.DeclaredVersion(result.RootElement);
+        var shape = AcpHandshake.DetectShape(result.RootElement);
+
+        if (shape == AcpProtocolShape.Unknown)
         {
-            return $"negotiated {negotiated} but answered in v1 shapes — version is advisory";
+            throw new InvalidOperationException(
+                "Could not tell which line the agent speaks from its initialize response.");
         }
 
-        return $"negotiated {negotiated}";
+        var disagrees = AcpHandshake.VersionDisagreesWithShape(result.RootElement);
+        var note = $"declared={declared}, shape={shape}";
+
+        return disagrees
+            ? $"{note} — reported a version it does not speak, so the shape is what to trust"
+            : note;
     }
 
     private static async Task<string> OpenSession(Harness harness, CancellationToken ct)

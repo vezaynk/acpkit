@@ -17,55 +17,55 @@ public interface IAcpAgent
 {
     /// <summary>
     /// Request parameters for the initialize method.
-    /// 
+    ///
     /// Sent by the client to establish connection and negotiate capabilities.
-    /// 
+    ///
     /// See protocol docs: [Initialization](https://agentclientprotocol.com/protocol/initialization)
     /// </summary>
     Task<InitializeResponse> InitializeAsync(InitializeRequest request, CancellationToken cancellationToken);
     /// <summary>
     /// Request parameters for the authenticate method.
-    /// 
+    ///
     /// Specifies which authentication method to use.
     /// </summary>
     Task<AuthenticateResponse> AuthenticateAsync(AuthenticateRequest request, CancellationToken cancellationToken);
     /// <summary>
     /// **UNSTABLE**
-    /// 
+    ///
     /// This capability is not part of the spec yet, and may be removed or changed at any point.
-    /// 
+    ///
     /// Request parameters for `providers/list`.
     /// </summary>
     Task<ListProvidersResponse> ProvidersListAsync(ListProvidersRequest request, CancellationToken cancellationToken);
     /// <summary>
     /// **UNSTABLE**
-    /// 
+    ///
     /// This capability is not part of the spec yet, and may be removed or changed at any point.
-    /// 
+    ///
     /// Request parameters for `providers/set`.
-    /// 
+    ///
     /// Replaces the full configuration for one provider ID.
     /// </summary>
     Task<SetProviderResponse> ProvidersSetAsync(SetProviderRequest request, CancellationToken cancellationToken);
     /// <summary>
     /// **UNSTABLE**
-    /// 
+    ///
     /// This capability is not part of the spec yet, and may be removed or changed at any point.
-    /// 
+    ///
     /// Request parameters for `providers/disable`.
     /// </summary>
     Task<DisableProviderResponse> ProvidersDisableAsync(DisableProviderRequest request, CancellationToken cancellationToken);
     /// <summary>
     /// Request parameters for creating a new session.
-    /// 
+    ///
     /// See protocol docs: [Creating a Session](https://agentclientprotocol.com/protocol/session-setup#creating-a-session)
     /// </summary>
     Task<NewSessionResponse> SessionNewAsync(NewSessionRequest request, CancellationToken cancellationToken);
     /// <summary>
     /// Request parameters for loading an existing session.
-    /// 
+    ///
     /// Only available if the Agent supports the `loadSession` capability.
-    /// 
+    ///
     /// See protocol docs: [Loading Sessions](https://agentclientprotocol.com/protocol/session-setup#loading-sessions)
     /// </summary>
     Task<LoadSessionResponse> SessionLoadAsync(LoadSessionRequest request, CancellationToken cancellationToken);
@@ -79,76 +79,76 @@ public interface IAcpAgent
     Task<SetSessionConfigOptionResponse> SessionSetConfigOptionAsync(SetSessionConfigOptionRequest request, CancellationToken cancellationToken);
     /// <summary>
     /// Request parameters for sending a user prompt to the agent.
-    /// 
+    ///
     /// Contains the user's message and any additional context.
-    /// 
+    ///
     /// See protocol docs: [User Message](https://agentclientprotocol.com/protocol/prompt-turn#1-user-message)
     /// </summary>
     Task<PromptResponse> SessionPromptAsync(PromptRequest request, CancellationToken cancellationToken);
     /// <summary>
     /// Notification to cancel ongoing operations for a session.
-    /// 
+    ///
     /// See protocol docs: [Cancellation](https://agentclientprotocol.com/protocol/prompt-turn#cancellation)
     /// </summary>
     Task SessionCancelAsync(CancelNotification request, CancellationToken cancellationToken);
     /// <summary>
     /// **UNSTABLE**
-    /// 
+    ///
     /// This capability is not part of the spec yet, and may be removed or changed at any point.
-    /// 
+    ///
     /// Notification parameters for `mcp/message`.
-    /// 
+    ///
     /// This is used when the wrapped MCP message is a notification and the outer JSON-RPC
     /// envelope has no `id`.
     /// </summary>
     Task<System.Text.Json.JsonElement> McpMessageAsync(MessageMcpRequest request, CancellationToken cancellationToken);
     /// <summary>
     /// Request parameters for listing existing sessions.
-    /// 
+    ///
     /// Only available if the Agent supports the `sessionCapabilities.list` capability.
     /// </summary>
     Task<ListSessionsResponse> SessionListAsync(ListSessionsRequest request, CancellationToken cancellationToken);
     /// <summary>
     /// Request parameters for deleting an existing session from `session/list`.
-    /// 
+    ///
     /// Only available if the Agent supports the `sessionCapabilities.delete` capability.
     /// </summary>
     Task<DeleteSessionResponse> SessionDeleteAsync(DeleteSessionRequest request, CancellationToken cancellationToken);
     /// <summary>
     /// **UNSTABLE**
-    /// 
+    ///
     /// This capability is not part of the spec yet, and may be removed or changed at any point.
-    /// 
+    ///
     /// Request parameters for forking an existing session.
-    /// 
+    ///
     /// Creates a new session based on the context of an existing one, allowing
     /// operations like generating summaries without affecting the original session's history.
-    /// 
+    ///
     /// Only available if the Agent supports the `session.fork` capability.
     /// </summary>
     Task<ForkSessionResponse> SessionForkAsync(ForkSessionRequest request, CancellationToken cancellationToken);
     /// <summary>
     /// Request parameters for resuming an existing session.
-    /// 
+    ///
     /// Resumes an existing session without returning previous messages (unlike `session/load`).
     /// This is useful for agents that can resume sessions but don't implement full session loading.
-    /// 
+    ///
     /// Only available if the Agent supports the `sessionCapabilities.resume` capability.
     /// </summary>
     Task<ResumeSessionResponse> SessionResumeAsync(ResumeSessionRequest request, CancellationToken cancellationToken);
     /// <summary>
     /// Request parameters for closing an active session.
-    /// 
+    ///
     /// If supported, the agent **must** cancel any ongoing work related to the session
     /// (treat it as if `session/cancel` was called) and then free up any resources
     /// associated with the session.
-    /// 
+    ///
     /// Only available if the Agent supports the `sessionCapabilities.close` capability.
     /// </summary>
     Task<CloseSessionResponse> SessionCloseAsync(CloseSessionRequest request, CancellationToken cancellationToken);
     /// <summary>
     /// Request parameters for the logout method.
-    /// 
+    ///
     /// Terminates the current authenticated session.
     /// </summary>
     Task<LogoutResponse> LogoutAsync(LogoutRequest request, CancellationToken cancellationToken);
@@ -170,7 +170,7 @@ public interface IAcpAgent
     Task NesRejectAsync(RejectNesNotification request, CancellationToken cancellationToken);
     /// <summary>
     /// Request to close an NES session.
-    /// 
+    ///
     /// The agent **must** cancel any ongoing work related to the NES session
     /// and then free up any resources associated with the session.
     /// </summary>
@@ -201,8 +201,8 @@ public interface IAcpAgent
 /// A live connection to the client, from the agent's side.
 /// </summary>
 /// <remarks>
-/// Owns an <see cref = "AcpPeer"/> and adds the typed calls this protocol version
-/// defines. Inbound traffic is routed to the <see cref = "IAcpAgent"/> supplied at
+/// Owns an <see cref="AcpPeer"/> and adds the typed calls this protocol version
+/// defines. Inbound traffic is routed to the <see cref="IAcpAgent"/> supplied at
 /// construction.
 /// </remarks>
 public sealed class ClientConnection : IAsyncDisposable
@@ -217,10 +217,10 @@ public sealed class ClientConnection : IAsyncDisposable
     /// <summary>
     /// Open a connection over a pair of streams.
     /// </summary>
-    /// <param name = "input">Where the client's messages arrive.</param>
-    /// <param name = "output">Where this side's messages go.</param>
-    /// <param name = "handler">This side's implementation, which serves inbound calls.</param>
-    /// <param name = "onDiagnostic">Receives non-JSON lines and other non-fatal oddities.</param>
+    /// <param name="input">Where the client's messages arrive.</param>
+    /// <param name="output">Where this side's messages go.</param>
+    /// <param name="handler">This side's implementation, which serves inbound calls.</param>
+    /// <param name="onDiagnostic">Receives non-JSON lines and other non-fatal oddities.</param>
     public static ClientConnection Create(Stream input, Stream output, IAcpAgent handler, Action<string>? onDiagnostic = null)
     {
         ArgumentNullException.ThrowIfNull(input);
@@ -234,29 +234,29 @@ public sealed class ClientConnection : IAsyncDisposable
     public Task RunAsync(CancellationToken cancellationToken = default) => _peer.RunAsync(cancellationToken);
     /// <summary>
     /// Request for user permission to execute a tool call.
-    /// 
+    ///
     /// Sent when the agent needs authorization before performing a sensitive operation.
-    /// 
+    ///
     /// See protocol docs: [Requesting Permission](https://agentclientprotocol.com/protocol/tool-calls#requesting-permission)
     /// </summary>
     public Task<RequestPermissionResponse> SessionRequestPermissionAsync(RequestPermissionRequest request, CancellationToken cancellationToken = default) => Peer.SendRequestAsync(AcpMethods.SessionRequestPermission, request, AcpUnstableJsonContext.Default.RequestPermissionRequest, AcpUnstableJsonContext.Default.RequestPermissionResponse, cancellationToken);
     /// <summary>
     /// Notification containing a session update from the agent.
-    /// 
+    ///
     /// Used to stream real-time progress and results during prompt processing.
-    /// 
+    ///
     /// See protocol docs: [Agent Reports Output](https://agentclientprotocol.com/protocol/prompt-turn#3-agent-reports-output)
     /// </summary>
     public Task SessionUpdateAsync(SessionNotification request, CancellationToken cancellationToken = default) => Peer.SendNotificationAsync(AcpMethods.SessionUpdate, request, AcpUnstableJsonContext.Default.SessionNotification, cancellationToken);
     /// <summary>
     /// Request to write content to a text file.
-    /// 
+    ///
     /// Only available if the client supports the `fs.writeTextFile` capability.
     /// </summary>
     public Task<WriteTextFileResponse> FsWriteTextFileAsync(WriteTextFileRequest request, CancellationToken cancellationToken = default) => Peer.SendRequestAsync(AcpMethods.FsWriteTextFile, request, AcpUnstableJsonContext.Default.WriteTextFileRequest, AcpUnstableJsonContext.Default.WriteTextFileResponse, cancellationToken);
     /// <summary>
     /// Request to read content from a text file.
-    /// 
+    ///
     /// Only available if the client supports the `fs.readTextFile` capability.
     /// </summary>
     public Task<ReadTextFileResponse> FsReadTextFileAsync(ReadTextFileRequest request, CancellationToken cancellationToken = default) => Peer.SendRequestAsync(AcpMethods.FsReadTextFile, request, AcpUnstableJsonContext.Default.ReadTextFileRequest, AcpUnstableJsonContext.Default.ReadTextFileResponse, cancellationToken);
@@ -282,38 +282,38 @@ public sealed class ClientConnection : IAsyncDisposable
     public Task<KillTerminalResponse> TerminalKillAsync(KillTerminalRequest request, CancellationToken cancellationToken = default) => Peer.SendRequestAsync(AcpMethods.TerminalKill, request, AcpUnstableJsonContext.Default.KillTerminalRequest, AcpUnstableJsonContext.Default.KillTerminalResponse, cancellationToken);
     /// <summary>
     /// **UNSTABLE**
-    /// 
+    ///
     /// This capability is not part of the spec yet, and may be removed or changed at any point.
-    /// 
+    ///
     /// Request parameters for `mcp/connect`.
     /// </summary>
     public Task<ConnectMcpResponse> McpConnectAsync(ConnectMcpRequest request, CancellationToken cancellationToken = default) => Peer.SendRequestAsync(AcpMethods.McpConnect, request, AcpUnstableJsonContext.Default.ConnectMcpRequest, AcpUnstableJsonContext.Default.ConnectMcpResponse, cancellationToken);
     /// <summary>
     /// **UNSTABLE**
-    /// 
+    ///
     /// This capability is not part of the spec yet, and may be removed or changed at any point.
-    /// 
+    ///
     /// Notification parameters for `mcp/message`.
-    /// 
+    ///
     /// This is used when the wrapped MCP message is a notification and the outer JSON-RPC
     /// envelope has no `id`.
     /// </summary>
     public Task<System.Text.Json.JsonElement> McpMessageAsync(MessageMcpRequest request, CancellationToken cancellationToken = default) => Peer.SendRequestAsync(AcpMethods.McpMessage, request, AcpUnstableJsonContext.Default.MessageMcpRequest, AcpUnstableJsonContext.Default.JsonElement, cancellationToken);
     /// <summary>
     /// **UNSTABLE**
-    /// 
+    ///
     /// This capability is not part of the spec yet, and may be removed or changed at any point.
-    /// 
+    ///
     /// Request parameters for `mcp/disconnect`.
     /// </summary>
     public Task<DisconnectMcpResponse> McpDisconnectAsync(DisconnectMcpRequest request, CancellationToken cancellationToken = default) => Peer.SendRequestAsync(AcpMethods.McpDisconnect, request, AcpUnstableJsonContext.Default.DisconnectMcpRequest, AcpUnstableJsonContext.Default.DisconnectMcpResponse, cancellationToken);
     /// <summary>
     /// **UNSTABLE**
-    /// 
+    ///
     /// This capability is not part of the spec yet, and may be removed or changed at any point.
-    /// 
+    ///
     /// Request from the agent to elicit structured user input.
-    /// 
+    ///
     /// The agent sends this to the client to request information from the user,
     /// either via a form or by directing them to a URL.
     /// Elicitations are tied to a session (optionally a tool call) or a request.
@@ -321,9 +321,9 @@ public sealed class ClientConnection : IAsyncDisposable
     public Task<CreateElicitationResponse> ElicitationCreateAsync(CreateElicitationRequest request, CancellationToken cancellationToken = default) => Peer.SendRequestAsync(AcpMethods.ElicitationCreate, request, AcpUnstableJsonContext.Default.CreateElicitationRequest, AcpUnstableJsonContext.Default.CreateElicitationResponse, cancellationToken);
     /// <summary>
     /// **UNSTABLE**
-    /// 
+    ///
     /// This capability is not part of the spec yet, and may be removed or changed at any point.
-    /// 
+    ///
     /// Notification sent by the agent when a URL-based elicitation is complete.
     /// </summary>
     public Task ElicitationCompleteAsync(CompleteElicitationNotification request, CancellationToken cancellationToken = default) => Peer.SendNotificationAsync(AcpMethods.ElicitationComplete, request, AcpUnstableJsonContext.Default.CompleteElicitationNotification, cancellationToken);
@@ -331,7 +331,7 @@ public sealed class ClientConnection : IAsyncDisposable
     public ValueTask DisposeAsync() => _peer.DisposeAsync();
 }
 
-/// <summary>Routes inbound traffic to an <see cref = "IAcpAgent"/>.</summary>
+/// <summary>Routes inbound traffic to an <see cref="IAcpAgent"/>.</summary>
 internal static class AgentDispatch
 {
     /// <summary>Answer a request, or refuse a method this version does not define.</summary>
@@ -460,7 +460,7 @@ internal static class AgentDispatch
             }
 
             default:
-                throw new AcpException(AcpErrorCode.MethodNotFound, $"This agent does not implement '{method}'.");
+            throw new AcpException(AcpErrorCode.MethodNotFound, $"This agent does not implement '{method}'.");
         }
     }
 
@@ -478,31 +478,31 @@ internal static class AgentDispatch
         switch (method)
         {
             case AcpMethods.SessionCancel:
-                await handler.SessionCancelAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.CancelNotification), cancellationToken).ConfigureAwait(false);
-                return;
+            await handler.SessionCancelAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.CancelNotification), cancellationToken).ConfigureAwait(false);
+            return;
             case AcpMethods.NesAccept:
-                await handler.NesAcceptAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.AcceptNesNotification), cancellationToken).ConfigureAwait(false);
-                return;
+            await handler.NesAcceptAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.AcceptNesNotification), cancellationToken).ConfigureAwait(false);
+            return;
             case AcpMethods.NesReject:
-                await handler.NesRejectAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.RejectNesNotification), cancellationToken).ConfigureAwait(false);
-                return;
+            await handler.NesRejectAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.RejectNesNotification), cancellationToken).ConfigureAwait(false);
+            return;
             case AcpMethods.DocumentDidOpen:
-                await handler.DocumentDidOpenAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.DidOpenDocumentNotification), cancellationToken).ConfigureAwait(false);
-                return;
+            await handler.DocumentDidOpenAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.DidOpenDocumentNotification), cancellationToken).ConfigureAwait(false);
+            return;
             case AcpMethods.DocumentDidChange:
-                await handler.DocumentDidChangeAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.DidChangeDocumentNotification), cancellationToken).ConfigureAwait(false);
-                return;
+            await handler.DocumentDidChangeAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.DidChangeDocumentNotification), cancellationToken).ConfigureAwait(false);
+            return;
             case AcpMethods.DocumentDidClose:
-                await handler.DocumentDidCloseAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.DidCloseDocumentNotification), cancellationToken).ConfigureAwait(false);
-                return;
+            await handler.DocumentDidCloseAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.DidCloseDocumentNotification), cancellationToken).ConfigureAwait(false);
+            return;
             case AcpMethods.DocumentDidSave:
-                await handler.DocumentDidSaveAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.DidSaveDocumentNotification), cancellationToken).ConfigureAwait(false);
-                return;
+            await handler.DocumentDidSaveAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.DidSaveDocumentNotification), cancellationToken).ConfigureAwait(false);
+            return;
             case AcpMethods.DocumentDidFocus:
-                await handler.DocumentDidFocusAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.DidFocusDocumentNotification), cancellationToken).ConfigureAwait(false);
-                return;
+            await handler.DocumentDidFocusAsync(AcpPayload.Deserialize(parameters, AcpUnstableJsonContext.Default.DidFocusDocumentNotification), cancellationToken).ConfigureAwait(false);
+            return;
             default:
-                return;
+            return;
         }
     }
 }

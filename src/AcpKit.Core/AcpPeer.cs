@@ -139,6 +139,49 @@ public sealed class AcpPeer : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Call a method with raw JSON in and raw JSON out.
+    /// </summary>
+    /// <remarks>
+    /// For the one call that cannot be typed in advance: <c>initialize</c>, whose response is
+    /// what tells you which protocol line the agent speaks and therefore which typed connection
+    /// to build. Also the escape hatch for <c>_</c>-prefixed vendor methods, which by definition
+    /// have no schema.
+    /// </remarks>
+    /// <param name="method">The method name.</param>
+    /// <param name="parametersJson">The <c>params</c> value, already serialized.</param>
+    /// <param name="cancellationToken">Cancels the call, announcing it with <c>$/cancel_request</c>.</param>
+    /// <returns>The <c>result</c> value. The caller owns the document and must dispose it.</returns>
+    public async Task<JsonDocument> SendRawRequestAsync(
+        string method,
+        ReadOnlyMemory<byte> parametersJson,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(method);
+
+        var id = RequestId.FromNumber(Interlocked.Increment(ref _nextId));
+        var completion = new TaskCompletionSource<Reply>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _pending[id] = completion;
+
+        try
+        {
+            await WriteAsync(w => WriteRequest(w, id, method, parametersJson.Span), cancellationToken)
+                .ConfigureAwait(false);
+
+            Reply reply;
+            await using (cancellationToken.Register(() => OnCallerCancelled(id, completion)).ConfigureAwait(false))
+            {
+                reply = await completion.Task.ConfigureAwait(false);
+            }
+
+            return JsonDocument.Parse(reply.Payload, DocumentOptions);
+        }
+        finally
+        {
+            _pending.TryRemove(id, out _);
+        }
+    }
+
     /// <summary>Send a notification. Nothing comes back, by definition.</summary>
     public async Task SendNotificationAsync<TParams>(
         string method,

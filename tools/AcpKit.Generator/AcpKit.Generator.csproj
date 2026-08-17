@@ -17,6 +17,9 @@
       the emitted text contains a particular substring.
     -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <!-- Formatter, so generated files read like hand-written ones rather than like
+         NormalizeWhitespace output. Build-time only. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
   </ItemGroup>
 
   <ItemGroup>

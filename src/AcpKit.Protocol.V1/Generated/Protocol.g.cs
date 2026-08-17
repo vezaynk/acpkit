@@ -16,7 +16,7 @@ public sealed class AgentAuthCapabilities
 {
     /// <summary>
     /// Whether the agent supports the logout method.
-    /// 
+    ///
     /// Optional. Omitted or `null` both mean the agent does not advertise support.
     /// Supplying `{}` means the agent supports the logout method.
     /// </summary>
@@ -28,7 +28,7 @@ public sealed class AgentAuthCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -38,10 +38,10 @@ public sealed class AgentAuthCapabilities
 
 /// <summary>
 /// Capabilities supported by the agent.
-/// 
+///
 /// Advertised during initialization to inform the client about
 /// available features and content types.
-/// 
+///
 /// See protocol docs: [Agent Capabilities](https://agentclientprotocol.com/protocol/initialization#agent-capabilities)
 /// </summary>
 public sealed class AgentCapabilities
@@ -85,7 +85,7 @@ public sealed class AgentCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -123,7 +123,7 @@ public sealed class Annotations
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -159,7 +159,7 @@ public sealed class AudioContent
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -169,7 +169,7 @@ public sealed class AudioContent
 
 /// <summary>
 /// Describes an available authentication method.
-/// 
+///
 /// The `type` field acts as the discriminator in the serialized JSON form.
 /// When no `type` is present, the method is treated as `agent`.
 /// </summary>
@@ -180,7 +180,7 @@ public abstract class AuthMethod
 
 /// <summary>
 /// Agent handles authentication itself.
-/// 
+///
 /// This is the default when no `type` is specified.
 /// </summary>
 public sealed class AuthMethodAuthMethodAgent : AuthMethod
@@ -189,7 +189,7 @@ public sealed class AuthMethodAuthMethodAgent : AuthMethod
     public required AuthMethodAgent Value { get; init; }
 }
 
-/// <summary>A <see cref = "AuthMethod"/> shape this protocol version does not define.</summary>
+/// <summary>A <see cref="AuthMethod"/> shape this protocol version does not define.</summary>
 public sealed class AuthMethodUnknown : AuthMethod
 {
     /// <summary>The payload exactly as it arrived.</summary>
@@ -197,7 +197,7 @@ public sealed class AuthMethodUnknown : AuthMethod
 }
 
 /// <summary>
-/// Resolves <see cref = "AuthMethod"/> by which required keys are present, since
+/// Resolves <see cref="AuthMethod"/> by which required keys are present, since
 /// nothing in the payload names the variant.
 /// </summary>
 internal sealed class AuthMethodConverter : JsonConverter<AuthMethod>
@@ -227,21 +227,21 @@ internal sealed class AuthMethodConverter : JsonConverter<AuthMethod>
         switch (value)
         {
             case AuthMethodAuthMethodAgent typed:
-                JsonSerializer.Serialize(writer, typed.Value, options.GetTypeInfo(typeof(AuthMethodAgent)));
-                break;
+            JsonSerializer.Serialize(writer, typed.Value, options.GetTypeInfo(typeof(AuthMethodAgent)));
+            break;
             case AuthMethodUnknown unknown:
-                unknown.Raw.WriteTo(writer);
-                break;
+            unknown.Raw.WriteTo(writer);
+            break;
             default:
-                writer.WriteNullValue();
-                break;
+            writer.WriteNullValue();
+            break;
         }
     }
 }
 
 /// <summary>
 /// Agent handles authentication itself.
-/// 
+///
 /// This is the default authentication method type.
 /// </summary>
 public sealed class AuthMethodAgent
@@ -269,7 +269,7 @@ public sealed class AuthMethodAgent
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -289,7 +289,7 @@ public readonly struct AuthMethodId : IEquatable<AuthMethodId>
     public string Value { get; }
 
     /// <summary>Unwrap to the underlying value.</summary>
-    public static implicit operator string (AuthMethodId value) => value.Value;
+    public static implicit operator string(AuthMethodId value) => value.Value;
     /// <summary>Wrap an underlying value.</summary>
     public static explicit operator AuthMethodId(string value) => new(value);
     /// <inheritdoc/>
@@ -306,7 +306,7 @@ public readonly struct AuthMethodId : IEquatable<AuthMethodId>
     public static bool operator !=(AuthMethodId left, AuthMethodId right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "AuthMethodId"/> as a bare <c>string</c>.</summary>
+/// <summary>Reads and writes <see cref="AuthMethodId"/> as a bare <c>string</c>.</summary>
 internal sealed class AuthMethodIdConverter : JsonConverter<AuthMethodId>
 {
     /// <inheritdoc/>
@@ -317,7 +317,7 @@ internal sealed class AuthMethodIdConverter : JsonConverter<AuthMethodId>
 
 /// <summary>
 /// Request parameters for the authenticate method.
-/// 
+///
 /// Specifies which authentication method to use.
 /// </summary>
 public sealed class AuthenticateRequest
@@ -333,7 +333,7 @@ public sealed class AuthenticateRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -350,7 +350,7 @@ public sealed class AuthenticateResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -386,7 +386,7 @@ public sealed class AvailableCommand
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -411,7 +411,7 @@ public sealed class AvailableCommandInputUnstructuredCommandInput : AvailableCom
     public required UnstructuredCommandInput Value { get; init; }
 }
 
-/// <summary>A <see cref = "AvailableCommandInput"/> shape this protocol version does not define.</summary>
+/// <summary>A <see cref="AvailableCommandInput"/> shape this protocol version does not define.</summary>
 public sealed class AvailableCommandInputUnknown : AvailableCommandInput
 {
     /// <summary>The payload exactly as it arrived.</summary>
@@ -419,7 +419,7 @@ public sealed class AvailableCommandInputUnknown : AvailableCommandInput
 }
 
 /// <summary>
-/// Resolves <see cref = "AvailableCommandInput"/> by which required keys are present, since
+/// Resolves <see cref="AvailableCommandInput"/> by which required keys are present, since
 /// nothing in the payload names the variant.
 /// </summary>
 internal sealed class AvailableCommandInputConverter : JsonConverter<AvailableCommandInput>
@@ -449,14 +449,14 @@ internal sealed class AvailableCommandInputConverter : JsonConverter<AvailableCo
         switch (value)
         {
             case AvailableCommandInputUnstructuredCommandInput typed:
-                JsonSerializer.Serialize(writer, typed.Value, options.GetTypeInfo(typeof(UnstructuredCommandInput)));
-                break;
+            JsonSerializer.Serialize(writer, typed.Value, options.GetTypeInfo(typeof(UnstructuredCommandInput)));
+            break;
             case AvailableCommandInputUnknown unknown:
-                unknown.Raw.WriteTo(writer);
-                break;
+            unknown.Raw.WriteTo(writer);
+            break;
             default:
-                writer.WriteNullValue();
-                break;
+            writer.WriteNullValue();
+            break;
         }
     }
 }
@@ -476,7 +476,7 @@ public sealed class AvailableCommandsUpdate
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -512,7 +512,7 @@ public sealed class BlobResourceContents
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -522,7 +522,7 @@ public sealed class BlobResourceContents
 
 /// <summary>
 /// Capabilities for boolean session configuration options.
-/// 
+///
 /// Supplying `{}` means the client supports boolean session configuration options.
 /// </summary>
 public sealed class BooleanConfigOptionCapabilities
@@ -531,7 +531,7 @@ public sealed class BooleanConfigOptionCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -541,7 +541,7 @@ public sealed class BooleanConfigOptionCapabilities
 
 /// <summary>
 /// Notification to cancel ongoing operations for a session.
-/// 
+///
 /// See protocol docs: [Cancellation](https://agentclientprotocol.com/protocol/prompt-turn#cancellation)
 /// </summary>
 public sealed class CancelNotification
@@ -556,7 +556,7 @@ public sealed class CancelNotification
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -566,7 +566,7 @@ public sealed class CancelNotification
 
 /// <summary>
 /// Notification to cancel an ongoing request.
-/// 
+///
 /// See protocol docs: [Cancellation](https://agentclientprotocol.com/protocol/cancellation)
 /// </summary>
 public sealed class CancelRequestNotification
@@ -581,7 +581,7 @@ public sealed class CancelRequestNotification
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -591,10 +591,10 @@ public sealed class CancelRequestNotification
 
 /// <summary>
 /// Capabilities supported by the client.
-/// 
+///
 /// Advertised during initialization to inform the agent about
 /// available features and methods.
-/// 
+///
 /// See protocol docs: [Client Capabilities](https://agentclientprotocol.com/protocol/initialization#client-capabilities)
 /// </summary>
 public sealed class ClientCapabilities
@@ -616,7 +616,7 @@ public sealed class ClientCapabilities
 
     /// <summary>
     /// Session-related capabilities supported by the client.
-    /// 
+    ///
     /// Optional. Omitted or `null` both mean the client does not advertise any
     /// session-related extensions.
     /// </summary>
@@ -628,7 +628,7 @@ public sealed class ClientCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -643,7 +643,7 @@ public sealed class ClientSessionCapabilities
 {
     /// <summary>
     /// Config option capabilities supported by the client.
-    /// 
+    ///
     /// Omitted or `null` both mean the client does not advertise support for any
     /// config option extensions.
     /// </summary>
@@ -655,7 +655,7 @@ public sealed class ClientSessionCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -665,11 +665,11 @@ public sealed class ClientSessionCapabilities
 
 /// <summary>
 /// Request parameters for closing an active session.
-/// 
+///
 /// If supported, the agent **must** cancel any ongoing work related to the session
 /// (treat it as if `session/cancel` was called) and then free up any resources
 /// associated with the session.
-/// 
+///
 /// Only available if the Agent supports the `sessionCapabilities.close` capability.
 /// </summary>
 public sealed class CloseSessionRequest
@@ -684,7 +684,7 @@ public sealed class CloseSessionRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -701,7 +701,7 @@ public sealed class CloseSessionResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -724,7 +724,7 @@ public sealed class ConfigOptionUpdate
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -747,7 +747,7 @@ public sealed class Content
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -757,18 +757,18 @@ public sealed class Content
 
 /// <summary>
 /// Content blocks represent displayable information in the Agent Client Protocol.
-/// 
+///
 /// They provide a structured way to handle various types of user-facing content—whether
 /// it's text from language models, images for analysis, or embedded resources for context.
-/// 
+///
 /// Content blocks appear in:
 /// - User prompts sent via `session/prompt`
 /// - Language model output streamed through `session/update` notifications
 /// - Progress updates and results from tool calls
-/// 
+///
 /// This structure is compatible with the Model Context Protocol (MCP), enabling
 /// agents to seamlessly forward content from MCP tool outputs without transformation.
-/// 
+///
 /// See protocol docs: [Content](https://agentclientprotocol.com/protocol/content)
 /// </summary>
 [JsonConverter(typeof(ContentBlockConverter))]
@@ -781,7 +781,7 @@ public abstract class ContentBlock
 
 /// <summary>
 /// Text content. May be plain text or formatted with Markdown.
-/// 
+///
 /// All agents MUST support text content blocks in prompts.
 /// Clients SHOULD render this text as Markdown.
 /// </summary>
@@ -796,7 +796,7 @@ public sealed class ContentBlockText : ContentBlock
 
 /// <summary>
 /// Images for visual context or analysis.
-/// 
+///
 /// Requires the `image` prompt capability when included in prompts.
 /// </summary>
 public sealed class ContentBlockImage : ContentBlock
@@ -810,7 +810,7 @@ public sealed class ContentBlockImage : ContentBlock
 
 /// <summary>
 /// Audio data for transcription or analysis.
-/// 
+///
 /// Requires the `audio` prompt capability when included in prompts.
 /// </summary>
 public sealed class ContentBlockAudio : ContentBlock
@@ -824,7 +824,7 @@ public sealed class ContentBlockAudio : ContentBlock
 
 /// <summary>
 /// References to resources that the agent can access.
-/// 
+///
 /// All agents MUST support resource links in prompts.
 /// </summary>
 public sealed class ContentBlockResourceLink : ContentBlock
@@ -838,9 +838,9 @@ public sealed class ContentBlockResourceLink : ContentBlock
 
 /// <summary>
 /// Complete resource contents embedded directly in the message.
-/// 
+///
 /// Preferred for including context as it avoids extra round-trips.
-/// 
+///
 /// Requires the `embeddedContext` prompt capability when included in prompts.
 /// </summary>
 public sealed class ContentBlockResource : ContentBlock
@@ -853,7 +853,7 @@ public sealed class ContentBlockResource : ContentBlock
 }
 
 /// <summary>
-/// A <see cref = "ContentBlock"/> variant this protocol version does not define.
+/// A <see cref="ContentBlock"/> variant this protocol version does not define.
 /// </summary>
 /// <remarks>
 /// Holds the payload verbatim so it can be stored, replayed, or proxied unchanged.
@@ -870,7 +870,7 @@ public sealed class ContentBlockUnknown : ContentBlock
     public required JsonElement Raw { get; init; }
 }
 
-/// <summary>Resolves <see cref = "ContentBlock"/> by its <c>type</c> discriminator.</summary>
+/// <summary>Resolves <see cref="ContentBlock"/> by its <c>type</c> discriminator.</summary>
 internal sealed class ContentBlockConverter : JsonConverter<ContentBlock>
 {
     /// <inheritdoc/>
@@ -923,22 +923,22 @@ internal sealed class ContentBlockConverter : JsonConverter<ContentBlock>
         switch (value)
         {
             case ContentBlockText typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case ContentBlockImage typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case ContentBlockAudio typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case ContentBlockResourceLink typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case ContentBlockResource typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             default:
-                break;
+            break;
         }
 
         writer.WriteEndObject();
@@ -958,7 +958,7 @@ public sealed class ContentChunk
 
     /// <summary>
     /// A unique identifier for the message this chunk belongs to.
-    /// 
+    ///
     /// All chunks belonging to the same message share the same `messageId`.
     /// A change in `messageId` indicates a new message has started.
     /// </summary>
@@ -970,7 +970,7 @@ public sealed class ContentChunk
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -999,7 +999,7 @@ public sealed class Cost
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1047,10 +1047,10 @@ public sealed class CreateTerminalRequest
 
     /// <summary>
     /// Maximum number of output bytes to retain.
-    /// 
+    ///
     /// When the limit is exceeded, the Client truncates from the beginning of the output
     /// to stay within the limit.
-    /// 
+    ///
     /// The Client MUST ensure truncation happens at a character boundary to maintain valid
     /// string output, even if this means the retained output is slightly less than the
     /// specified limit.
@@ -1063,7 +1063,7 @@ public sealed class CreateTerminalRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1086,7 +1086,7 @@ public sealed class CreateTerminalResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1096,7 +1096,7 @@ public sealed class CreateTerminalResponse
 
 /// <summary>
 /// The current mode of the session has changed
-/// 
+///
 /// See protocol docs: [Session Modes](https://agentclientprotocol.com/protocol/session-modes)
 /// </summary>
 public sealed class CurrentModeUpdate
@@ -1111,7 +1111,7 @@ public sealed class CurrentModeUpdate
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1121,7 +1121,7 @@ public sealed class CurrentModeUpdate
 
 /// <summary>
 /// Request parameters for deleting an existing session from `session/list`.
-/// 
+///
 /// Only available if the Agent supports the `sessionCapabilities.delete` capability.
 /// </summary>
 public sealed class DeleteSessionRequest
@@ -1136,7 +1136,7 @@ public sealed class DeleteSessionRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1153,7 +1153,7 @@ public sealed class DeleteSessionResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1163,9 +1163,9 @@ public sealed class DeleteSessionResponse
 
 /// <summary>
 /// A diff representing file modifications.
-/// 
+///
 /// Shows changes to files in a format suitable for display in the client UI.
-/// 
+///
 /// See protocol docs: [Content](https://agentclientprotocol.com/protocol/tool-calls#content)
 /// </summary>
 public sealed class Diff
@@ -1193,7 +1193,7 @@ public sealed class Diff
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1223,7 +1223,7 @@ public sealed class EmbeddedResource
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1257,7 +1257,7 @@ public sealed class EmbeddedResourceResourceBlobResourceContents : EmbeddedResou
     public required BlobResourceContents Value { get; init; }
 }
 
-/// <summary>A <see cref = "EmbeddedResourceResource"/> shape this protocol version does not define.</summary>
+/// <summary>A <see cref="EmbeddedResourceResource"/> shape this protocol version does not define.</summary>
 public sealed class EmbeddedResourceResourceUnknown : EmbeddedResourceResource
 {
     /// <summary>The payload exactly as it arrived.</summary>
@@ -1265,7 +1265,7 @@ public sealed class EmbeddedResourceResourceUnknown : EmbeddedResourceResource
 }
 
 /// <summary>
-/// Resolves <see cref = "EmbeddedResourceResource"/> by which required keys are present, since
+/// Resolves <see cref="EmbeddedResourceResource"/> by which required keys are present, since
 /// nothing in the payload names the variant.
 /// </summary>
 internal sealed class EmbeddedResourceResourceConverter : JsonConverter<EmbeddedResourceResource>
@@ -1303,17 +1303,17 @@ internal sealed class EmbeddedResourceResourceConverter : JsonConverter<Embedded
         switch (value)
         {
             case EmbeddedResourceResourceTextResourceContents typed:
-                JsonSerializer.Serialize(writer, typed.Value, options.GetTypeInfo(typeof(TextResourceContents)));
-                break;
+            JsonSerializer.Serialize(writer, typed.Value, options.GetTypeInfo(typeof(TextResourceContents)));
+            break;
             case EmbeddedResourceResourceBlobResourceContents typed:
-                JsonSerializer.Serialize(writer, typed.Value, options.GetTypeInfo(typeof(BlobResourceContents)));
-                break;
+            JsonSerializer.Serialize(writer, typed.Value, options.GetTypeInfo(typeof(BlobResourceContents)));
+            break;
             case EmbeddedResourceResourceUnknown unknown:
-                unknown.Raw.WriteTo(writer);
-                break;
+            unknown.Raw.WriteTo(writer);
+            break;
             default:
-                writer.WriteNullValue();
-                break;
+            writer.WriteNullValue();
+            break;
         }
     }
 }
@@ -1339,7 +1339,7 @@ public sealed class EnvVariable
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1349,10 +1349,10 @@ public sealed class EnvVariable
 
 /// <summary>
 /// JSON-RPC error object.
-/// 
+///
 /// Represents an error that occurred during method execution, following the
 /// JSON-RPC 2.0 error object specification with optional additional data.
-/// 
+///
 /// See protocol docs: [JSON-RPC Error Object](https://www.jsonrpc.org/specification#error_object)
 /// </summary>
 public sealed class Error
@@ -1382,7 +1382,7 @@ public sealed class Error
 
 /// <summary>
 /// Predefined error codes for common JSON-RPC and ACP-specific errors.
-/// 
+///
 /// These codes follow the JSON-RPC 2.0 specification for standard errors
 /// and use the reserved range (-32000 to -32099) for protocol-specific errors.
 /// </summary>
@@ -1433,7 +1433,7 @@ public readonly struct ErrorCode : IEquatable<ErrorCode>
     public static bool operator !=(ErrorCode left, ErrorCode right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "ErrorCode"/>, preserving unknown values verbatim.</summary>
+/// <summary>Reads and writes <see cref="ErrorCode"/>, preserving unknown values verbatim.</summary>
 internal sealed class ErrorCodeConverter : JsonConverter<ErrorCode>
 {
     /// <inheritdoc/>
@@ -1444,7 +1444,7 @@ internal sealed class ErrorCodeConverter : JsonConverter<ErrorCode>
 
 /// <summary>
 /// File system capabilities that a client may support.
-/// 
+///
 /// See protocol docs: [FileSystem](https://agentclientprotocol.com/protocol/initialization#filesystem)
 /// </summary>
 public sealed class FileSystemCapabilities
@@ -1467,7 +1467,7 @@ public sealed class FileSystemCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1496,7 +1496,7 @@ public sealed class HttpHeader
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1539,7 +1539,7 @@ public sealed class ImageContent
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1564,7 +1564,7 @@ public sealed class Implementation
     /// <summary>
     /// Intended for UI and end-user contexts — optimized to be human-readable
     /// and easily understood.
-    /// 
+    ///
     /// If not provided, the name should be used for display.
     /// </summary>
     [JsonPropertyName("title")]
@@ -1582,7 +1582,7 @@ public sealed class Implementation
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1592,9 +1592,9 @@ public sealed class Implementation
 
 /// <summary>
 /// Request parameters for the initialize method.
-/// 
+///
 /// Sent by the client to establish connection and negotiate capabilities.
-/// 
+///
 /// See protocol docs: [Initialization](https://agentclientprotocol.com/protocol/initialization)
 /// </summary>
 public sealed class InitializeRequest
@@ -1614,7 +1614,7 @@ public sealed class InitializeRequest
 
     /// <summary>
     /// Information about the Client name and version sent to the Agent.
-    /// 
+    ///
     /// Note: in future versions of the protocol, this will be required.
     /// </summary>
     [JsonPropertyName("clientInfo")]
@@ -1625,7 +1625,7 @@ public sealed class InitializeRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1635,9 +1635,9 @@ public sealed class InitializeRequest
 
 /// <summary>
 /// Response to the `initialize` method.
-/// 
+///
 /// Contains the negotiated protocol version and agent capabilities.
-/// 
+///
 /// See protocol docs: [Initialization](https://agentclientprotocol.com/protocol/initialization)
 /// </summary>
 public sealed class InitializeResponse
@@ -1645,7 +1645,7 @@ public sealed class InitializeResponse
     /// <summary>
     /// The protocol version the client specified if supported by the agent,
     /// or the latest protocol version supported by the agent.
-    /// 
+    ///
     /// The client should disconnect, if it doesn't support this version.
     /// </summary>
     [JsonPropertyName("protocolVersion")]
@@ -1667,7 +1667,7 @@ public sealed class InitializeResponse
 
     /// <summary>
     /// Information about the Agent name and version sent to the Client.
-    /// 
+    ///
     /// Note: in future versions of the protocol, this will be required.
     /// </summary>
     [JsonPropertyName("agentInfo")]
@@ -1678,7 +1678,7 @@ public sealed class InitializeResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1707,7 +1707,7 @@ public sealed class KillTerminalRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1724,7 +1724,7 @@ public sealed class KillTerminalResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1734,7 +1734,7 @@ public sealed class KillTerminalResponse
 
 /// <summary>
 /// Request parameters for listing existing sessions.
-/// 
+///
 /// Only available if the Agent supports the `sessionCapabilities.list` capability.
 /// </summary>
 public sealed class ListSessionsRequest
@@ -1757,7 +1757,7 @@ public sealed class ListSessionsRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1788,7 +1788,7 @@ public sealed class ListSessionsResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1798,9 +1798,9 @@ public sealed class ListSessionsResponse
 
 /// <summary>
 /// Request parameters for loading an existing session.
-/// 
+///
 /// Only available if the Agent supports the `loadSession` capability.
-/// 
+///
 /// See protocol docs: [Loading Sessions](https://agentclientprotocol.com/protocol/session-setup#loading-sessions)
 /// </summary>
 public sealed class LoadSessionRequest
@@ -1819,7 +1819,7 @@ public sealed class LoadSessionRequest
 
     /// <summary>
     /// Additional workspace roots to activate for this session. Each path must be absolute.
-    /// 
+    ///
     /// When omitted or empty, no additional roots are activated. When non-empty,
     /// this is the complete resulting additional-root list for the loaded
     /// session. It may differ from any previously used or reported list as long as
@@ -1839,7 +1839,7 @@ public sealed class LoadSessionRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1854,7 +1854,7 @@ public sealed class LoadSessionResponse
 {
     /// <summary>
     /// Initial mode state if supported by the Agent
-    /// 
+    ///
     /// See protocol docs: [Session Modes](https://agentclientprotocol.com/protocol/session-modes)
     /// </summary>
     [JsonPropertyName("modes")]
@@ -1872,7 +1872,7 @@ public sealed class LoadSessionResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1882,7 +1882,7 @@ public sealed class LoadSessionResponse
 
 /// <summary>
 /// Logout capabilities supported by the agent.
-/// 
+///
 /// Supplying `{}` means the agent supports the logout method.
 /// </summary>
 public sealed class LogoutCapabilities
@@ -1891,7 +1891,7 @@ public sealed class LogoutCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1901,7 +1901,7 @@ public sealed class LogoutCapabilities
 
 /// <summary>
 /// Request parameters for the logout method.
-/// 
+///
 /// Terminates the current authenticated session.
 /// </summary>
 public sealed class LogoutRequest
@@ -1910,7 +1910,7 @@ public sealed class LogoutRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1927,7 +1927,7 @@ public sealed class LogoutResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1958,7 +1958,7 @@ public sealed class McpCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -1968,10 +1968,10 @@ public sealed class McpCapabilities
 
 /// <summary>
 /// Configuration for connecting to an MCP (Model Context Protocol) server.
-/// 
+///
 /// MCP servers provide tools and context that the agent can use when
 /// processing prompts.
-/// 
+///
 /// See protocol docs: [MCP Servers](https://agentclientprotocol.com/protocol/session-setup#mcp-servers)
 /// </summary>
 [JsonConverter(typeof(McpServerConverter))]
@@ -1983,7 +1983,7 @@ public abstract class McpServer
 }
 
 /// <summary>
-/// A <see cref = "McpServer"/> variant this protocol version does not define.
+/// A <see cref="McpServer"/> variant this protocol version does not define.
 /// </summary>
 /// <remarks>
 /// Holds the payload verbatim so it can be stored, replayed, or proxied unchanged.
@@ -2000,7 +2000,7 @@ public sealed class McpServerUnknown : McpServer
     public required JsonElement Raw { get; init; }
 }
 
-/// <summary>Resolves <see cref = "McpServer"/> by its <c>type</c> discriminator.</summary>
+/// <summary>Resolves <see cref="McpServer"/> by its <c>type</c> discriminator.</summary>
 internal sealed class McpServerConverter : JsonConverter<McpServer>
 {
     /// <inheritdoc/>
@@ -2035,13 +2035,13 @@ internal sealed class McpServerConverter : JsonConverter<McpServer>
         switch (value)
         {
             case McpServerHttp typed:
-                AcpJson.WriteMembers(writer, typed, options);
-                break;
+            AcpJson.WriteMembers(writer, typed, options);
+            break;
             case McpServerSse typed:
-                AcpJson.WriteMembers(writer, typed, options);
-                break;
+            AcpJson.WriteMembers(writer, typed, options);
+            break;
             default:
-                break;
+            break;
         }
 
         writer.WriteEndObject();
@@ -2079,7 +2079,7 @@ public sealed class McpServerHttp : McpServer
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -2118,7 +2118,7 @@ public sealed class McpServerSse : McpServer
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -2159,7 +2159,7 @@ public sealed class McpServerStdio
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -2179,7 +2179,7 @@ public readonly struct MessageId : IEquatable<MessageId>
     public string Value { get; }
 
     /// <summary>Unwrap to the underlying value.</summary>
-    public static implicit operator string (MessageId value) => value.Value;
+    public static implicit operator string(MessageId value) => value.Value;
     /// <summary>Wrap an underlying value.</summary>
     public static explicit operator MessageId(string value) => new(value);
     /// <inheritdoc/>
@@ -2196,7 +2196,7 @@ public readonly struct MessageId : IEquatable<MessageId>
     public static bool operator !=(MessageId left, MessageId right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "MessageId"/> as a bare <c>string</c>.</summary>
+/// <summary>Reads and writes <see cref="MessageId"/> as a bare <c>string</c>.</summary>
 internal sealed class MessageIdConverter : JsonConverter<MessageId>
 {
     /// <inheritdoc/>
@@ -2207,7 +2207,7 @@ internal sealed class MessageIdConverter : JsonConverter<MessageId>
 
 /// <summary>
 /// Request parameters for creating a new session.
-/// 
+///
 /// See protocol docs: [Creating a Session](https://agentclientprotocol.com/protocol/session-setup#creating-a-session)
 /// </summary>
 public sealed class NewSessionRequest
@@ -2220,7 +2220,7 @@ public sealed class NewSessionRequest
 
     /// <summary>
     /// Additional workspace roots for this session. Each path must be absolute.
-    /// 
+    ///
     /// These expand the session's filesystem scope without changing `cwd`, which
     /// remains the base for relative paths. When omitted or empty, no
     /// additional roots are activated for the new session.
@@ -2239,7 +2239,7 @@ public sealed class NewSessionRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -2249,14 +2249,14 @@ public sealed class NewSessionRequest
 
 /// <summary>
 /// Response from creating a new session.
-/// 
+///
 /// See protocol docs: [Creating a Session](https://agentclientprotocol.com/protocol/session-setup#creating-a-session)
 /// </summary>
 public sealed class NewSessionResponse
 {
     /// <summary>
     /// Unique identifier for the created session.
-    /// 
+    ///
     /// Used in all subsequent requests for this conversation.
     /// </summary>
     [JsonPropertyName("sessionId")]
@@ -2264,7 +2264,7 @@ public sealed class NewSessionResponse
 
     /// <summary>
     /// Initial mode state if supported by the Agent
-    /// 
+    ///
     /// See protocol docs: [Session Modes](https://agentclientprotocol.com/protocol/session-modes)
     /// </summary>
     [JsonPropertyName("modes")]
@@ -2282,7 +2282,7 @@ public sealed class NewSessionResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -2317,7 +2317,7 @@ public sealed class PermissionOption
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -2337,7 +2337,7 @@ public readonly struct PermissionOptionId : IEquatable<PermissionOptionId>
     public string Value { get; }
 
     /// <summary>Unwrap to the underlying value.</summary>
-    public static implicit operator string (PermissionOptionId value) => value.Value;
+    public static implicit operator string(PermissionOptionId value) => value.Value;
     /// <summary>Wrap an underlying value.</summary>
     public static explicit operator PermissionOptionId(string value) => new(value);
     /// <inheritdoc/>
@@ -2354,7 +2354,7 @@ public readonly struct PermissionOptionId : IEquatable<PermissionOptionId>
     public static bool operator !=(PermissionOptionId left, PermissionOptionId right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "PermissionOptionId"/> as a bare <c>string</c>.</summary>
+/// <summary>Reads and writes <see cref="PermissionOptionId"/> as a bare <c>string</c>.</summary>
 internal sealed class PermissionOptionIdConverter : JsonConverter<PermissionOptionId>
 {
     /// <inheritdoc/>
@@ -2365,7 +2365,7 @@ internal sealed class PermissionOptionIdConverter : JsonConverter<PermissionOpti
 
 /// <summary>
 /// The type of permission option being presented to the user.
-/// 
+///
 /// Helps clients choose appropriate icons and UI treatment.
 /// </summary>
 [JsonConverter(typeof(PermissionOptionKindConverter))]
@@ -2407,7 +2407,7 @@ public readonly struct PermissionOptionKind : IEquatable<PermissionOptionKind>
     public static bool operator !=(PermissionOptionKind left, PermissionOptionKind right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "PermissionOptionKind"/>, preserving unknown values verbatim.</summary>
+/// <summary>Reads and writes <see cref="PermissionOptionKind"/>, preserving unknown values verbatim.</summary>
 internal sealed class PermissionOptionKindConverter : JsonConverter<PermissionOptionKind>
 {
     /// <inheritdoc/>
@@ -2418,18 +2418,18 @@ internal sealed class PermissionOptionKindConverter : JsonConverter<PermissionOp
 
 /// <summary>
 /// An execution plan for accomplishing complex tasks.
-/// 
+///
 /// Plans consist of multiple entries representing individual tasks or goals.
 /// Agents report plans to clients to provide visibility into their execution strategy.
 /// Plans can evolve during execution as the agent discovers new requirements or completes tasks.
-/// 
+///
 /// See protocol docs: [Agent Plan](https://agentclientprotocol.com/protocol/agent-plan)
 /// </summary>
 public sealed class Plan
 {
     /// <summary>
     /// The list of tasks to be accomplished.
-    /// 
+    ///
     /// When updating a plan, the agent must send a complete list of all entries
     /// with their current status. The client replaces the entire plan with each update.
     /// </summary>
@@ -2440,7 +2440,7 @@ public sealed class Plan
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -2450,7 +2450,7 @@ public sealed class Plan
 
 /// <summary>
 /// A single entry in the execution plan.
-/// 
+///
 /// Represents a task or goal that the assistant intends to accomplish
 /// as part of fulfilling the user's request.
 /// See protocol docs: [Plan Entries](https://agentclientprotocol.com/protocol/agent-plan#plan-entries)
@@ -2480,7 +2480,7 @@ public sealed class PlanEntry
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -2490,7 +2490,7 @@ public sealed class PlanEntry
 
 /// <summary>
 /// Priority levels for plan entries.
-/// 
+///
 /// Used to indicate the relative importance or urgency of different
 /// tasks in the execution plan.
 /// See protocol docs: [Plan Entries](https://agentclientprotocol.com/protocol/agent-plan#plan-entries)
@@ -2532,7 +2532,7 @@ public readonly struct PlanEntryPriority : IEquatable<PlanEntryPriority>
     public static bool operator !=(PlanEntryPriority left, PlanEntryPriority right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "PlanEntryPriority"/>, preserving unknown values verbatim.</summary>
+/// <summary>Reads and writes <see cref="PlanEntryPriority"/>, preserving unknown values verbatim.</summary>
 internal sealed class PlanEntryPriorityConverter : JsonConverter<PlanEntryPriority>
 {
     /// <inheritdoc/>
@@ -2543,7 +2543,7 @@ internal sealed class PlanEntryPriorityConverter : JsonConverter<PlanEntryPriori
 
 /// <summary>
 /// Status of a plan entry in the execution flow.
-/// 
+///
 /// Tracks the lifecycle of each task from planning through completion.
 /// See protocol docs: [Plan Entries](https://agentclientprotocol.com/protocol/agent-plan#plan-entries)
 /// </summary>
@@ -2584,7 +2584,7 @@ public readonly struct PlanEntryStatus : IEquatable<PlanEntryStatus>
     public static bool operator !=(PlanEntryStatus left, PlanEntryStatus right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "PlanEntryStatus"/>, preserving unknown values verbatim.</summary>
+/// <summary>Reads and writes <see cref="PlanEntryStatus"/>, preserving unknown values verbatim.</summary>
 internal sealed class PlanEntryStatusConverter : JsonConverter<PlanEntryStatus>
 {
     /// <inheritdoc/>
@@ -2595,16 +2595,16 @@ internal sealed class PlanEntryStatusConverter : JsonConverter<PlanEntryStatus>
 
 /// <summary>
 /// Prompt capabilities supported by the agent in `session/prompt` requests.
-/// 
+///
 /// Baseline agent functionality requires support for [`ContentBlock::Text`]
 /// and [`ContentBlock::ResourceLink`] in prompt requests.
-/// 
+///
 /// Other variants must be explicitly opted in to.
 /// Capabilities for different types of content in prompt requests.
-/// 
+///
 /// Indicates which content types beyond the baseline (text and resource links)
 /// the agent can process.
-/// 
+///
 /// See protocol docs: [Prompt Capabilities](https://agentclientprotocol.com/protocol/initialization#prompt-capabilities)
 /// </summary>
 public sealed class PromptCapabilities
@@ -2625,7 +2625,7 @@ public sealed class PromptCapabilities
 
     /// <summary>
     /// Agent supports embedded context in `session/prompt` requests.
-    /// 
+    ///
     /// When enabled, the Client is allowed to include [`ContentBlock::Resource`]
     /// in prompt requests for pieces of context that are referenced in the message.
     /// </summary>
@@ -2637,7 +2637,7 @@ public sealed class PromptCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -2647,9 +2647,9 @@ public sealed class PromptCapabilities
 
 /// <summary>
 /// Request parameters for sending a user prompt to the agent.
-/// 
+///
 /// Contains the user's message and any additional context.
-/// 
+///
 /// See protocol docs: [User Message](https://agentclientprotocol.com/protocol/prompt-turn#1-user-message)
 /// </summary>
 public sealed class PromptRequest
@@ -2662,15 +2662,15 @@ public sealed class PromptRequest
 
     /// <summary>
     /// The blocks of content that compose the user's message.
-    /// 
+    ///
     /// As a baseline, the Agent MUST support [`ContentBlock::Text`] and [`ContentBlock::ResourceLink`],
     /// while other variants are optionally enabled via [`PromptCapabilities`].
-    /// 
+    ///
     /// The Client MUST adapt its interface according to [`PromptCapabilities`].
-    /// 
+    ///
     /// The client MAY include referenced pieces of context as either
     /// [`ContentBlock::Resource`] or [`ContentBlock::ResourceLink`].
-    /// 
+    ///
     /// When available, [`ContentBlock::Resource`] is preferred
     /// as it avoids extra round-trips and allows the message to include
     /// pieces of context from sources the agent may not have access to.
@@ -2682,7 +2682,7 @@ public sealed class PromptRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -2692,7 +2692,7 @@ public sealed class PromptRequest
 
 /// <summary>
 /// Response from processing a user prompt.
-/// 
+///
 /// See protocol docs: [Check for Completion](https://agentclientprotocol.com/protocol/prompt-turn#4-check-for-completion)
 /// </summary>
 public sealed class PromptResponse
@@ -2707,7 +2707,7 @@ public sealed class PromptResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -2717,7 +2717,7 @@ public sealed class PromptResponse
 
 /// <summary>
 /// Protocol version identifier.
-/// 
+///
 /// This version is only bumped for breaking changes.
 /// Non-breaking changes should be introduced via capabilities.
 /// </summary>
@@ -2730,7 +2730,7 @@ public readonly struct ProtocolVersion : IEquatable<ProtocolVersion>
     public ushort Value { get; }
 
     /// <summary>Unwrap to the underlying value.</summary>
-    public static implicit operator ushort (ProtocolVersion value) => value.Value;
+    public static implicit operator ushort(ProtocolVersion value) => value.Value;
     /// <summary>Wrap an underlying value.</summary>
     public static explicit operator ProtocolVersion(ushort value) => new(value);
     /// <inheritdoc/>
@@ -2747,7 +2747,7 @@ public readonly struct ProtocolVersion : IEquatable<ProtocolVersion>
     public static bool operator !=(ProtocolVersion left, ProtocolVersion right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "ProtocolVersion"/> as a bare <c>ushort</c>.</summary>
+/// <summary>Reads and writes <see cref="ProtocolVersion"/> as a bare <c>ushort</c>.</summary>
 internal sealed class ProtocolVersionConverter : JsonConverter<ProtocolVersion>
 {
     /// <inheritdoc/>
@@ -2758,7 +2758,7 @@ internal sealed class ProtocolVersionConverter : JsonConverter<ProtocolVersion>
 
 /// <summary>
 /// Request to read content from a text file.
-/// 
+///
 /// Only available if the client supports the `fs.readTextFile` capability.
 /// </summary>
 public sealed class ReadTextFileRequest
@@ -2793,7 +2793,7 @@ public sealed class ReadTextFileRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -2816,7 +2816,7 @@ public sealed class ReadTextFileResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -2845,7 +2845,7 @@ public sealed class ReleaseTerminalRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -2862,7 +2862,7 @@ public sealed class ReleaseTerminalResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -2872,13 +2872,13 @@ public sealed class ReleaseTerminalResponse
 
 /// <summary>
 /// JSON RPC Request Id
-/// 
+///
 /// An identifier established by the Client that MUST contain a String, Number, or NULL value if included. If it is not included it is assumed to be a notification. The value SHOULD normally not be Null \[1\] and Numbers SHOULD NOT contain fractional parts \[2\]
-/// 
+///
 /// The Server MUST reply with the same value in the Response object if included. This member is used to correlate the context between the two objects.
-/// 
+///
 /// \[1\] The use of Null as a value for the id member in a Request object is discouraged, because this specification uses a value of Null for Responses with an unknown id. Also, because JSON-RPC 1.0 uses an id value of Null for Notifications this could cause confusion in handling.
-/// 
+///
 /// \[2\] Fractional parts may be problematic, since many decimal fractions cannot be represented exactly as binary fractions.
 /// </summary>
 [JsonConverter(typeof(RequestIdConverter))]
@@ -2901,7 +2901,7 @@ public readonly struct RequestId
     public bool TryGetString(out string value) => AcpJson.TryRead(Raw, AcpJsonContext.Default.Options, out value);
 }
 
-/// <summary>Reads and writes <see cref = "RequestId"/> verbatim.</summary>
+/// <summary>Reads and writes <see cref="RequestId"/> verbatim.</summary>
 internal sealed class RequestIdConverter : JsonConverter<RequestId>
 {
     /// <inheritdoc/>
@@ -2928,11 +2928,11 @@ public abstract class RequestPermissionOutcome
 
 /// <summary>
 /// The prompt turn was cancelled before the user responded.
-/// 
+///
 /// When a client sends a `session/cancel` notification to cancel an ongoing
 /// prompt turn, it MUST respond to all pending `session/request_permission`
 /// requests with this `Cancelled` outcome.
-/// 
+///
 /// See protocol docs: [Cancellation](https://agentclientprotocol.com/protocol/prompt-turn#cancellation)
 /// </summary>
 public sealed class RequestPermissionOutcomeCancelled : RequestPermissionOutcome
@@ -2955,7 +2955,7 @@ public sealed class RequestPermissionOutcomeSelected : RequestPermissionOutcome
 }
 
 /// <summary>
-/// A <see cref = "RequestPermissionOutcome"/> variant this protocol version does not define.
+/// A <see cref="RequestPermissionOutcome"/> variant this protocol version does not define.
 /// </summary>
 /// <remarks>
 /// Holds the payload verbatim so it can be stored, replayed, or proxied unchanged.
@@ -2972,7 +2972,7 @@ public sealed class RequestPermissionOutcomeUnknown : RequestPermissionOutcome
     public required JsonElement Raw { get; init; }
 }
 
-/// <summary>Resolves <see cref = "RequestPermissionOutcome"/> by its <c>outcome</c> discriminator.</summary>
+/// <summary>Resolves <see cref="RequestPermissionOutcome"/> by its <c>outcome</c> discriminator.</summary>
 internal sealed class RequestPermissionOutcomeConverter : JsonConverter<RequestPermissionOutcome>
 {
     /// <inheritdoc/>
@@ -3012,12 +3012,12 @@ internal sealed class RequestPermissionOutcomeConverter : JsonConverter<RequestP
         switch (value)
         {
             case RequestPermissionOutcomeCancelled typed:
-                break;
+            break;
             case RequestPermissionOutcomeSelected typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             default:
-                break;
+            break;
         }
 
         writer.WriteEndObject();
@@ -3026,9 +3026,9 @@ internal sealed class RequestPermissionOutcomeConverter : JsonConverter<RequestP
 
 /// <summary>
 /// Request for user permission to execute a tool call.
-/// 
+///
 /// Sent when the agent needs authorization before performing a sensitive operation.
-/// 
+///
 /// See protocol docs: [Requesting Permission](https://agentclientprotocol.com/protocol/tool-calls#requesting-permission)
 /// </summary>
 public sealed class RequestPermissionRequest
@@ -3055,7 +3055,7 @@ public sealed class RequestPermissionRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -3078,7 +3078,7 @@ public sealed class RequestPermissionResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -3142,7 +3142,7 @@ public sealed class ResourceLink
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -3152,10 +3152,10 @@ public sealed class ResourceLink
 
 /// <summary>
 /// Request parameters for resuming an existing session.
-/// 
+///
 /// Resumes an existing session without returning previous messages (unlike `session/load`).
 /// This is useful for agents that can resume sessions but don't implement full session loading.
-/// 
+///
 /// Only available if the Agent supports the `sessionCapabilities.resume` capability.
 /// </summary>
 public sealed class ResumeSessionRequest
@@ -3174,7 +3174,7 @@ public sealed class ResumeSessionRequest
 
     /// <summary>
     /// Additional workspace roots to activate for this session. Each path must be absolute.
-    /// 
+    ///
     /// When omitted or empty, no additional roots are activated. When non-empty,
     /// this is the complete resulting additional-root list for the resumed
     /// session. It may differ from any previously used or reported list as long as
@@ -3195,7 +3195,7 @@ public sealed class ResumeSessionRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -3210,7 +3210,7 @@ public sealed class ResumeSessionResponse
 {
     /// <summary>
     /// Initial mode state if supported by the Agent
-    /// 
+    ///
     /// See protocol docs: [Session Modes](https://agentclientprotocol.com/protocol/session-modes)
     /// </summary>
     [JsonPropertyName("modes")]
@@ -3228,7 +3228,7 @@ public sealed class ResumeSessionResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -3274,7 +3274,7 @@ public readonly struct Role : IEquatable<Role>
     public static bool operator !=(Role left, Role right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "Role"/>, preserving unknown values verbatim.</summary>
+/// <summary>Reads and writes <see cref="Role"/>, preserving unknown values verbatim.</summary>
 internal sealed class RoleConverter : JsonConverter<Role>
 {
     /// <inheritdoc/>
@@ -3298,7 +3298,7 @@ public sealed class SelectedPermissionOutcome
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -3308,7 +3308,7 @@ public sealed class SelectedPermissionOutcome
 
 /// <summary>
 /// Capabilities for additional session directories support.
-/// 
+///
 /// Supplying `{}` means the agent supports the `additionalDirectories` field on
 /// supported session lifecycle requests. Agents that also support
 /// `session/list` may return `SessionInfo.additionalDirectories` to report the
@@ -3320,7 +3320,7 @@ public sealed class SessionAdditionalDirectoriesCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -3330,20 +3330,20 @@ public sealed class SessionAdditionalDirectoriesCapabilities
 
 /// <summary>
 /// Session capabilities supported by the agent.
-/// 
+///
 /// As a baseline, all Agents **MUST** support `session/new`, `session/prompt`, `session/cancel`, and `session/update`.
-/// 
+///
 /// Optionally, they **MAY** support other session methods and notifications by specifying additional capabilities.
-/// 
+///
 /// Note: `session/load` is still handled by the top-level `load_session` capability. This will be unified in future versions of the protocol.
-/// 
+///
 /// See protocol docs: [Session Capabilities](https://agentclientprotocol.com/protocol/initialization#session-capabilities)
 /// </summary>
 public sealed class SessionCapabilities
 {
     /// <summary>
     /// Whether the agent supports `session/list`.
-    /// 
+    ///
     /// Optional. Omitted or `null` both mean the agent does not advertise support.
     /// Supplying `{}` means the agent supports listing sessions.
     /// </summary>
@@ -3353,7 +3353,7 @@ public sealed class SessionCapabilities
 
     /// <summary>
     /// Whether the agent supports `session/delete`.
-    /// 
+    ///
     /// Optional. Omitted or `null` both mean the agent does not advertise support.
     /// Supplying `{}` means the agent supports deleting sessions from `session/list`.
     /// </summary>
@@ -3363,11 +3363,11 @@ public sealed class SessionCapabilities
 
     /// <summary>
     /// Whether the agent supports `additionalDirectories` on supported session lifecycle requests.
-    /// 
+    ///
     /// Optional. Omitted or `null` both mean the agent does not advertise support.
     /// Supplying `{}` means the agent supports `additionalDirectories` on
     /// supported session lifecycle requests.
-    /// 
+    ///
     /// Agents that also support `session/list` may return
     /// `SessionInfo.additionalDirectories` to report the complete ordered
     /// additional-root list associated with a listed session.
@@ -3378,7 +3378,7 @@ public sealed class SessionCapabilities
 
     /// <summary>
     /// Whether the agent supports `session/resume`.
-    /// 
+    ///
     /// Optional. Omitted or `null` both mean the agent does not advertise support.
     /// Supplying `{}` means the agent supports resuming sessions.
     /// </summary>
@@ -3388,7 +3388,7 @@ public sealed class SessionCapabilities
 
     /// <summary>
     /// Whether the agent supports `session/close`.
-    /// 
+    ///
     /// Optional. Omitted or `null` both mean the agent does not advertise support.
     /// Supplying `{}` means the agent supports closing sessions.
     /// </summary>
@@ -3400,7 +3400,7 @@ public sealed class SessionCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -3410,7 +3410,7 @@ public sealed class SessionCapabilities
 
 /// <summary>
 /// Capabilities for the `session/close` method.
-/// 
+///
 /// Supplying `{}` means the agent supports closing sessions.
 /// </summary>
 public sealed class SessionCloseCapabilities
@@ -3419,7 +3419,7 @@ public sealed class SessionCloseCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -3451,7 +3451,7 @@ public readonly struct SessionConfigGroupId : IEquatable<SessionConfigGroupId>
     public string Value { get; }
 
     /// <summary>Unwrap to the underlying value.</summary>
-    public static implicit operator string (SessionConfigGroupId value) => value.Value;
+    public static implicit operator string(SessionConfigGroupId value) => value.Value;
     /// <summary>Wrap an underlying value.</summary>
     public static explicit operator SessionConfigGroupId(string value) => new(value);
     /// <inheritdoc/>
@@ -3468,7 +3468,7 @@ public readonly struct SessionConfigGroupId : IEquatable<SessionConfigGroupId>
     public static bool operator !=(SessionConfigGroupId left, SessionConfigGroupId right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "SessionConfigGroupId"/> as a bare <c>string</c>.</summary>
+/// <summary>Reads and writes <see cref="SessionConfigGroupId"/> as a bare <c>string</c>.</summary>
 internal sealed class SessionConfigGroupIdConverter : JsonConverter<SessionConfigGroupId>
 {
     /// <inheritdoc/>
@@ -3489,7 +3489,7 @@ public readonly struct SessionConfigId : IEquatable<SessionConfigId>
     public string Value { get; }
 
     /// <summary>Unwrap to the underlying value.</summary>
-    public static implicit operator string (SessionConfigId value) => value.Value;
+    public static implicit operator string(SessionConfigId value) => value.Value;
     /// <summary>Wrap an underlying value.</summary>
     public static explicit operator SessionConfigId(string value) => new(value);
     /// <inheritdoc/>
@@ -3506,7 +3506,7 @@ public readonly struct SessionConfigId : IEquatable<SessionConfigId>
     public static bool operator !=(SessionConfigId left, SessionConfigId right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "SessionConfigId"/> as a bare <c>string</c>.</summary>
+/// <summary>Reads and writes <see cref="SessionConfigId"/> as a bare <c>string</c>.</summary>
 internal sealed class SessionConfigIdConverter : JsonConverter<SessionConfigId>
 {
     /// <inheritdoc/>
@@ -3555,7 +3555,7 @@ public abstract class SessionConfigOption
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -3588,7 +3588,7 @@ public sealed class SessionConfigOptionBoolean : SessionConfigOption
 }
 
 /// <summary>
-/// A <see cref = "SessionConfigOption"/> variant this protocol version does not define.
+/// A <see cref="SessionConfigOption"/> variant this protocol version does not define.
 /// </summary>
 /// <remarks>
 /// Holds the payload verbatim so it can be stored, replayed, or proxied unchanged.
@@ -3605,7 +3605,7 @@ public sealed class SessionConfigOptionUnknown : SessionConfigOption
     public required JsonElement Raw { get; init; }
 }
 
-/// <summary>Resolves <see cref = "SessionConfigOption"/> by its <c>type</c> discriminator.</summary>
+/// <summary>Resolves <see cref="SessionConfigOption"/> by its <c>type</c> discriminator.</summary>
 internal sealed class SessionConfigOptionConverter : JsonConverter<SessionConfigOption>
 {
     /// <inheritdoc/>
@@ -3696,13 +3696,13 @@ internal sealed class SessionConfigOptionConverter : JsonConverter<SessionConfig
         switch (value)
         {
             case SessionConfigOptionSelect typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case SessionConfigOptionBoolean typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             default:
-                break;
+            break;
         }
 
         writer.WriteEndObject();
@@ -3711,12 +3711,12 @@ internal sealed class SessionConfigOptionConverter : JsonConverter<SessionConfig
 
 /// <summary>
 /// Semantic category for a session configuration option.
-/// 
+///
 /// This is intended to help Clients distinguish broadly common selectors (e.g. model selector vs
 /// session mode selector vs thought/reasoning level) for UX purposes (keyboard shortcuts, icons,
 /// placement). It MUST NOT be required for correctness. Clients MUST handle missing or unknown
 /// categories gracefully.
-/// 
+///
 /// Category names beginning with `_` are free for custom use, like other ACP extension methods.
 /// Category names that do not begin with `_` are reserved for the ACP spec.
 /// </summary>
@@ -3759,7 +3759,7 @@ public readonly struct SessionConfigOptionCategory : IEquatable<SessionConfigOpt
     public static bool operator !=(SessionConfigOptionCategory left, SessionConfigOptionCategory right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "SessionConfigOptionCategory"/>, preserving unknown values verbatim.</summary>
+/// <summary>Reads and writes <see cref="SessionConfigOptionCategory"/>, preserving unknown values verbatim.</summary>
 internal sealed class SessionConfigOptionCategoryConverter : JsonConverter<SessionConfigOptionCategory>
 {
     /// <inheritdoc/>
@@ -3775,7 +3775,7 @@ public sealed class SessionConfigOptionsCapabilities
 {
     /// <summary>
     /// Whether the client supports boolean session configuration options.
-    /// 
+    ///
     /// Optional. Omitted or `null` both mean the client does not advertise support.
     /// Supplying `{}` means agents may include `type: "boolean"` entries in
     /// `configOptions`, and the client may send `session/set_config_option`
@@ -3789,7 +3789,7 @@ public sealed class SessionConfigOptionsCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -3842,7 +3842,7 @@ public sealed class SessionConfigSelectGroup
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -3878,7 +3878,7 @@ public sealed class SessionConfigSelectOption
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -3909,7 +3909,7 @@ public readonly struct SessionConfigSelectOptions
     public bool TryGetSessionConfigSelectGroupArray(out SessionConfigSelectGroup[] value) => AcpJson.TryRead(Raw, AcpJsonContext.Default.Options, out value);
 }
 
-/// <summary>Reads and writes <see cref = "SessionConfigSelectOptions"/> verbatim.</summary>
+/// <summary>Reads and writes <see cref="SessionConfigSelectOptions"/> verbatim.</summary>
 internal sealed class SessionConfigSelectOptionsConverter : JsonConverter<SessionConfigSelectOptions>
 {
     /// <inheritdoc/>
@@ -3935,7 +3935,7 @@ public readonly struct SessionConfigValueId : IEquatable<SessionConfigValueId>
     public string Value { get; }
 
     /// <summary>Unwrap to the underlying value.</summary>
-    public static implicit operator string (SessionConfigValueId value) => value.Value;
+    public static implicit operator string(SessionConfigValueId value) => value.Value;
     /// <summary>Wrap an underlying value.</summary>
     public static explicit operator SessionConfigValueId(string value) => new(value);
     /// <inheritdoc/>
@@ -3952,7 +3952,7 @@ public readonly struct SessionConfigValueId : IEquatable<SessionConfigValueId>
     public static bool operator !=(SessionConfigValueId left, SessionConfigValueId right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "SessionConfigValueId"/> as a bare <c>string</c>.</summary>
+/// <summary>Reads and writes <see cref="SessionConfigValueId"/> as a bare <c>string</c>.</summary>
 internal sealed class SessionConfigValueIdConverter : JsonConverter<SessionConfigValueId>
 {
     /// <inheritdoc/>
@@ -3963,7 +3963,7 @@ internal sealed class SessionConfigValueIdConverter : JsonConverter<SessionConfi
 
 /// <summary>
 /// Capabilities for the `session/delete` method.
-/// 
+///
 /// Supplying `{}` means the agent supports deleting sessions from `session/list`.
 /// </summary>
 public sealed class SessionDeleteCapabilities
@@ -3972,7 +3972,7 @@ public sealed class SessionDeleteCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -3982,10 +3982,10 @@ public sealed class SessionDeleteCapabilities
 
 /// <summary>
 /// A unique identifier for a conversation session between a client and agent.
-/// 
+///
 /// Sessions maintain their own context, conversation history, and state,
 /// allowing multiple independent interactions with the same agent.
-/// 
+///
 /// See protocol docs: [Session ID](https://agentclientprotocol.com/protocol/session-setup#session-id)
 /// </summary>
 [JsonConverter(typeof(SessionIdConverter))]
@@ -3997,7 +3997,7 @@ public readonly struct SessionId : IEquatable<SessionId>
     public string Value { get; }
 
     /// <summary>Unwrap to the underlying value.</summary>
-    public static implicit operator string (SessionId value) => value.Value;
+    public static implicit operator string(SessionId value) => value.Value;
     /// <summary>Wrap an underlying value.</summary>
     public static explicit operator SessionId(string value) => new(value);
     /// <inheritdoc/>
@@ -4014,7 +4014,7 @@ public readonly struct SessionId : IEquatable<SessionId>
     public static bool operator !=(SessionId left, SessionId right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "SessionId"/> as a bare <c>string</c>.</summary>
+/// <summary>Reads and writes <see cref="SessionId"/> as a bare <c>string</c>.</summary>
 internal sealed class SessionIdConverter : JsonConverter<SessionId>
 {
     /// <inheritdoc/>
@@ -4042,7 +4042,7 @@ public sealed class SessionInfo
 
     /// <summary>
     /// Additional workspace roots reported for this session. Each path must be absolute.
-    /// 
+    ///
     /// When present, this is the complete ordered additional-root list reported
     /// by the Agent. Omitted and empty values are equivalent: the response
     /// reports no additional roots.
@@ -4069,7 +4069,7 @@ public sealed class SessionInfo
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -4079,7 +4079,7 @@ public sealed class SessionInfo
 
 /// <summary>
 /// Update to session metadata. All fields are optional to support partial updates.
-/// 
+///
 /// Agents send this notification to update session information like title or custom metadata.
 /// This allows clients to display dynamic session names and track session state changes.
 /// </summary>
@@ -4103,7 +4103,7 @@ public sealed class SessionInfoUpdate
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -4113,7 +4113,7 @@ public sealed class SessionInfoUpdate
 
 /// <summary>
 /// Capabilities for the `session/list` method.
-/// 
+///
 /// Supplying `{}` means the agent supports listing sessions.
 /// </summary>
 public sealed class SessionListCapabilities
@@ -4122,7 +4122,7 @@ public sealed class SessionListCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -4132,7 +4132,7 @@ public sealed class SessionListCapabilities
 
 /// <summary>
 /// A mode the agent can operate in.
-/// 
+///
 /// See protocol docs: [Session Modes](https://agentclientprotocol.com/protocol/session-modes)
 /// </summary>
 public sealed class SessionMode
@@ -4160,7 +4160,7 @@ public sealed class SessionMode
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -4180,7 +4180,7 @@ public readonly struct SessionModeId : IEquatable<SessionModeId>
     public string Value { get; }
 
     /// <summary>Unwrap to the underlying value.</summary>
-    public static implicit operator string (SessionModeId value) => value.Value;
+    public static implicit operator string(SessionModeId value) => value.Value;
     /// <summary>Wrap an underlying value.</summary>
     public static explicit operator SessionModeId(string value) => new(value);
     /// <inheritdoc/>
@@ -4197,7 +4197,7 @@ public readonly struct SessionModeId : IEquatable<SessionModeId>
     public static bool operator !=(SessionModeId left, SessionModeId right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "SessionModeId"/> as a bare <c>string</c>.</summary>
+/// <summary>Reads and writes <see cref="SessionModeId"/> as a bare <c>string</c>.</summary>
 internal sealed class SessionModeIdConverter : JsonConverter<SessionModeId>
 {
     /// <inheritdoc/>
@@ -4227,7 +4227,7 @@ public sealed class SessionModeState
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -4237,9 +4237,9 @@ public sealed class SessionModeState
 
 /// <summary>
 /// Notification containing a session update from the agent.
-/// 
+///
 /// Used to stream real-time progress and results during prompt processing.
-/// 
+///
 /// See protocol docs: [Agent Reports Output](https://agentclientprotocol.com/protocol/prompt-turn#3-agent-reports-output)
 /// </summary>
 public sealed class SessionNotification
@@ -4260,7 +4260,7 @@ public sealed class SessionNotification
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -4270,7 +4270,7 @@ public sealed class SessionNotification
 
 /// <summary>
 /// Capabilities for the `session/resume` method.
-/// 
+///
 /// Supplying `{}` means the agent supports resuming sessions.
 /// </summary>
 public sealed class SessionResumeCapabilities
@@ -4279,7 +4279,7 @@ public sealed class SessionResumeCapabilities
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -4289,9 +4289,9 @@ public sealed class SessionResumeCapabilities
 
 /// <summary>
 /// Different types of updates that can be sent during session processing.
-/// 
+///
 /// These updates provide real-time feedback about the agent's progress.
-/// 
+///
 /// See protocol docs: [Agent Reports Output](https://agentclientprotocol.com/protocol/prompt-turn#3-agent-reports-output)
 /// </summary>
 [JsonConverter(typeof(SessionUpdateConverter))]
@@ -4389,7 +4389,7 @@ public sealed class SessionUpdateAvailableCommandsUpdate : SessionUpdate
 
 /// <summary>
 /// The current mode of the session has changed
-/// 
+///
 /// See protocol docs: [Session Modes](https://agentclientprotocol.com/protocol/session-modes)
 /// </summary>
 public sealed class SessionUpdateCurrentModeUpdate : SessionUpdate
@@ -4438,7 +4438,7 @@ public sealed class SessionUpdateUsageUpdate : SessionUpdate
 }
 
 /// <summary>
-/// A <see cref = "SessionUpdate"/> variant this protocol version does not define.
+/// A <see cref="SessionUpdate"/> variant this protocol version does not define.
 /// </summary>
 /// <remarks>
 /// Holds the payload verbatim so it can be stored, replayed, or proxied unchanged.
@@ -4455,7 +4455,7 @@ public sealed class SessionUpdateUnknown : SessionUpdate
     public required JsonElement Raw { get; init; }
 }
 
-/// <summary>Resolves <see cref = "SessionUpdate"/> by its <c>sessionUpdate</c> discriminator.</summary>
+/// <summary>Resolves <see cref="SessionUpdate"/> by its <c>sessionUpdate</c> discriminator.</summary>
 internal sealed class SessionUpdateConverter : JsonConverter<SessionUpdate>
 {
     /// <inheritdoc/>
@@ -4532,40 +4532,40 @@ internal sealed class SessionUpdateConverter : JsonConverter<SessionUpdate>
         switch (value)
         {
             case SessionUpdateUserMessageChunk typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case SessionUpdateAgentMessageChunk typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case SessionUpdateAgentThoughtChunk typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case SessionUpdateToolCall typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case SessionUpdateToolCallUpdate typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case SessionUpdatePlan typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case SessionUpdateAvailableCommandsUpdate typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case SessionUpdateCurrentModeUpdate typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case SessionUpdateConfigOptionUpdate typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case SessionUpdateSessionInfoUpdate typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case SessionUpdateUsageUpdate typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             default:
-                break;
+            break;
         }
 
         writer.WriteEndObject();
@@ -4598,7 +4598,7 @@ public abstract class SetSessionConfigOptionRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -4617,7 +4617,7 @@ public sealed class SetSessionConfigOptionRequestBoolean : SetSessionConfigOptio
 }
 
 /// <summary>
-/// A <see cref = "SetSessionConfigOptionRequest"/> variant this protocol version does not define.
+/// A <see cref="SetSessionConfigOptionRequest"/> variant this protocol version does not define.
 /// </summary>
 /// <remarks>
 /// Holds the payload verbatim so it can be stored, replayed, or proxied unchanged.
@@ -4634,7 +4634,7 @@ public sealed class SetSessionConfigOptionRequestUnknown : SetSessionConfigOptio
     public required JsonElement Raw { get; init; }
 }
 
-/// <summary>Resolves <see cref = "SetSessionConfigOptionRequest"/> by its <c>type</c> discriminator.</summary>
+/// <summary>Resolves <see cref="SetSessionConfigOptionRequest"/> by its <c>type</c> discriminator.</summary>
 internal sealed class SetSessionConfigOptionRequestConverter : JsonConverter<SetSessionConfigOptionRequest>
 {
     /// <inheritdoc/>
@@ -4697,9 +4697,9 @@ internal sealed class SetSessionConfigOptionRequestConverter : JsonConverter<Set
         switch (value)
         {
             case SetSessionConfigOptionRequestBoolean typed:
-                break;
+            break;
             default:
-                break;
+            break;
         }
 
         writer.WriteEndObject();
@@ -4721,7 +4721,7 @@ public sealed class SetSessionConfigOptionResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -4750,7 +4750,7 @@ public sealed class SetSessionModeRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -4767,7 +4767,7 @@ public sealed class SetSessionModeResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -4777,7 +4777,7 @@ public sealed class SetSessionModeResponse
 
 /// <summary>
 /// Reasons why an agent stops processing a prompt turn.
-/// 
+///
 /// See protocol docs: [Stop Reasons](https://agentclientprotocol.com/protocol/prompt-turn#stop-reasons)
 /// </summary>
 [JsonConverter(typeof(StopReasonConverter))]
@@ -4821,7 +4821,7 @@ public readonly struct StopReason : IEquatable<StopReason>
     public static bool operator !=(StopReason left, StopReason right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "StopReason"/>, preserving unknown values verbatim.</summary>
+/// <summary>Reads and writes <see cref="StopReason"/>, preserving unknown values verbatim.</summary>
 internal sealed class StopReasonConverter : JsonConverter<StopReason>
 {
     /// <inheritdoc/>
@@ -4832,9 +4832,9 @@ internal sealed class StopReasonConverter : JsonConverter<StopReason>
 
 /// <summary>
 /// Embed a terminal created with `terminal/create` by its id.
-/// 
+///
 /// The terminal must be added before calling `terminal/release`.
-/// 
+///
 /// See protocol docs: [Terminal](https://agentclientprotocol.com/protocol/terminals)
 /// </summary>
 public sealed class Terminal
@@ -4849,7 +4849,7 @@ public sealed class Terminal
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -4880,7 +4880,7 @@ public sealed class TerminalExitStatus
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -4900,7 +4900,7 @@ public readonly struct TerminalId : IEquatable<TerminalId>
     public string Value { get; }
 
     /// <summary>Unwrap to the underlying value.</summary>
-    public static implicit operator string (TerminalId value) => value.Value;
+    public static implicit operator string(TerminalId value) => value.Value;
     /// <summary>Wrap an underlying value.</summary>
     public static explicit operator TerminalId(string value) => new(value);
     /// <inheritdoc/>
@@ -4917,7 +4917,7 @@ public readonly struct TerminalId : IEquatable<TerminalId>
     public static bool operator !=(TerminalId left, TerminalId right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "TerminalId"/> as a bare <c>string</c>.</summary>
+/// <summary>Reads and writes <see cref="TerminalId"/> as a bare <c>string</c>.</summary>
 internal sealed class TerminalIdConverter : JsonConverter<TerminalId>
 {
     /// <inheritdoc/>
@@ -4947,7 +4947,7 @@ public sealed class TerminalOutputRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -4983,7 +4983,7 @@ public sealed class TerminalOutputResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -5013,7 +5013,7 @@ public sealed class TextContent
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -5049,7 +5049,7 @@ public sealed class TextResourceContents
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -5059,10 +5059,10 @@ public sealed class TextResourceContents
 
 /// <summary>
 /// Represents a tool call that the language model has requested.
-/// 
+///
 /// Tool calls are actions that the agent executes on behalf of the language model,
 /// such as reading files, executing code, or fetching data from external sources.
-/// 
+///
 /// See protocol docs: [Tool Calls](https://agentclientprotocol.com/protocol/tool-calls)
 /// </summary>
 public sealed class ToolCall
@@ -5127,7 +5127,7 @@ public sealed class ToolCall
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -5137,10 +5137,10 @@ public sealed class ToolCall
 
 /// <summary>
 /// Content produced by a tool call.
-/// 
+///
 /// Tool calls can produce different types of content including
 /// standard content blocks (text, images) or file diffs.
-/// 
+///
 /// See protocol docs: [Content](https://agentclientprotocol.com/protocol/tool-calls#content)
 /// </summary>
 [JsonConverter(typeof(ToolCallContentConverter))]
@@ -5177,9 +5177,9 @@ public sealed class ToolCallContentDiff : ToolCallContent
 
 /// <summary>
 /// Embed a terminal created with `terminal/create` by its id.
-/// 
+///
 /// The terminal must be added before calling `terminal/release`.
-/// 
+///
 /// See protocol docs: [Terminal](https://agentclientprotocol.com/protocol/terminals)
 /// </summary>
 public sealed class ToolCallContentTerminal : ToolCallContent
@@ -5192,7 +5192,7 @@ public sealed class ToolCallContentTerminal : ToolCallContent
 }
 
 /// <summary>
-/// A <see cref = "ToolCallContent"/> variant this protocol version does not define.
+/// A <see cref="ToolCallContent"/> variant this protocol version does not define.
 /// </summary>
 /// <remarks>
 /// Holds the payload verbatim so it can be stored, replayed, or proxied unchanged.
@@ -5209,7 +5209,7 @@ public sealed class ToolCallContentUnknown : ToolCallContent
     public required JsonElement Raw { get; init; }
 }
 
-/// <summary>Resolves <see cref = "ToolCallContent"/> by its <c>type</c> discriminator.</summary>
+/// <summary>Resolves <see cref="ToolCallContent"/> by its <c>type</c> discriminator.</summary>
 internal sealed class ToolCallContentConverter : JsonConverter<ToolCallContent>
 {
     /// <inheritdoc/>
@@ -5254,16 +5254,16 @@ internal sealed class ToolCallContentConverter : JsonConverter<ToolCallContent>
         switch (value)
         {
             case ToolCallContentContent typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case ToolCallContentDiff typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             case ToolCallContentTerminal typed:
-                AcpJson.WriteMembers(writer, typed.Value, options);
-                break;
+            AcpJson.WriteMembers(writer, typed.Value, options);
+            break;
             default:
-                break;
+            break;
         }
 
         writer.WriteEndObject();
@@ -5282,7 +5282,7 @@ public readonly struct ToolCallId : IEquatable<ToolCallId>
     public string Value { get; }
 
     /// <summary>Unwrap to the underlying value.</summary>
-    public static implicit operator string (ToolCallId value) => value.Value;
+    public static implicit operator string(ToolCallId value) => value.Value;
     /// <summary>Wrap an underlying value.</summary>
     public static explicit operator ToolCallId(string value) => new(value);
     /// <inheritdoc/>
@@ -5299,7 +5299,7 @@ public readonly struct ToolCallId : IEquatable<ToolCallId>
     public static bool operator !=(ToolCallId left, ToolCallId right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "ToolCallId"/> as a bare <c>string</c>.</summary>
+/// <summary>Reads and writes <see cref="ToolCallId"/> as a bare <c>string</c>.</summary>
 internal sealed class ToolCallIdConverter : JsonConverter<ToolCallId>
 {
     /// <inheritdoc/>
@@ -5310,10 +5310,10 @@ internal sealed class ToolCallIdConverter : JsonConverter<ToolCallId>
 
 /// <summary>
 /// A file location being accessed or modified by a tool.
-/// 
+///
 /// Enables clients to implement "follow-along" features that track
 /// which files the agent is working with in real-time.
-/// 
+///
 /// See protocol docs: [Following the Agent](https://agentclientprotocol.com/protocol/tool-calls#following-the-agent)
 /// </summary>
 public sealed class ToolCallLocation
@@ -5335,7 +5335,7 @@ public sealed class ToolCallLocation
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -5345,9 +5345,9 @@ public sealed class ToolCallLocation
 
 /// <summary>
 /// Execution status of a tool call.
-/// 
+///
 /// Tool calls progress through different statuses during their lifecycle.
-/// 
+///
 /// See protocol docs: [Status](https://agentclientprotocol.com/protocol/tool-calls#status)
 /// </summary>
 [JsonConverter(typeof(ToolCallStatusConverter))]
@@ -5389,7 +5389,7 @@ public readonly struct ToolCallStatus : IEquatable<ToolCallStatus>
     public static bool operator !=(ToolCallStatus left, ToolCallStatus right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "ToolCallStatus"/>, preserving unknown values verbatim.</summary>
+/// <summary>Reads and writes <see cref="ToolCallStatus"/>, preserving unknown values verbatim.</summary>
 internal sealed class ToolCallStatusConverter : JsonConverter<ToolCallStatus>
 {
     /// <inheritdoc/>
@@ -5400,10 +5400,10 @@ internal sealed class ToolCallStatusConverter : JsonConverter<ToolCallStatus>
 
 /// <summary>
 /// An update to an existing tool call.
-/// 
+///
 /// Used to report progress and results as tools execute. All fields except
 /// the tool call ID are optional - only changed fields need to be included.
-/// 
+///
 /// See protocol docs: [Updating](https://agentclientprotocol.com/protocol/tool-calls#updating)
 /// </summary>
 public sealed class ToolCallUpdate
@@ -5467,7 +5467,7 @@ public sealed class ToolCallUpdate
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -5477,10 +5477,10 @@ public sealed class ToolCallUpdate
 
 /// <summary>
 /// Categories of tools that can be invoked.
-/// 
+///
 /// Tool kinds help clients choose appropriate icons and optimize how they
 /// display tool execution progress.
-/// 
+///
 /// See protocol docs: [Creating](https://agentclientprotocol.com/protocol/tool-calls#creating)
 /// </summary>
 [JsonConverter(typeof(ToolKindConverter))]
@@ -5534,7 +5534,7 @@ public readonly struct ToolKind : IEquatable<ToolKind>
     public static bool operator !=(ToolKind left, ToolKind right) => !left.Equals(right);
 }
 
-/// <summary>Reads and writes <see cref = "ToolKind"/>, preserving unknown values verbatim.</summary>
+/// <summary>Reads and writes <see cref="ToolKind"/>, preserving unknown values verbatim.</summary>
 internal sealed class ToolKindConverter : JsonConverter<ToolKind>
 {
     /// <inheritdoc/>
@@ -5558,7 +5558,7 @@ public sealed class UnstructuredCommandInput
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -5594,7 +5594,7 @@ public sealed class UsageUpdate
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -5623,7 +5623,7 @@ public sealed class WaitForTerminalExitRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -5654,7 +5654,7 @@ public sealed class WaitForTerminalExitResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -5664,7 +5664,7 @@ public sealed class WaitForTerminalExitResponse
 
 /// <summary>
 /// Request to write content to a text file.
-/// 
+///
 /// Only available if the client supports the `fs.writeTextFile` capability.
 /// </summary>
 public sealed class WriteTextFileRequest
@@ -5691,7 +5691,7 @@ public sealed class WriteTextFileRequest
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
@@ -5708,7 +5708,7 @@ public sealed class WriteTextFileResponse
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
-    /// 
+    ///
     /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]

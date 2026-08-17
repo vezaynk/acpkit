@@ -35,7 +35,7 @@ internal static class UnionEmitter
         }
 
         yield return parse($$"""
-            {{CSharpEmitter.DocsText(type.Documentation, string.Empty)}}[JsonConverter(typeof({{converter}}))]
+            {{CSharpEmitter.DocsText(type.Documentation)}}[JsonConverter(typeof({{converter}}))]
             public abstract class {{type.Name}}
             {
                 /// <summary>The value of <c>{{CSharpEmitter.EscapeText(type.DiscriminatorJsonName)}}</c> that selects this variant.</summary>
@@ -59,7 +59,7 @@ internal static class UnionEmitter
                 : string.Empty;
 
             yield return parse($$"""
-                {{CSharpEmitter.DocsText(variant.Documentation, string.Empty)}}public sealed class {{variant.CsName}} : {{type.Name}}
+                {{CSharpEmitter.DocsText(variant.Documentation)}}public sealed class {{variant.CsName}} : {{type.Name}}
                 {
                     /// <inheritdoc/>
                     [JsonIgnore]
@@ -216,7 +216,7 @@ internal static class UnionEmitter
         var converter = type.Name + "Converter";
 
         yield return parse($$"""
-            {{CSharpEmitter.DocsText(type.Documentation, string.Empty)}}[JsonConverter(typeof({{converter}}))]
+            {{CSharpEmitter.DocsText(type.Documentation)}}[JsonConverter(typeof({{converter}}))]
             public abstract class {{type.Name}}
             {
             }
@@ -225,7 +225,7 @@ internal static class UnionEmitter
         foreach (var arm in type.Arms)
         {
             yield return parse($$"""
-                {{CSharpEmitter.DocsText(arm.Documentation, string.Empty)}}public sealed class {{type.Name}}{{arm.Type.Name}} : {{type.Name}}
+                {{CSharpEmitter.DocsText(arm.Documentation)}}public sealed class {{type.Name}}{{arm.Type.Name}} : {{type.Name}}
                 {
                     /// <summary>The value this arm carries.</summary>
                     public required {{arm.Type.Name}} Value { get; init; }
@@ -325,7 +325,7 @@ internal static class UnionEmitter
         }
 
         yield return parse($$"""
-            {{CSharpEmitter.DocsText(type.Documentation, string.Empty)}}[JsonConverter(typeof({{converter}}))]
+            {{CSharpEmitter.DocsText(type.Documentation)}}[JsonConverter(typeof({{converter}}))]
             public readonly struct {{type.Name}}
             {
                 /// <summary>Wrap a raw payload.</summary>
