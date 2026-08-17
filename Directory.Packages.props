@@ -1,0 +1,22 @@
+<Project>
+
+  <PropertyGroup>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+  </PropertyGroup>
+
+  <!--
+    The shipped libraries take no package dependencies at all: System.Text.Json and its
+    source generator are in the shared framework for every target here. Everything below
+    is build-time or test-time only.
+  -->
+  <ItemGroup>
+    <PackageVersion Include="System.CommandLine" Version="2.0.3" />
+  </ItemGroup>
+
+  <ItemGroup Label="Test">
+    <PackageVersion Include="MSTest" Version="4.0.1" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+  </ItemGroup>
+
+</Project>
