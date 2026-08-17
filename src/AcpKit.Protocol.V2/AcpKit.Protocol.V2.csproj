@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>AcpKit.Protocol.V2</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <PackageId>AcpKit.Protocol.V2</PackageId>
+    <Title>ACP v2 protocol types for .NET.</Title>
+    <Description>
+      Generated models, converters, and the method table for the Agent Client Protocol v2
+      line. Reflection-free: every contract is produced by the System.Text.Json source
+      generator, so the assembly is trimmable and AOT-compatible.
+    </Description>
+    <!-- Every file here is generated; its documentation comes from the schema. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../AcpKit.Core/AcpKit.Core.csproj" />
+    <None Include="$(MSBuildThisFileDirectory)../../README.md" Pack="true" PackagePath="/" Visible="false" />
+  </ItemGroup>
+
+</Project>

@@ -58,11 +58,17 @@ internal sealed record PropertyModel(
 /// <summary>One arm of a discriminated union.</summary>
 /// <param name="DiscriminatorValue">The <c>const</c> that selects this arm.</param>
 /// <param name="PayloadType">The type carrying the arm's fields.</param>
+/// <param name="Inline">
+/// True when the payload type <em>is</em> the variant: it is used by this arm alone, and its
+/// name already matches. Such a payload derives from the union directly instead of being
+/// wrapped, which removes a pointless <c>.Value</c> hop from the public API.
+/// </param>
 internal sealed record UnionVariant(
     string CsName,
     string DiscriminatorValue,
     TypeRef PayloadType,
-    string? Documentation);
+    string? Documentation,
+    bool Inline = false);
 
 /// <summary>
 /// A type the generator intends to emit.
@@ -98,10 +104,17 @@ internal sealed record OpenEnumType(string Name, string? Documentation, IReadOnl
     : EmittedType(Name, Documentation);
 
 /// <summary>An object with named properties.</summary>
+/// <param name="UnionBase">
+/// The union this object is a variant of, when it derives from one directly. See
+/// <see cref="UnionVariant.Inline"/>.
+/// </param>
+/// <param name="DiscriminatorValue">The discriminator value selecting it, when <paramref name="UnionBase"/> is set.</param>
 internal sealed record ObjectType(
     string Name,
     string? Documentation,
-    IReadOnlyList<PropertyModel> Properties)
+    IReadOnlyList<PropertyModel> Properties,
+    string? UnionBase = null,
+    string? DiscriminatorValue = null)
     : EmittedType(Name, Documentation);
 
 /// <summary>
@@ -153,8 +166,15 @@ internal sealed record ValueUnionType(
     : EmittedType(Name, Documentation);
 
 /// <summary>Everything one (line, variant) contributes to a generated assembly.</summary>
+/// <param name="ContextName">
+/// The serialization context's class name. Distinct per variant, because System.Text.Json's
+/// source generator derives its output filenames from the class name alone — two contexts
+/// called the same thing in one assembly collide on hint names and the generator aborts,
+/// taking every contract with it.
+/// </param>
 internal sealed record EmitPlan(
     string Namespace,
+    string ContextName,
     string SchemaVersion,
     int ProtocolVersion,
     IReadOnlyList<EmittedType> Types,

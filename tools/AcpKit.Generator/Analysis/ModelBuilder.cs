@@ -32,7 +32,7 @@ internal sealed class ModelBuilder(SchemaSet schema)
     /// </summary>
     public IReadOnlyList<string> Flattened => _flattened;
 
-    public EmitPlan Build(string @namespace)
+    public EmitPlan Build(string @namespace, string contextName)
     {
         var types = new List<EmittedType>();
 
@@ -49,11 +49,66 @@ internal sealed class ModelBuilder(SchemaSet schema)
             }
         }
 
+        LinkInlineVariants(types);
+
         var methods = schema.Methods
             .Select(m => new MethodConstant(Naming.Constant(m.Key), m.Path, m.Side.ToString()))
             .ToList();
 
-        return new EmitPlan(@namespace, schema.Version, schema.ProtocolVersion, types, methods);
+        return new EmitPlan(@namespace, contextName, schema.Version, schema.ProtocolVersion, types, methods);
+    }
+
+    /// <summary>
+    /// Point a payload type at the union it belongs to, where the two are one and the same.
+    /// </summary>
+    /// <remarks>
+    /// A variant whose computed name already equals its payload's name is not a coincidence —
+    /// it means the schema named the arm after the type it merges, and nothing else uses it.
+    /// Wrapping such a type in a variant class would both collide with it and force callers
+    /// through a redundant indirection, so instead the payload inherits the union.
+    /// </remarks>
+    private static void LinkInlineVariants(List<EmittedType> types)
+    {
+        var usage = types.OfType<UnionType>()
+            .SelectMany(u => u.Variants)
+            .GroupBy(v => v.PayloadType.Name, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
+
+        var objects = types.OfType<ObjectType>().ToDictionary(o => o.Name, StringComparer.Ordinal);
+
+        for (var i = 0; i < types.Count; i++)
+        {
+            if (types[i] is not UnionType union)
+            {
+                continue;
+            }
+
+            var updated = new List<UnionVariant>(union.Variants.Count);
+            foreach (var variant in union.Variants)
+            {
+                var inline = string.Equals(variant.CsName, variant.PayloadType.Name, StringComparison.Ordinal)
+                    && usage.GetValueOrDefault(variant.PayloadType.Name) == 1
+                    && objects.ContainsKey(variant.PayloadType.Name);
+
+                updated.Add(inline ? variant with { Inline = true } : variant);
+
+                if (!inline)
+                {
+                    continue;
+                }
+
+                var index = types.IndexOf(objects[variant.PayloadType.Name]);
+                var linked = objects[variant.PayloadType.Name] with
+                {
+                    UnionBase = union.Name,
+                    DiscriminatorValue = variant.DiscriminatorValue,
+                };
+                types[index] = linked;
+                objects[variant.PayloadType.Name] = linked;
+            }
+
+            types[i] = union with { Variants = updated };
+        }
     }
 
     private EmittedType? Classify(string name, SchemaNode definition)
@@ -87,7 +142,7 @@ internal sealed class ModelBuilder(SchemaSet schema)
 
         if (typeNames is ["object"] || hasOwnProperties)
         {
-            return new ObjectType(csName, documentation, ReadProperties(definition));
+            return new ObjectType(csName, documentation, ReadProperties(definition, csName));
         }
 
         // A bare primitive that upstream nonetheless gave a name to. That naming is the whole
@@ -178,7 +233,7 @@ internal sealed class ModelBuilder(SchemaSet schema)
             // reason to stop being a union: DiffChange keys on `operation` while `path` and
             // `fileType` apply to all six operations.
             var baseProperties = hasOwnProperties
-                ? ReadProperties(definition).Where(p => p.JsonName != properties[0]).ToList()
+                ? ReadProperties(definition, csName).Where(p => p.JsonName != properties[0]).ToList()
                 : (IReadOnlyList<PropertyModel>)[];
 
             return new UnionType(csName, documentation, properties[0], variants, baseProperties);
@@ -192,13 +247,13 @@ internal sealed class ModelBuilder(SchemaSet schema)
         // deserialization time anyway.
         if (hasOwnProperties)
         {
-            var merged = ReadProperties(definition).ToList();
+            var merged = ReadProperties(definition, csName).ToList();
             var seen = merged.Select(p => p.JsonName).ToHashSet(StringComparer.Ordinal);
 
             foreach (var arm in variantNodes)
             {
                 var armDefinition = schema.Resolve(arm.AllOfRefName() ?? arm.RefName());
-                foreach (var property in ReadProperties(armDefinition))
+                foreach (var property in ReadProperties(armDefinition, csName))
                 {
                     if (seen.Add(property.JsonName))
                     {
@@ -235,12 +290,9 @@ internal sealed class ModelBuilder(SchemaSet schema)
 
         if (shapeArms.Count > 0 && shapeArms.Count == plainArms.Count)
         {
-            // One arm and nothing to choose between: the union is a rename of its only member.
-            if (shapeArms.Count == 1)
-            {
-                return new AliasType(csName, documentation, shapeArms[0].Type);
-            }
-
+            // A one-arm union stays a union. Collapsing it to an alias would name a type that
+            // nothing emits, and single-arm unions are precisely the ones upstream grows: v1's
+            // AvailableCommandInput has one arm today and gains a tagged `text` arm in v2.
             var distinguishing = shapeArms
                 .Select(a => string.Join(",", a.RequiredKeys.Order(StringComparer.Ordinal)))
                 .Distinct(StringComparer.Ordinal)
@@ -337,7 +389,7 @@ internal sealed class ModelBuilder(SchemaSet schema)
         return null;
     }
 
-    private IReadOnlyList<PropertyModel> ReadProperties(SchemaNode definition)
+    private IReadOnlyList<PropertyModel> ReadProperties(SchemaNode definition, string ownerName = "")
     {
         var required = definition.Strings("required").ToHashSet(StringComparer.Ordinal);
         var properties = new List<PropertyModel>();
@@ -352,9 +404,17 @@ internal sealed class ModelBuilder(SchemaSet schema)
             // which a plain nullable property cannot express.
             var threeState = schema.Line == ProtocolLine.V2 && !isRequired && allowsNull;
 
+            // C# forbids a member sharing its enclosing type's name, and ACP has several:
+            // Content.content, Terminal.terminal. Suffixing keeps the wire name untouched.
+            var csName = Naming.Property(jsonName);
+            if (string.Equals(csName, ownerName, StringComparison.Ordinal))
+            {
+                csName += "Value";
+            }
+
             properties.Add(new PropertyModel(
                 JsonName: jsonName,
-                CsName: Naming.Property(jsonName),
+                CsName: csName,
                 Type: ResolveType(jsonName, node),
                 Required: isRequired,
                 Nullable: allowsNull || !isRequired,

@@ -38,6 +38,7 @@ internal sealed class CSharpEmitter(EmitPlan plan)
         }
 
         members.Add(EmitMethodTable());
+        members.Add(EmitSerializerContext());
 
         var @namespace = FileScopedNamespaceDeclaration(ParseName(plan.Namespace))
             .WithMembers(List(members));
@@ -72,12 +73,10 @@ internal sealed class CSharpEmitter(EmitPlan plan)
         AliasType alias => EmitAlias(alias),
         OpenEnumType openEnum => EmitOpenEnum(openEnum),
 
-        // Not yet emitted. Left as explicit arms rather than a discard so that adding a case
-        // to the model forces a decision here instead of silently producing nothing.
-        ObjectType => [],
-        UnionType => [],
-        ShapeUnionType => [],
-        ValueUnionType => [],
+        ObjectType record => EmitObject(record),
+        UnionType union => UnionEmitter.EmitDiscriminated(union, Parse),
+        ShapeUnionType shape => UnionEmitter.EmitShape(shape, Parse),
+        ValueUnionType value => UnionEmitter.EmitValue(value, plan.ContextName, Parse),
         _ => throw new NotSupportedException($"No emitter for {type.GetType().Name}."),
     };
 
@@ -106,7 +105,7 @@ internal sealed class CSharpEmitter(EmitPlan plan)
         var converter = alias.Name + "Converter";
 
         yield return Parse($$"""
-            {{Docs(alias.Documentation, string.Empty)}}[JsonConverter(typeof({{converter}}))]
+            {{DocsText(alias.Documentation, string.Empty)}}[JsonConverter(typeof({{converter}}))]
             public readonly struct {{alias.Name}} : IEquatable<{{alias.Name}}>
             {
                 /// <summary>Wrap a raw <c>{{underlying}}</c> value.</summary>
@@ -175,7 +174,7 @@ internal sealed class CSharpEmitter(EmitPlan plan)
         {
             members.Append($"""
 
-                    /// <summary>The <c>{Escape(member.WireValue)}</c> value.</summary>
+                    /// <summary>The <c>{EscapeText(member.WireValue)}</c> value.</summary>
                     public static readonly {type.Name} {member.CsName} = new("{member.WireValue}");
 
             """);
@@ -184,7 +183,7 @@ internal sealed class CSharpEmitter(EmitPlan plan)
         var known = string.Join(" || ", type.Members.Select(m => $"Value == {m.CsName}.Value"));
 
         yield return Parse($$"""
-            {{Docs(type.Documentation, string.Empty)}}[JsonConverter(typeof({{converter}}))]
+            {{DocsText(type.Documentation, string.Empty)}}[JsonConverter(typeof({{converter}}))]
             public readonly struct {{type.Name}} : IEquatable<{{type.Name}}>
             {
                 /// <summary>Wrap a wire value, known or not.</summary>
@@ -238,6 +237,195 @@ internal sealed class CSharpEmitter(EmitPlan plan)
             """);
     }
 
+    /// <summary>
+    /// A protocol object, as a sealed class with init-only properties.
+    /// </summary>
+    /// <remarks>
+    /// Init-only rather than mutable because a decoded message is a record of what arrived and
+    /// should not be edited in place; <c>required</c> on the schema's required properties so a
+    /// caller cannot construct one that could never appear on the wire.
+    /// </remarks>
+    private static IEnumerable<MemberDeclarationSyntax> EmitObject(ObjectType type)
+    {
+        var body = new StringBuilder();
+        var first = true;
+
+        foreach (var property in type.Properties)
+        {
+            if (!first)
+            {
+                body.Append('\n');
+            }
+
+            first = false;
+            body.Append(EmitPropertyText(property));
+        }
+
+        var baseClause = type.UnionBase is null ? string.Empty : $" : {type.UnionBase}";
+        var discriminator = type.UnionBase is null
+            ? string.Empty
+            : $"""
+                    /// <inheritdoc/>
+                    [JsonIgnore]
+                    public override string Discriminator => "{type.DiscriminatorValue}";
+
+            """;
+
+        yield return Parse($$"""
+            {{DocsText(type.Documentation, string.Empty)}}public sealed class {{type.Name}}{{baseClause}}
+            {
+            {{discriminator}}{{body}}}
+            """);
+    }
+
+    internal static string EmitPropertyText(PropertyModel property)
+    {
+        var lines = new StringBuilder();
+        lines.Append(DocsText(property.Documentation, "    "));
+        lines.Append($"    [JsonPropertyName(\"{property.JsonName}\")]\n");
+
+        if (property.ThreeState)
+        {
+            // Unset is default(Patch<T>), so WhenWritingDefault is what makes an untouched
+            // field vanish from the payload instead of being sent as null. The distinction is
+            // the entire point of the type.
+            lines.Append($"    [JsonConverter(typeof(AcpKit.PatchConverter<{property.Type.Name}>))]\n");
+            lines.Append("    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]\n");
+            lines.Append($"    public AcpKit.Patch<{property.Type.Name}> {property.CsName} {{ get; init; }}\n");
+            return lines.ToString();
+        }
+
+        if (property.Required)
+        {
+            lines.Append($"    public required {property.Type.Name} {property.CsName} {{ get; init; }}\n");
+            return lines.ToString();
+        }
+
+        lines.Append("    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]\n");
+        lines.Append($"    public {property.Type.Render(true)} {property.CsName} {{ get; init; }}\n");
+        return lines.ToString();
+    }
+
+    /// <summary>
+    /// The source-generated serialization context covering every emitted type.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This is what makes the whole assembly trimmable and AOT-safe. System.Text.Json's source
+    /// generator turns each <c>[JsonSerializable]</c> into a compile-time contract, so nothing
+    /// at runtime ever reflects over a <see cref="Type"/> to work out how to read or write it.
+    /// </para>
+    /// <para>
+    /// Registering <em>every</em> type rather than only the request and response roots is
+    /// deliberate: the hand-written converters resolve their payloads through
+    /// <c>options.GetTypeInfo(typeof(T))</c>, and a type missing from the context would fail
+    /// there at runtime rather than here at build time.
+    /// </para>
+    /// </remarks>
+    private MemberDeclarationSyntax EmitSerializerContext()
+    {
+        var attributes = new StringBuilder();
+
+        foreach (var name in SerializableTypeNames().Order(StringComparer.Ordinal))
+        {
+            attributes.Append($"[JsonSerializable(typeof({name}))]\n");
+        }
+
+        return Parse($$"""
+            /// <summary>Compile-time serialization contracts for every type in this protocol version.</summary>
+            [JsonSourceGenerationOptions(
+                PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                UseStringEnumConverter = false)]
+            {{attributes}}public sealed partial class {{plan.ContextName}} : JsonSerializerContext
+            {
+            }
+            """);
+    }
+
+    /// <summary>
+    /// Every type name the context must know, including the closed <c>Patch&lt;T&gt;</c>
+    /// instantiations that properties reference.
+    /// </summary>
+    private IEnumerable<string> SerializableTypeNames()
+    {
+        var names = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var type in plan.Types)
+        {
+            switch (type)
+            {
+                case AliasType alias:
+                    // Aliases over raw JSON are the extensibility escape hatch and emit no type
+                    // of their own, so there is nothing to register a contract for.
+                    if (alias.Underlying.Name != TypeRef.Object.Name
+                        && (alias.Underlying.IsValueType || alias.Underlying.Name == "string"))
+                    {
+                        names.Add(type.Name);
+                    }
+
+                    break;
+                case OpenEnumType:
+                    names.Add(type.Name);
+                    break;
+                case ObjectType record:
+                    names.Add(record.Name);
+                    foreach (var property in record.Properties)
+                    {
+                        names.Add(property.Type.Name);
+                        if (property.ThreeState)
+                        {
+                            names.Add($"AcpKit.Patch<{property.Type.Name}>");
+                        }
+                    }
+
+                    break;
+                case UnionType union:
+                    names.Add(union.Name);
+                    foreach (var variant in union.Variants)
+                    {
+                        names.Add(variant.PayloadType.Name);
+                        if (!variant.Inline)
+                        {
+                            names.Add(variant.CsName);
+                        }
+                    }
+
+                    foreach (var property in union.BaseProperties)
+                    {
+                        names.Add(property.Type.Name);
+                    }
+
+                    names.Add($"{union.Name}Unknown");
+                    break;
+                case ShapeUnionType shape:
+                    names.Add(shape.Name);
+                    foreach (var arm in shape.Arms)
+                    {
+                        names.Add(arm.Type.Name);
+                        names.Add($"{shape.Name}{arm.Type.Name}");
+                    }
+
+                    names.Add($"{shape.Name}Unknown");
+                    break;
+                case ValueUnionType value:
+                    names.Add(value.Name);
+                    foreach (var arm in value.Arms)
+                    {
+                        names.Add(arm.Name);
+                    }
+
+                    break;
+                default:
+                    throw new NotSupportedException($"No context registration for {type.GetType().Name}.");
+            }
+        }
+
+        // JsonElement carries raw payloads on unknown variants and _meta; it needs no contract.
+        names.Remove(TypeRef.Object.Name);
+        return names;
+    }
+
     /// <summary>The method names this protocol version defines, as constants.</summary>
     private MemberDeclarationSyntax EmitMethodTable()
     {
@@ -256,7 +444,7 @@ internal sealed class CSharpEmitter(EmitPlan plan)
         {
             constants.Append($"""
 
-                    /// <summary>The <c>{Escape(method.Path)}</c> method, answered by the {method.Side.ToLowerInvariant()}.</summary>
+                    /// <summary>The <c>{EscapeText(method.Path)}</c> method, answered by the {method.Side.ToLowerInvariant()}.</summary>
                     public const string {method.CsName} = "{method.Path}";
 
             """);
@@ -306,7 +494,7 @@ internal sealed class CSharpEmitter(EmitPlan plan)
     /// <summary>
     /// A schema description as a doc comment, XML-escaped and prefixed line by line.
     /// </summary>
-    private static string Docs(string? description, string indent)
+    internal static string DocsText(string? description, string indent)
     {
         if (string.IsNullOrWhiteSpace(description))
         {
@@ -317,14 +505,14 @@ internal sealed class CSharpEmitter(EmitPlan plan)
         builder.Append(indent).Append("/// <summary>\n");
         foreach (var line in description.Replace("\r\n", "\n").Split('\n'))
         {
-            builder.Append(indent).Append("/// ").Append(Escape(line.TrimEnd())).Append('\n');
+            builder.Append(indent).Append("/// ").Append(EscapeText(line.TrimEnd())).Append('\n');
         }
 
         builder.Append(indent).Append("/// </summary>\n");
         return builder.ToString();
     }
 
-    private static string Escape(string value) =>
+    internal static string EscapeText(string value) =>
         value.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
 
     /// <summary>
@@ -334,7 +522,7 @@ internal sealed class CSharpEmitter(EmitPlan plan)
     /// Catching this here rather than at compile time turns "the generator emitted nonsense"
     /// into a message naming the template that did it.
     /// </remarks>
-    private static MemberDeclarationSyntax Parse(string source)
+    internal static MemberDeclarationSyntax Parse(string source)
     {
         var member = ParseMemberDeclaration(source)
             ?? throw new InvalidOperationException($"Template did not parse as a member:\n{source}");

@@ -19,4 +19,13 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!--
+      Referenced so the compile verifier can resolve the runtime types generated code binds
+      against — Patch<T>, AcpJson, AcpException. Verifying against the real assembly rather
+      than a stub is the point: a signature drift in Core becomes a generation failure.
+    -->
+    <ProjectReference Include="../../src/AcpKit.Core/AcpKit.Core.csproj" />
+  </ItemGroup>
+
 </Project>

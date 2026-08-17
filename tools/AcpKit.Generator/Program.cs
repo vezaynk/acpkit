@@ -27,6 +27,7 @@ internal static class Program
             "inspect" => Inspect(repoRoot, Selected(args)),
             "show" => Show(repoRoot, args.Skip(1).ToArray()),
             "emit" => EmitAndVerify(repoRoot, Selected(args)),
+            "generate" => Generate(repoRoot, Selected(args)),
             "help" or "--help" or "-h" => Help(),
             _ => Unknown(command),
         };
@@ -50,7 +51,7 @@ internal static class Program
             var schema = SchemaSet.Load(directory, line, variant);
 
             var builder = new ModelBuilder(schema);
-            var plan = builder.Build($"AcpKit.Protocol.{line}");
+            var plan = builder.Build($"AcpKit.Protocol.{line}", ContextName(variant));
 
             Console.WriteLine();
             Console.WriteLine($"  {schema.Describe()}  {schema.Version}  (protocolVersion {schema.ProtocolVersion})");
@@ -133,7 +134,7 @@ internal static class Program
             var directory = Path.Combine(repoRoot, "schema", line.ToString().ToLowerInvariant(), variant.ToString().ToLowerInvariant());
             var schema = SchemaSet.Load(directory, line, variant);
             var suffix = variant == SchemaVariant.Unstable ? ".Unstable" : string.Empty;
-            var plan = new ModelBuilder(schema).Build($"AcpKit.Protocol.{line}{suffix}");
+            var plan = new ModelBuilder(schema).Build($"AcpKit.Protocol.{line}{suffix}", ContextName(variant));
 
             var rendered = new CSharpEmitter(plan).Render();
             var lines = rendered.Count(c => c == '\n');
@@ -158,7 +159,8 @@ internal static class Program
 
             foreach (var diagnostic in errors.Concat(warnings).Take(15))
             {
-                Console.WriteLine($"    {diagnostic.Severity.ToString().ToLowerInvariant()} {diagnostic.Id}: {diagnostic.GetMessage()}");
+                var span = diagnostic.Location.GetLineSpan();
+                Console.WriteLine($"    {diagnostic.Severity.ToString().ToLowerInvariant()} {diagnostic.Id} (line {span.StartLinePosition.Line + 1}): {diagnostic.GetMessage()}");
                 failed = true;
             }
 
@@ -174,6 +176,40 @@ internal static class Program
         return failed ? 1 : 0;
     }
 
+    /// <summary>
+    /// Write the generated sources into their projects.
+    /// </summary>
+    /// <remarks>
+    /// The files are checked in, so a schema bump arrives as a reviewable diff rather than as
+    /// an opaque rebuild. Building those projects is also the authoritative verification:
+    /// System.Text.Json's source generator runs there and completes the serialization context,
+    /// which an in-memory compilation cannot do.
+    /// </remarks>
+    private static int Generate(string repoRoot, IReadOnlyList<(ProtocolLine Line, SchemaVariant Variant)> sets)
+    {
+        foreach (var (line, variant) in sets)
+        {
+            var directory = Path.Combine(repoRoot, "schema", line.ToString().ToLowerInvariant(), variant.ToString().ToLowerInvariant());
+            var schema = SchemaSet.Load(directory, line, variant);
+            var suffix = variant == SchemaVariant.Unstable ? ".Unstable" : string.Empty;
+            var @namespace = $"AcpKit.Protocol.{line}{suffix}";
+            var plan = new ModelBuilder(schema).Build(@namespace, ContextName(variant));
+
+            var project = Path.Combine(repoRoot, "src", $"AcpKit.Protocol.{line}", "Generated");
+            Directory.CreateDirectory(project);
+
+            var file = Path.Combine(project, variant == SchemaVariant.Unstable ? "Unstable.g.cs" : "Protocol.g.cs");
+            var rendered = new CSharpEmitter(plan).Render();
+            File.WriteAllText(file, rendered);
+
+            Console.WriteLine($"  {schema.Describe()} -> {Path.GetRelativePath(repoRoot, file)}  ({rendered.Count(c => c == '\n')} lines)");
+            schema.Dispose();
+        }
+
+        Console.WriteLine();
+        return 0;
+    }
+
     /// <summary>Print how one named definition classified, for spot-checking the analysis.</summary>
     private static int Show(string repoRoot, string[] names)
     {
@@ -185,7 +221,7 @@ internal static class Program
 
         var directory = Path.Combine(repoRoot, "schema", "v2", "stable");
         var schema = SchemaSet.Load(directory, ProtocolLine.V2, SchemaVariant.Stable);
-        var plan = new ModelBuilder(schema).Build("AcpKit.Protocol.V2");
+        var plan = new ModelBuilder(schema).Build("AcpKit.Protocol.V2", "AcpJsonContext");
 
         foreach (var name in names)
         {
@@ -242,6 +278,14 @@ internal static class Program
         return 0;
     }
 
+    /// <summary>
+    /// The serialization context's name for a variant. Stable and unstable share an assembly,
+    /// and System.Text.Json's generator names its output files after the context class, so the
+    /// two must differ or the generator aborts on a duplicate hint name.
+    /// </summary>
+    private static string ContextName(SchemaVariant variant) =>
+        variant == SchemaVariant.Unstable ? "AcpUnstableJsonContext" : "AcpJsonContext";
+
     private static IReadOnlyList<(ProtocolLine, SchemaVariant)> Selected(string[] args)
     {
         var lines = new List<ProtocolLine>();
@@ -285,6 +329,9 @@ internal static class Program
               emit [--line v1] [--line v2]
                   Render each schema to C# and compile the result, failing on any
                   diagnostic. Nothing is written to disk.
+
+              generate [--line v1] [--line v2]
+                  Write the generated sources into src/AcpKit.Protocol.V*/Generated/.
             """);
         return 0;
     }

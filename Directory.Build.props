@@ -34,8 +34,8 @@
     <Company>Slava Knyazev</Company>
     <Copyright>Copyright (c) 2026 Slava Knyazev</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/knyazev/acpkit</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/knyazev/acpkit</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/vezaynk/acpkit</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/vezaynk/acpkit</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>acp;agent-client-protocol;agent;llm;jsonrpc;aot</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
