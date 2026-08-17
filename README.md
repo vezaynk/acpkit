@@ -8,9 +8,9 @@ on the runtime path — so it works under native AOT and trimming.
 
 ## Why another one
 
-ACP has a .NET SDK already — [timxx/dotacp](https://github.com/timxx/dotacp), which AcpKit's
-generator is forked from and which remains the reference for anyone who needs
-`netstandard2.0` or `net472`. AcpKit exists for a narrower target:
+ACP has a .NET SDK already — [timxx/dotacp](https://github.com/timxx/dotacp), which remains
+the reference for anyone who needs `netstandard2.0` or `net472`. AcpKit is an independent
+implementation aimed at a narrower target:
 
 - **Native AOT and trimming.** Every JSON converter is generated for its concrete type. There
   is no `Activator.CreateInstance`, no `FieldInfo`, no constructor probing, and no
@@ -22,6 +22,10 @@ generator is forked from and which remains the reference for anyone who needs
   and `x-deserialize-skip-invalid-items` hints, and v2 requires that unknown enum values,
   unknown union variants, and `_`-prefixed vendor extensions survive a round trip. AcpKit
   honours all of it.
+
+The generator builds a typed model of what it intends to emit, renders it through Roslyn, and
+then *compiles* the result as part of the build. Output that does not compile clean under
+nullable reference types and warnings-as-errors is a build failure, not a review comment.
 
 ## Layout
 
@@ -49,6 +53,6 @@ and opens a pull request when the output changes.
 
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE) — the generator is derived from
-[timxx/dotacp](https://github.com/timxx/dotacp), and the schemas come from
-[agentclientprotocol/agent-client-protocol](https://github.com/agentclientprotocol/agent-client-protocol).
+Apache-2.0. See [LICENSE](LICENSE). The ACP schemas vendored under `schema/` come from
+[agentclientprotocol/agent-client-protocol](https://github.com/agentclientprotocol/agent-client-protocol)
+and are Apache-2.0 as well; see [NOTICE](NOTICE).

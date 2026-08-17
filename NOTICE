@@ -1,28 +1,12 @@
 AcpKit
 Copyright 2026 Slava Knyazev
 
-This product includes software developed as part of the dotacp project
-(https://github.com/timxx/dotacp), Copyright (c) timxx, licensed under the
-Apache License, Version 2.0.
+This product includes material from the Agent Client Protocol
+(https://github.com/agentclientprotocol/agent-client-protocol), Copyright (c) the
+Agent Client Protocol authors, licensed under the Apache License, Version 2.0.
 
-Portions of tools/AcpKit.Generator and tests/AcpKit.Generator.Tests are derived
-from dotacp's `generator/` and `unittest/` directories. Those portions have been
-modified. The principal changes are:
+Specifically, the JSON Schema and method-table documents vendored under schema/ are
+copied from that project without modification, and the C# sources generated from
+them under src/**/Generated/ are derived from those documents.
 
-  * The JSON layer was moved from Newtonsoft.Json to System.Text.Json, both in
-    the generator itself and in every artifact it emits.
-  * Reflection-based JSON converters were replaced by converters emitted per
-    concrete type, so that generated code carries no runtime reflection and is
-    compatible with native AOT compilation and trimming.
-  * The generator was extended to emit code for the ACP v2 protocol line
-    alongside v1, and to read the `x-deserialize-default-on-error` and
-    `x-deserialize-skip-invalid-items` schema hints.
-  * Enums are emitted as open (extensible) value types, and fields with ACP v2
-    upsert semantics are emitted with an explicit three-state representation.
-  * The StreamJsonRpc dependency was removed in favour of a JSON-RPC 2.0
-    implementation contained in AcpKit.Core.
-  * Target frameworks were changed from netstandard2.0/net472 to net8.0/net10.0.
-
-The Agent Client Protocol schemas under schema/ are retrieved from
-https://github.com/agentclientprotocol/agent-client-protocol and are licensed
-under the Apache License, Version 2.0.
+All other code in this repository is original work.
