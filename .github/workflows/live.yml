@@ -1,4 +1,5 @@
 name: live
+# Registered with GitHub on the push that made this repository public.
 
 # Drives a real ACP agent. This tier costs money and needs credentials, so it never runs on
 # an untrusted trigger: pull_request_target is deliberately not used, and the job refuses to
