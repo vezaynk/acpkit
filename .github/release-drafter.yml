@@ -1,0 +1,51 @@
+# Keeps a draft release updated as pull requests merge, so cutting a release is a decision
+# rather than a chore. Nothing is published until someone presses Publish on the draft.
+
+name-template: 'AcpKit $RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+
+categories:
+  - title: 'Protocol'
+    labels: ['protocol', 'schema-bump']
+  - title: 'Added'
+    labels: ['enhancement', 'feature']
+  - title: 'Fixed'
+    labels: ['bug', 'fix']
+  - title: 'Generator'
+    labels: ['generator']
+  - title: 'Build and CI'
+    labels: ['ci', 'build', 'dependencies']
+  - title: 'Documentation'
+    labels: ['documentation']
+
+# Anything unlabelled still appears, under this heading, rather than being dropped silently.
+category-template: '### $TITLE'
+exclude-labels: ['skip-changelog']
+
+# Which part of the version moves. Nothing here is 1.0 yet, so `major` is deliberately left
+# without labels: a breaking change at 0.0.x moves the patch like everything else, and the
+# first deliberate 1.0 should be a decision someone makes by hand.
+version-resolver:
+  minor:
+    labels: ['breaking', 'protocol']
+  default: patch
+
+autolabeler:
+  - label: 'generator'
+    files: ['tools/AcpKit.Generator/**']
+  - label: 'protocol'
+    files: ['schema/**', 'src/*/Generated/**']
+  - label: 'ci'
+    files: ['.github/workflows/**']
+  - label: 'documentation'
+    files: ['README.md', 'NOTICE']
+
+template: |
+  $CHANGES
+
+  **Packages**: `AcpKit.Core`, `AcpKit.Protocol.V1`/`.V2`, `AcpKit.Client.V1`/`.V2`,
+  `AcpKit.Agent.V1`/`.V2` — all published at $RESOLVED_VERSION.
+
+  The v2 packages remain a preview: no agent implements ACP v2 yet.
+
+  **Full diff**: https://github.com/vezaynk/acpkit/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
