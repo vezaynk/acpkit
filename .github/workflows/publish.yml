@@ -4,9 +4,12 @@ name: publish
 # but never deleted or reused — so it should take a deliberate act, not a merge.
 
 on:
-  push:
-    tags:
-      - 'v*'
+  # Publishing a drafted release is the trigger, not a tag push. GitHub creates the tag as
+  # part of publishing, so this fires once with the tag already in place for MinVer to read.
+  # Listening for the tag push instead would be fragile: a tag created by a workflow using
+  # GITHUB_TOKEN does not raise a push event at all.
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       dry-run:
@@ -77,7 +80,7 @@ jobs:
           user: knyzorg
 
       - name: Push
-        if: github.event_name == 'push' || !inputs.dry-run
+        if: github.event_name == 'release' || !inputs.dry-run
         run: |
           # --skip-duplicate so a partial failure can be retried: packages that already landed
           # are left alone instead of failing the whole run.

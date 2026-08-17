@@ -249,6 +249,16 @@ CI fails if regenerating produces a diff, so the checked-in output always matche
 it claims to come from. A scheduled workflow tracks the newest `schema-v1.*` and
 `schema-v2.*` tags weekly and opens a pull request when the output changes.
 
+## Releasing
+
+Package versions come from git tags, via MinVer — there is no version number in the source to
+bump, and an untagged commit builds as a prerelease off the last tag.
+
+Merging a pull request does not release anything. A draft release accumulates as work merges;
+publishing that draft creates the tag and triggers the publish workflow, which pushes to NuGet
+using trusted publishing. Cutting a release is one button, and choosing not to cut one is the
+default.
+
 ## Testing
 
 ```sh

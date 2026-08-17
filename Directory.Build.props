@@ -24,14 +24,14 @@
 
   <PropertyGroup Label="Package metadata">
     <!--
-      0.0.x while the shape of the public API is still settling. Both lines carry the same
-      version: at 0.0.x nothing here claims stability, and the v2 line rests on a schema
-      upstream still tags 2.0.0-alpha, so a separate prerelease suffix would say nothing the
-      major version does not already say.
+      The version comes from the git tag, via MinVer. There is deliberately no version in this
+      file: a number that lives in source has to be bumped in a pull request before every
+      release, and is then wrong on every commit that follows until the next one. A tag is the
+      thing that actually marks a release, so it is the thing that should carry the number.
+
+      Untagged commits build as a prerelease off the last tag, which is what a CI build of
+      unreleased work should be.
     -->
-    <VersionPrefix>0.0.3</VersionPrefix>
-    <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
-    <FileVersion>$(VersionPrefix)</FileVersion>
     <Authors>Slava Knyazev</Authors>
     <Company>Slava Knyazev</Company>
     <Copyright>Copyright (c) 2026 Slava Knyazev</Copyright>
@@ -51,5 +51,14 @@
     <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="/" Visible="false" />
     <None Include="$(MSBuildThisFileDirectory)NOTICE" Pack="true" PackagePath="/" Visible="false" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer" PrivateAssets="all" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- Tags are written v0.0.3, so the prefix has to be stripped to get a version. -->
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+  </PropertyGroup>
 
 </Project>
