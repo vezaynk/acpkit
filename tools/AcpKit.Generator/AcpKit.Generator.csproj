@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>acpkit-generate</AssemblyName>
+    <RootNamespace>AcpKit.Generator</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      Build-time only, so its size is irrelevant and it never reaches a published package.
+      Roslyn is here to assemble and then *compile* the generated trees: output that does not
+      build clean is a generation failure, which is a far better oracle than asserting that
+      the emitted text contains a particular substring.
+    -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+  </ItemGroup>
+
+</Project>
