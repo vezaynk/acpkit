@@ -1,5 +1,4 @@
 name: schema-regen
-# Registered with GitHub on the push that made this repository public.
 
 # Tracks the upstream schema. Both ACP lines move independently, and v2 is still tagged
 # 2.0.0-alpha, so this is the mechanism that keeps the checked-in output honest about which

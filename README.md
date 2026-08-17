@@ -4,7 +4,26 @@ A .NET SDK for the [Agent Client Protocol](https://agentclientprotocol.com/), fo
 **v1** and **v2** protocol lines, generated from the official schemas and free of reflection
 on the runtime path — so it works under native AOT and trimming.
 
-> **Status: under construction.** Nothing is published to NuGet yet.
+[![AcpKit.Core](https://img.shields.io/nuget/v/AcpKit.Core?label=AcpKit.Core)](https://www.nuget.org/packages/AcpKit.Core)
+[![ci](https://github.com/vezaynk/acpkit/actions/workflows/ci.yml/badge.svg)](https://github.com/vezaynk/acpkit/actions/workflows/ci.yml)
+
+> **Status: early.** Published at 0.0.x, which is a claim about the API's stability rather
+> than the implementation's: the shape of the public surface is still settling, and no
+> production consumer has exercised it yet.
+
+## Installing
+
+Take the pair for the protocol line you need. Both pull in `AcpKit.Core` and the matching
+protocol types.
+
+```sh
+dotnet add package AcpKit.Client.V1     # build a client against ACP v1
+dotnet add package AcpKit.Agent.V1      # build an agent against ACP v1
+```
+
+Substitute `.V2` for the v2 line. Which one you want is not a matter of taste — see
+[Do not trust the reported protocol version](#do-not-trust-the-reported-protocol-version)
+below. Every agent measured so far speaks v1, so v1 is the practical default today.
 
 ## Why another one
 
