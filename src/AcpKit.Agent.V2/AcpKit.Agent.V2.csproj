@@ -10,6 +10,10 @@
     <Description>
       Implement IAcpAgent and drive a typed connection to the client, for the Agent Client
       Protocol v2 line. Generated from the official schema and free of reflection.
+
+        PREVIEW: no agent implements ACP v2 yet. The schema is still tagged 2.0.0-alpha,
+        the reference Rust SDK gates v2 behind an opt-in unstable_protocol_v2 feature, and
+        the TypeScript SDK has no v2 surface at all. Use the V1 packages for anything real.
     </Description>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>

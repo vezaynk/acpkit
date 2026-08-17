@@ -21,9 +21,10 @@ dotnet add package AcpKit.Client.V1     # build a client against ACP v1
 dotnet add package AcpKit.Agent.V1      # build an agent against ACP v1
 ```
 
-Substitute `.V2` for the v2 line. Which one you want is not a matter of taste — see
+Substitute `.V2` for the v2 line, bearing in mind it is a preview: see
+[Packages](#packages) above and
 [Do not trust the reported protocol version](#do-not-trust-the-reported-protocol-version)
-below. Every agent measured so far speaks v1, so v1 is the practical default today.
+below.
 
 ## Why another one
 
@@ -55,6 +56,12 @@ nullable reference types and warnings-as-errors is a build failure, not a review
 | `AcpKit.Client.V1` / `.V2` | `IAcpClient` and `AgentConnection` — for building a client |
 | `AcpKit.Agent.V1` / `.V2` | `IAcpAgent` and `ClientConnection` — for building an agent |
 
+**The v2 packages are for preview only.** No agent implements ACP v2 yet: the schema is
+still tagged `2.0.0-alpha`, the reference Rust SDK gates v2 behind an opt-in
+`unstable_protocol_v2` feature, and the TypeScript SDK — which most agents build on — has no
+v2 surface at all. Every agent measured answers in v1 shapes. Use `.V1` for anything real;
+`.V2` is there to develop against and to be ready when the ecosystem moves.
+
 Each protocol package also carries the line's **unstable** surface under a `.Unstable`
 namespace. That surface is exempt from SemVer: it tracks schema features that have not
 stabilised, and it is substantially larger than the stable one — v1 unstable has 262
@@ -69,7 +76,8 @@ You implement `IAcpClient` — the methods the *agent* may call on you — and h
 using AcpKit;
 using AcpKit.Protocol.V1;
 
-var agent = Process.Start(new ProcessStartInfo("goose", "acp")
+// Whatever ACP agent you are driving, launched so it speaks the protocol over stdio.
+var agent = Process.Start(new ProcessStartInfo("your-agent", "acp")
 {
     RedirectStandardInput = true,
     RedirectStandardOutput = true,
@@ -149,10 +157,10 @@ Writing an **agent** is the mirror image: implement `IAcpAgent` and hold a `Clie
 ## Do not trust the reported protocol version
 
 The obvious way to decide which line an agent speaks is to read `protocolVersion` from the
-`initialize` response. It does not work. goose 1.46.0 echoes back whatever version it is
-sent — answering `2` to a request for 2, and `99` to a request for 99 — while always replying
-with v1 field names. A client that believed the number would try to read a v1 body as v2 and
-fail on the first field it could not find.
+`initialize` response. It does not work. At least one shipping agent echoes back whatever
+version it is sent — answering `2` to a request for 2, and `99` to a request for 99 — while
+always replying with v1 field names. A client that believed the number would try to read a v1
+body as v2 and fail on the first field it could not find.
 
 What identifies the line is the shape of the response, because v2 renamed the fields that
 carry it: `agentCapabilities` became `capabilities`, and `agentInfo` became a required `info`.
@@ -264,11 +272,13 @@ anything.
 The live tier needs an agent and a credential:
 
 ```sh
-ACPKIT_AGENT=goose ACPKIT_AGENT_ARGS=acp \
-GOOSE_PROVIDER=anthropic GOOSE_MODEL=claude-haiku-4-5-20251001 \
-ANTHROPIC_API_KEY=... \
+ACPKIT_AGENT=your-agent ACPKIT_AGENT_ARGS=acp \
   dotnet run --project tests/AcpKit.Live
 ```
+
+`ACPKIT_AGENT` and `ACPKIT_AGENT_ARGS` name the binary to drive; whatever credentials and
+model that agent needs come from its own environment variables. Because no agent implements
+v2, this tier exercises the v1 client only.
 
 ## License
 

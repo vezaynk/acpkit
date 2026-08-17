@@ -11,6 +11,10 @@
       Generated models, converters, and the method table for the Agent Client Protocol v2
       line. Reflection-free: every contract is produced by the System.Text.Json source
       generator, so the assembly is trimmable and AOT-compatible.
+
+        PREVIEW: no agent implements ACP v2 yet. The schema is still tagged 2.0.0-alpha,
+        the reference Rust SDK gates v2 behind an opt-in unstable_protocol_v2 feature, and
+        the TypeScript SDK has no v2 surface at all. Use the V1 packages for anything real.
     </Description>
     <!-- Every file here is generated; its documentation comes from the schema. -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
