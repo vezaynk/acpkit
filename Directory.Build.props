@@ -29,7 +29,7 @@
       upstream still tags 2.0.0-alpha, so a separate prerelease suffix would say nothing the
       major version does not already say.
     -->
-    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionPrefix>0.0.2</VersionPrefix>
     <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <Authors>Slava Knyazev</Authors>

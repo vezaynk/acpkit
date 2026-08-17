@@ -219,11 +219,11 @@ public sealed class AcpPeer : IAsyncDisposable
 
     private async Task ReadLoopAsync(CancellationToken cancellationToken)
     {
-        using var reader = new NdjsonReader(_input);
+        using var reader = new AcpFrameReader(_input);
 
         while (true)
         {
-            var line = await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+            var line = await reader.ReadFrameAsync(cancellationToken).ConfigureAwait(false);
             if (line is null)
             {
                 return;

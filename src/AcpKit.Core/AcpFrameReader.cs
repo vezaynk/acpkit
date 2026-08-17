@@ -3,9 +3,15 @@ using System.Buffers;
 namespace AcpKit;
 
 /// <summary>
-/// Reads newline-delimited messages off a stream.
+/// Reads newline-delimited JSON frames off a stream.
 /// </summary>
 /// <remarks>
+/// <para>
+/// Public because a peer is not the only thing that needs ACP's framing. A bridge, a proxy,
+/// a recorder, or a debugger all have to split the same stream, and all of them want the
+/// bytes rather than a decoded message — forwarding a frame verbatim cannot corrupt it or
+/// break when the protocol grows a construct the forwarder has never seen.
+/// </para>
 /// <para>
 /// Deliberately hand-rolled rather than layered on <c>StreamReader</c> or
 /// <c>System.IO.Pipelines</c>: the former decodes eagerly and hides byte boundaries, and the
@@ -20,7 +26,7 @@ namespace AcpKit;
 /// and transcoding to UTF-16 and back is pure waste on the hot path.
 /// </para>
 /// </remarks>
-internal sealed class NdjsonReader : IDisposable
+public sealed class AcpFrameReader : IDisposable
 {
     private const int InitialCapacity = 8 * 1024;
 
@@ -30,20 +36,21 @@ internal sealed class NdjsonReader : IDisposable
     private int _length;
     private bool _disposed;
 
-    public NdjsonReader(Stream stream)
+    /// <summary>Read frames from <paramref name="stream"/>.</summary>
+    public AcpFrameReader(Stream stream)
     {
         _stream = stream;
         _buffer = ArrayPool<byte>.Shared.Rent(InitialCapacity);
     }
 
     /// <summary>
-    /// The next line, without its terminator, or null at end of stream.
+    /// The next frame, without its terminator, or null at end of stream.
     /// </summary>
     /// <remarks>
     /// The returned memory points into an internal buffer and is valid only until the next
     /// call. Callers that keep it must copy.
     /// </remarks>
-    public async ValueTask<ReadOnlyMemory<byte>?> ReadLineAsync(CancellationToken cancellationToken)
+    public async ValueTask<ReadOnlyMemory<byte>?> ReadFrameAsync(CancellationToken cancellationToken)
     {
         while (true)
         {
@@ -131,6 +138,7 @@ internal sealed class NdjsonReader : IDisposable
         _start = 0;
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         if (_disposed)
