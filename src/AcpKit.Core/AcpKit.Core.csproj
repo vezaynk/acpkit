@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>AcpKit</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <PackageId>AcpKit.Core</PackageId>
+    <Title>JSON-RPC 2.0 transport for the Agent Client Protocol.</Title>
+    <Description>
+      The version-agnostic half of AcpKit: JSON-RPC 2.0 over newline-delimited JSON, with
+      request correlation, batch support, and error mapping. Contains no protocol types;
+      those live in AcpKit.Protocol.V1 and AcpKit.Protocol.V2.
+    </Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)../../README.md" Pack="true" PackagePath="/" Visible="false" />
+  </ItemGroup>
+
+</Project>
