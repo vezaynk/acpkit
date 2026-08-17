@@ -1,0 +1,5 @@
+# Generated sources are checked in and golden-tested, so line endings have to be
+# identical on every machine that runs the generator.
+* text=auto eol=lf
+*.json text eol=lf
+*.cs   text eol=lf
