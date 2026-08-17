@@ -74,7 +74,7 @@ jobs:
         id: login
         uses: NuGet/login@v1
         with:
-          user: vezaynk
+          user: knyzorg
 
       - name: Push
         if: github.event_name == 'push' || !inputs.dry-run
