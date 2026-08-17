@@ -45,7 +45,7 @@ namespace AcpKit.Generator
             sb.AppendLineLf("    {");
 
             // Add protocol version
-            var version = (ushort?)(Json.ToClrValue(meta.Node("version")) as long?) ?? 1;
+            var version = (ushort)(meta.Int("version") ?? 1);
             sb.AppendLineLf("        /// <summary>");
             sb.AppendLineLf("        /// ACP Protocol Version");
             sb.AppendLineLf("        /// </summary>");

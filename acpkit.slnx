@@ -2,4 +2,7 @@
   <Folder Name="/tools/">
     <Project Path="tools/AcpKit.Generator/AcpKit.Generator.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AcpKit.Generator.Tests/AcpKit.Generator.Tests.csproj" />
+  </Folder>
 </Solution>

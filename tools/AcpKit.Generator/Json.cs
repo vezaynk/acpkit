@@ -67,6 +67,18 @@ namespace AcpKit.Generator
             _ => null,
         };
 
+        /// <summary>The integer at <paramref name="name"/>, or null when absent or not a number.</summary>
+        public static long? Int(this JsonObject? obj, string name)
+        {
+            var node = obj.Node(name);
+            if (node is null || node.GetValueKind() != JsonValueKind.Number)
+            {
+                return null;
+            }
+
+            return node.TryGetValue<long>(out var value) ? value : null;
+        }
+
         /// <summary>True when <paramref name="name"/> is present and set to <c>true</c>.</summary>
         public static bool Flag(this JsonObject? obj, string name) => obj.Node(name)?.GetValueKind() == JsonValueKind.True;
 
@@ -156,7 +168,10 @@ namespace AcpKit.Generator
                 case JsonValueKind.Undefined:
                     return null;
                 case JsonValueKind.Number:
-                    return node.TryGetValue<long>(out var l) ? l : node.GetValue<double>();
+                    // The (object) cast is load-bearing: without it the conditional unifies
+                    // long and double to double, and every integer comes back boxed as a
+                    // double, so `is long` tests downstream silently stop matching.
+                    return node.TryGetValue<long>(out var l) ? (object)l : node.GetValue<double>();
                 default:
                     return node.ToJsonString();
             }

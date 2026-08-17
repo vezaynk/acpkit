@@ -26,7 +26,7 @@ namespace AcpKit.Generator
         /// <summary>
         /// Resolve a version string to a git ref
         /// </summary>
-        public string ResolveRef(string version)
+        public string ResolveRef(string? version)
         {
             if (string.IsNullOrEmpty(version))
             {

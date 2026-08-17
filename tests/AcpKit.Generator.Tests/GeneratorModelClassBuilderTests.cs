@@ -1,0 +1,509 @@
+using AcpKit.Generator;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Text.Json.Nodes;
+
+namespace AcpKit.Generator.Tests
+{
+    [TestClass]
+    public class ModelClassBuilderTests
+    {
+        private static string BuildModel(string name, JsonObject defs)
+        {
+            var resolver = new PropertyTypeResolver(defs);
+            var discriminatorAnalyzer = new DiscriminatorAnalyzer(defs);
+            var definition = defs.Obj(name) ?? throw new InvalidOperationException($"Fixture has no definition named '{name}'.");
+            var builder = new ModelClassBuilder(name, definition, defs, resolver, discriminatorAnalyzer);
+            return builder.Generate();
+        }
+
+        [TestMethod]
+        public void DiscriminatorHandling_GeneratesAbstractBaseAndMapping()
+        {
+            var defs = Json.ParseObject(@"{
+  ""TextContent"": { ""type"": ""object"", ""properties"": { ""text"": { ""type"": ""string"" } }, ""required"": [""text""] },
+  ""ContentBlock"": {
+    ""discriminator"": { ""propertyName"": ""type"" },
+    ""oneOf"": [
+      {
+        ""allOf"": [ { ""$ref"": ""#/$defs/TextContent"" } ],
+        ""properties"": { ""type"": { ""const"": ""text"", ""type"": ""string"" } },
+        ""required"": [""type""],
+        ""type"": ""object""
+      }
+    ]
+  }
+}");
+
+            var result = BuildModel("ContentBlock", defs);
+
+            StringAssert.Contains(result, "abstract class ContentBlock");
+            StringAssert.Contains(result, "DiscriminatorPropertyName = \"type\"");
+            StringAssert.Contains(result, "typeof(TextContent)");
+        }
+
+        [TestMethod]
+        public void DiscriminatorHandling_AddsOverrideForDerivedType()
+        {
+            var defs = Json.ParseObject(@"{
+  ""TextContent"": { ""type"": ""object"", ""properties"": { ""text"": { ""type"": ""string"" } }, ""required"": [""text""] },
+  ""ContentBlock"": {
+    ""discriminator"": { ""propertyName"": ""type"" },
+    ""oneOf"": [
+      {
+        ""allOf"": [ { ""$ref"": ""#/$defs/TextContent"" } ],
+        ""properties"": { ""type"": { ""const"": ""text"", ""type"": ""string"" } },
+        ""required"": [""type""],
+        ""type"": ""object""
+      }
+    ]
+  }
+}");
+
+            var result = BuildModel("TextContent", defs);
+
+            StringAssert.Contains(result, "class TextContent : ContentBlock");
+            StringAssert.Contains(result, "override string Type");
+            StringAssert.Contains(result, "=> \"text\"");
+        }
+
+        [TestMethod]
+        public void DiscriminatorHandling_UsesWrapperVariantsWhenRefsRepeat()
+        {
+            var defs = Json.ParseObject(@"{
+  ""Chunk"": { ""type"": ""object"", ""properties"": { ""content"": { ""type"": ""string"" } }, ""required"": [""content""] },
+  ""Update"": {
+    ""discriminator"": { ""propertyName"": ""kind"" },
+    ""oneOf"": [
+      {
+        ""allOf"": [ { ""$ref"": ""#/$defs/Chunk"" } ],
+        ""properties"": { ""kind"": { ""const"": ""first"", ""type"": ""string"" } },
+        ""required"": [""kind""],
+        ""type"": ""object""
+      },
+      {
+        ""allOf"": [ { ""$ref"": ""#/$defs/Chunk"" } ],
+        ""properties"": { ""kind"": { ""const"": ""second"", ""type"": ""string"" } },
+        ""required"": [""kind""],
+        ""type"": ""object""
+      }
+    ]
+  }
+}");
+
+            var updateResult = BuildModel("Update", defs);
+            var chunkResult = BuildModel("Chunk", defs);
+
+            StringAssert.Contains(updateResult, "class UpdateFirst");
+            StringAssert.Contains(updateResult, "class UpdateSecond");
+            StringAssert.Contains(updateResult, "override string Kind");
+            Assert.DoesNotContain("class Chunk : Update", chunkResult, "Chunk should not inherit from Update when refs repeat");
+        }
+
+        [TestMethod]
+        public void DiscriminatorHandling_GeneratesDefaultTypeWhenDiscriminatorMissing_ForTitleOnlyVariant()
+        {
+            var defs = Json.ParseObject(@"{
+  ""AuthMethodAgent"": { ""type"": ""object"", ""properties"": { ""id"": { ""type"": ""string"" }, ""name"": { ""type"": ""string"" } }, ""required"": [""id"", ""name""] },
+  ""AuthMethodEnvVar"": { ""type"": ""object"", ""properties"": { ""id"": { ""type"": ""string"" }, ""name"": { ""type"": ""string"" }, ""vars"": { ""type"": ""array"" } }, ""required"": [""id"", ""name"", ""vars""] },
+  ""AuthMethod"": {
+    ""anyOf"": [
+      { ""allOf"": [ { ""$ref"": ""#/$defs/AuthMethodEnvVar"" } ], ""properties"": { ""type"": { ""const"": ""env_var"", ""type"": ""string"" } }, ""required"": [""type""], ""type"": ""object"" },
+      { ""allOf"": [ { ""$ref"": ""#/$defs/AuthMethodAgent"" } ], ""title"": ""agent"" }
+    ]
+  }
+}");
+
+            var result = BuildModel("AuthMethod", defs);
+
+            StringAssert.Contains(result, "DefaultTypeWhenDiscriminatorMissing");
+            StringAssert.Contains(result, "typeof(AuthMethodAgent)");
+        }
+
+        [TestMethod]
+        public void AnyOfWithBaseProperties_MergesAndGeneratesUnionPropertyType()
+        {
+            var defs = Json.ParseObject(@"{
+  ""SessionId"": { ""type"": ""string"" },
+  ""SessionConfigId"": { ""type"": ""string"" },
+  ""SessionConfigValueId"": { ""type"": ""string"" },
+  ""SetSessionConfigOptionRequest"": {
+    ""anyOf"": [
+      {
+        ""properties"": {
+          ""type"": { ""const"": ""boolean"", ""type"": ""string"" },
+          ""value"": { ""type"": ""boolean"" }
+        },
+        ""required"": [""type"", ""value""],
+        ""type"": ""object""
+      },
+      {
+        ""properties"": {
+          ""value"": { ""allOf"": [ { ""$ref"": ""#/$defs/SessionConfigValueId"" } ] }
+        },
+        ""required"": [""value""],
+        ""type"": ""object""
+      }
+    ],
+    ""properties"": {
+      ""_meta"": { ""type"": [""object"", ""null""], ""additionalProperties"": true },
+      ""configId"": { ""$ref"": ""#/$defs/SessionConfigId"" },
+      ""sessionId"": { ""$ref"": ""#/$defs/SessionId"" }
+    },
+    ""required"": [""sessionId"", ""configId""],
+    ""type"": ""object""
+  }
+}");
+
+            var result = BuildModel("SetSessionConfigOptionRequest", defs);
+
+            StringAssert.Contains(result, "public readonly struct SetSessionConfigOptionRequestValue");
+            StringAssert.Contains(result, "public SetSessionConfigOptionRequestValue Value");
+            StringAssert.Contains(result, "public SessionId SessionId");
+            StringAssert.Contains(result, "public SessionConfigId ConfigId");
+            StringAssert.Contains(result, "TryGetBool");
+            StringAssert.Contains(result, "TryGetSessionConfigValueId");
+        }
+
+        [TestMethod]
+        public void TypeAliasStruct_GeneratesStringAliasStruct()
+        {
+            var defs = Json.ParseObject(@"{ ""TestId"": { ""type"": ""string"", ""description"": ""Test string alias"" } }");
+            var result = BuildModel("TestId", defs);
+
+            StringAssert.Contains(result, "public readonly struct TestId");
+            StringAssert.Contains(result, "IEquatable<TestId>");
+            StringAssert.Contains(result, "private readonly string _value");
+            StringAssert.Contains(result, "Test string alias");
+        }
+
+        [TestMethod]
+        public void TypeAliasStruct_GeneratesUShortAliasStruct()
+        {
+            var defs = Json.ParseObject(@"{ ""TestVersion"": { ""type"": ""integer"", ""format"": ""uint16"", ""description"": ""Test version number"" } }");
+            var result = BuildModel("TestVersion", defs);
+
+            StringAssert.Contains(result, "public readonly struct TestVersion");
+            StringAssert.Contains(result, "private readonly ushort _value");
+            StringAssert.Contains(result, "Test version number");
+        }
+
+        [TestMethod]
+        public void TypeAliasStruct_IncludesImplicitOperatorsAndOverrides()
+        {
+            var defs = Json.ParseObject(@"{ ""TestId"": { ""type"": ""string"" } }");
+            var result = BuildModel("TestId", defs);
+
+            StringAssert.Contains(result, "public static implicit operator TestId(string value)");
+            StringAssert.Contains(result, "public static implicit operator string(TestId alias)");
+            StringAssert.Contains(result, "public bool Equals(TestId other)");
+            StringAssert.Contains(result, "public override bool Equals(object obj)");
+            StringAssert.Contains(result, "public override int GetHashCode()");
+            StringAssert.Contains(result, "public override string ToString()");
+        }
+
+        [TestMethod]
+        public void TypeAliasStruct_HandlesNullForReferenceTypeHashCode()
+        {
+            var defs = Json.ParseObject(@"{ ""TestId"": { ""type"": ""string"" } }");
+            var result = BuildModel("TestId", defs);
+
+            StringAssert.Contains(result, "_value?.GetHashCode() ?? 0");
+        }
+
+        [TestMethod]
+        public void TypeAliasStruct_UsesValueTypeHashCodeForValueTypes()
+        {
+            var defs = Json.ParseObject(@"{ ""TestVersion"": { ""type"": ""integer"", ""format"": ""uint16"" } }");
+            var result = BuildModel("TestVersion", defs);
+
+            Assert.DoesNotContain("_value?.GetHashCode", result, "Value types should not use null-conditional hash code");
+            StringAssert.Contains(result, "_value.GetHashCode()");
+        }
+
+        [TestMethod]
+        public void TypeAliasStruct_IncludesJsonConverterAttribute()
+        {
+            var defs = Json.ParseObject(@"{ ""TestId"": { ""type"": ""string"" } }");
+            var result = BuildModel("TestId", defs);
+
+            StringAssert.Contains(result, "[JsonConverter(typeof(TypeAliasConverter<TestId, string>))]");
+        }
+
+        [TestMethod]
+        public void AnyOfEnumDetection_GeneratesStringEnum()
+        {
+            var defs = Json.ParseObject(@"{
+  ""TestEnum"": {
+    ""description"": ""Test enum"",
+    ""anyOf"": [
+      { ""type"": ""string"", ""const"": ""value1"", ""description"": ""First value"" },
+      { ""type"": ""string"", ""const"": ""value2"", ""description"": ""Second value"" }
+    ]
+  }
+}");
+
+            var result = BuildModel("TestEnum", defs);
+
+            StringAssert.Contains(result, "public enum TestEnum");
+            StringAssert.Contains(result, "JsonEnumValue(\"value1\")");
+            StringAssert.Contains(result, "JsonEnumValue(\"value2\")");
+            StringAssert.Contains(result, "Value1");
+            StringAssert.Contains(result, "Value2");
+        }
+
+        [TestMethod]
+        public void AnyOfEnumDetection_GeneratesOpenStringStructWithTitleFallback()
+        {
+            var defs = Json.ParseObject(@"{
+  ""TestCategory"": {
+    ""description"": ""Test enum with titles"",
+    ""anyOf"": [
+      { ""type"": ""string"", ""title"": ""Mode"", ""const"": ""mode"" },
+      { ""type"": ""string"", ""title"": ""Other"" }
+    ]
+  }
+}");
+
+            var result = BuildModel("TestCategory", defs);
+
+            StringAssert.Contains(result, "public readonly struct TestCategory");
+            StringAssert.Contains(result, "TypeAliasConverter<TestCategory, string>");
+            StringAssert.Contains(result, "public static TestCategory Mode => new TestCategory(\"mode\");");
+            Assert.DoesNotContain("public enum TestCategory", result);
+            Assert.DoesNotContain("JsonEnumValue(\"other\")", result);
+            Assert.DoesNotContain("public static TestCategory Other", result);
+        }
+
+        [TestMethod]
+        public void AnyOfEnumDetection_GeneratesOpenStringStructForKnownValuesPlusFallback()
+        {
+            var defs = Json.ParseObject(@"{
+  ""SessionConfigOptionCategory"": {
+    ""description"": ""Semantic category for a session configuration option."",
+    ""anyOf"": [
+      { ""type"": ""string"", ""const"": ""mode"", ""description"": ""Session mode selector."" },
+      { ""type"": ""string"", ""const"": ""model"", ""description"": ""Model selector."" },
+      { ""type"": ""string"", ""const"": ""thought_level"", ""description"": ""Thought/reasoning level selector."" },
+      { ""type"": ""string"", ""title"": ""other"", ""description"": ""Unknown / uncategorized selector."" }
+    ]
+  }
+}");
+
+            var result = BuildModel("SessionConfigOptionCategory", defs);
+
+            StringAssert.Contains(result, "public readonly struct SessionConfigOptionCategory");
+            StringAssert.Contains(result, "TypeAliasConverter<SessionConfigOptionCategory, string>");
+            StringAssert.Contains(result, "SessionConfigOptionCategory(string value)");
+            StringAssert.Contains(result, "implicit operator SessionConfigOptionCategory(string value)");
+            StringAssert.Contains(result, "public static SessionConfigOptionCategory Mode => new SessionConfigOptionCategory(\"mode\");");
+            StringAssert.Contains(result, "public static SessionConfigOptionCategory Model => new SessionConfigOptionCategory(\"model\");");
+            StringAssert.Contains(result, "public static SessionConfigOptionCategory ThoughtLevel => new SessionConfigOptionCategory(\"thought_level\");");
+            Assert.DoesNotContain("public enum SessionConfigOptionCategory", result);
+            Assert.DoesNotContain("JsonEnumValue(\"other\")", result);
+            Assert.DoesNotContain("public static SessionConfigOptionCategory Other", result);
+        }
+
+        [TestMethod]
+        public void AnyOfEnumDetection_DoesNotTreatConstrainedStringArmAsOpenFallback()
+        {
+            var defs = Json.ParseObject(@"{
+  ""ConstrainedCategory"": {
+    ""description"": ""Should stay closed when fallback is constrained."",
+    ""anyOf"": [
+      { ""type"": ""string"", ""const"": ""mode"" },
+      { ""type"": ""string"", ""title"": ""Other"", ""pattern"": ""^[a-z]+$"" }
+    ]
+  }
+}");
+
+            var result = BuildModel("ConstrainedCategory", defs);
+
+            StringAssert.Contains(result, "public readonly struct ConstrainedCategory");
+            StringAssert.Contains(result, "UnionTypeConverter<ConstrainedCategory>");
+            Assert.DoesNotContain("TypeAliasConverter<ConstrainedCategory, string>", result);
+        }
+
+        [TestMethod]
+        public void AnyOfEnumDetection_GeneratesIntegerEnum()
+        {
+            var defs = Json.ParseObject(@"{
+  ""ErrorCode"": {
+    ""description"": ""Error codes"",
+    ""anyOf"": [
+      { ""type"": ""integer"", ""format"": ""int32"", ""const"": -32700, ""title"": ""Parse error"", ""description"": ""Parse error"" },
+      { ""type"": ""integer"", ""format"": ""int32"", ""const"": -32600, ""title"": ""Invalid request"", ""description"": ""Invalid request"" },
+      { ""type"": ""integer"", ""format"": ""int32"", ""title"": ""Other"" }
+    ]
+  }
+}");
+
+            var result = BuildModel("ErrorCode", defs);
+
+            StringAssert.Contains(result, "public enum ErrorCode");
+            StringAssert.Contains(result, ": int");
+            StringAssert.Contains(result, "ParseError = -32700");
+            StringAssert.Contains(result, "InvalidRequest = -32600");
+            Assert.DoesNotContain("Other = 0", result);
+        }
+
+        [TestMethod]
+        public void AnyOfEnumDetection_GeneratesLongBackedEnum()
+        {
+            var defs = Json.ParseObject(@"{ ""LongEnum"": { ""anyOf"": [ { ""type"": ""integer"", ""format"": ""int64"", ""const"": 9223372036854775807, ""title"": ""MaxLong"" } ] } }");
+            var result = BuildModel("LongEnum", defs);
+
+            StringAssert.Contains(result, "public enum LongEnum");
+            StringAssert.Contains(result, ": long");
+        }
+
+        [TestMethod]
+        public void AnyOfUnionDetection_GeneratesUnionStruct()
+        {
+            var defs = Json.ParseObject(@"{
+  ""RequestId"": {
+    ""description"": ""Request ID"",
+    ""anyOf"": [
+      { ""type"": ""null"", ""title"": ""Null"" },
+      { ""type"": ""integer"", ""format"": ""int64"", ""title"": ""Number"" },
+      { ""type"": ""string"", ""title"": ""Str"" }
+    ]
+  }
+}");
+
+            var result = BuildModel("RequestId", defs);
+
+            StringAssert.Contains(result, "public readonly struct RequestId");
+            StringAssert.Contains(result, "IEquatable<RequestId>");
+            StringAssert.Contains(result, "UnionTypeConverter<RequestId>");
+            StringAssert.Contains(result, "public RequestId(long value)");
+            StringAssert.Contains(result, "public RequestId(string value)");
+            StringAssert.Contains(result, "public bool IsNull");
+            StringAssert.Contains(result, "public static RequestId Null");
+            StringAssert.Contains(result, "public bool TryGetLong(out long value)");
+            StringAssert.Contains(result, "public bool TryGetString(out string value)");
+        }
+
+        [TestMethod]
+        public void AnyOfUnionDetection_DoesNotIncludeNullFlagWhenMissing()
+        {
+            var defs = Json.ParseObject(@"{ ""SimpleUnion"": { ""anyOf"": [ { ""type"": ""integer"", ""format"": ""int32"" }, { ""type"": ""string"" } ] } }");
+            var result = BuildModel("SimpleUnion", defs);
+
+            Assert.DoesNotContain("_isNull", result, "Union should not include null flag when null is not present");
+            Assert.DoesNotContain("IsNull", result, "Union should not include IsNull when null is not present");
+        }
+
+        [TestMethod]
+        public void AnyOfUnionDetection_GeneratesTypedArrayUnionStructForSessionConfigSelectOptions()
+        {
+            var defs = Json.ParseObject(@"{
+  ""SessionConfigSelectOption"": {
+    ""type"": ""object"",
+    ""properties"": { ""value"": { ""type"": ""string"" }, ""name"": { ""type"": ""string"" } },
+    ""required"": [""value"", ""name""]
+  },
+  ""SessionConfigSelectGroup"": {
+    ""type"": ""object"",
+    ""properties"": {
+      ""group"": { ""type"": ""string"" },
+      ""name"": { ""type"": ""string"" },
+      ""options"": { ""type"": ""array"", ""items"": { ""$ref"": ""#/$defs/SessionConfigSelectOption"" } }
+    },
+    ""required"": [""group"", ""name"", ""options""]
+  },
+  ""SessionConfigSelectOptions"": {
+    ""anyOf"": [
+      { ""type"": ""array"", ""items"": { ""$ref"": ""#/$defs/SessionConfigSelectOption"" } },
+      { ""type"": ""array"", ""items"": { ""$ref"": ""#/$defs/SessionConfigSelectGroup"" } }
+    ]
+  }
+}");
+
+            var result = BuildModel("SessionConfigSelectOptions", defs);
+
+            StringAssert.Contains(result, "public SessionConfigSelectOptions(SessionConfigSelectOption[] value)");
+            StringAssert.Contains(result, "public SessionConfigSelectOptions(SessionConfigSelectGroup[] value)");
+            StringAssert.Contains(result, "public static implicit operator SessionConfigSelectOptions(SessionConfigSelectOption[] value)");
+            StringAssert.Contains(result, "public static implicit operator SessionConfigSelectOptions(SessionConfigSelectGroup[] value)");
+            StringAssert.Contains(result, "public bool TryGetSessionConfigSelectOption(out SessionConfigSelectOption[] value)");
+            StringAssert.Contains(result, "public bool TryGetSessionConfigSelectGroup(out SessionConfigSelectGroup[] value)");
+            Assert.DoesNotContain("SessionConfigSelectOptions(object[] value)", result);
+        }
+
+        [TestMethod]
+        public void AnyOfVsDiscriminatedUnion_GeneratesClassWhenAnyOfHasProperties()
+        {
+            var defs = Json.ParseObject(@"{
+  ""Content"": {
+    ""anyOf"": [
+      {
+        ""type"": ""object"",
+        ""properties"": {
+          ""type"": { ""type"": ""string"", ""const"": ""text"" },
+          ""text"": { ""type"": ""string"" }
+        },
+        ""required"": [""type"", ""text""]
+      },
+      {
+        ""type"": ""object"",
+        ""properties"": {
+          ""type"": { ""type"": ""string"", ""const"": ""image"" },
+          ""data"": { ""type"": ""string"" }
+        },
+        ""required"": [""type"", ""data""]
+      }
+    ]
+  }
+}");
+
+            var result = BuildModel("Content", defs);
+
+            StringAssert.Contains(result, "public class Content");
+            Assert.DoesNotContain("public enum", result, "Should not generate enum for discriminated union class");
+            Assert.DoesNotContain("UnionTypeConverter", result, "Should not generate union struct for discriminated union class");
+        }
+
+        [TestMethod]
+        public void SimpleEnum_GeneratesStringEnum()
+        {
+            var defs = Json.ParseObject(@"{
+  ""Role"": {
+    ""description"": ""The sender or recipient of messages and data in a conversation."",
+    ""type"": ""string"",
+    ""enum"": [""assistant"", ""user""]
+  }
+}");
+
+            var result = BuildModel("Role", defs);
+
+            StringAssert.Contains(result, "public enum Role");
+            StringAssert.Contains(result, "JsonEnumMemberConverter<Role>");
+            StringAssert.Contains(result, "JsonEnumValue(\"assistant\")");
+            StringAssert.Contains(result, "JsonEnumValue(\"user\")");
+            StringAssert.Contains(result, "Assistant");
+            StringAssert.Contains(result, "User");
+            StringAssert.Contains(result, "The sender or recipient");
+        }
+
+        [TestMethod]
+        public void SimpleEnum_GeneratesIntegerEnum()
+        {
+            var defs = Json.ParseObject(@"{
+  ""HttpStatus"": {
+    ""description"": ""HTTP status codes"",
+    ""type"": ""integer"",
+    ""format"": ""uint32"",
+    ""enum"": [200, 404, 500]
+  }
+}");
+
+            var result = BuildModel("HttpStatus", defs);
+
+            StringAssert.Contains(result, "public enum HttpStatus");
+            StringAssert.Contains(result, ": uint");
+            StringAssert.Contains(result, "200");
+            StringAssert.Contains(result, "404");
+            StringAssert.Contains(result, "500");
+        }
+    }
+}
