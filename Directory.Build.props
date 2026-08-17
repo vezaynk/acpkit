@@ -24,10 +24,12 @@
 
   <PropertyGroup Label="Package metadata">
     <!--
-      The v1 line ships stable; the v2 line ships prerelease for as long as the upstream
-      schema is tagged schema-v2.0.0-alpha.*. V2 projects add a VersionSuffix of their own.
+      0.0.x while the shape of the public API is still settling. Both lines carry the same
+      version: at 0.0.x nothing here claims stability, and the v2 line rests on a schema
+      upstream still tags 2.0.0-alpha, so a separate prerelease suffix would say nothing the
+      major version does not already say.
     -->
-    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionPrefix>0.0.1</VersionPrefix>
     <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <Authors>Slava Knyazev</Authors>

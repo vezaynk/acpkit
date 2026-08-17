@@ -1,0 +1,77 @@
+name: publish
+
+# Pushes packages to NuGet. Triggered by a tag, because a published version can be unlisted
+# but never deleted or reused — so it should take a deliberate act, not a merge.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Pack and validate without pushing'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # SourceLink embeds commit information, which needs real history rather than a
+          # shallow clone.
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      # Nothing ships that has not passed everything the free tiers can check. The live tier
+      # is deliberately not a gate here: it depends on a third-party agent being reachable,
+      # and an outage there should not block a release.
+      - name: Build
+        run: dotnet build acpkit.slnx -c Release
+
+      - name: Generated sources are up to date
+        run: |
+          dotnet run --project tools/AcpKit.Generator -c Release -- generate
+          if ! git diff --quiet; then
+            echo "::error::Generated output does not match the checked-in files."
+            git --no-pager diff --stat
+            exit 1
+          fi
+
+      - name: Conformance
+        run: dotnet run --project tests/AcpKit.Conformance -c Release
+
+      - name: Pack
+        run: dotnet pack acpkit.slnx -c Release --no-build -o artifacts/package
+
+      - name: List what would be pushed
+        run: ls -la artifacts/package
+
+      - name: Push
+        if: github.event_name == 'push' || !inputs.dry-run
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "::error::NUGET_API_KEY is not set. Add it as a repository secret."
+            exit 1
+          fi
+
+          # --skip-duplicate so a partial failure can be retried: the packages that already
+          # landed are left alone instead of failing the whole run.
+          dotnet nuget push 'artifacts/package/*.nupkg' \
+            --api-key "$NUGET_API_KEY" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
