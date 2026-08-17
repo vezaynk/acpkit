@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>AcpKit.Protocol.V1</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <PackageId>AcpKit.Client.V1</PackageId>
+    <Title>Build an ACP client against the v1 protocol line.</Title>
+    <Description>
+      Implement IAcpClient and drive a typed connection to the agent, for the Agent Client
+      Protocol v1 line. Generated from the official schema and free of reflection.
+    </Description>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../AcpKit.Protocol.V1/AcpKit.Protocol.V1.csproj" />
+    <None Include="$(MSBuildThisFileDirectory)../../README.md" Pack="true" PackagePath="/" Visible="false" />
+  </ItemGroup>
+
+</Project>

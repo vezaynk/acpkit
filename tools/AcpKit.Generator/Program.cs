@@ -198,16 +198,27 @@ internal static class Program
             var project = Path.Combine(repoRoot, "src", $"AcpKit.Protocol.{line}", "Generated");
             Directory.CreateDirectory(project);
 
-            var file = Path.Combine(project, variant == SchemaVariant.Unstable ? "Unstable.g.cs" : "Protocol.g.cs");
-            var rendered = new CSharpEmitter(plan).Render();
-            File.WriteAllText(file, rendered);
+            var stem = variant == SchemaVariant.Unstable ? "Unstable" : "Protocol";
+            Write(repoRoot, Path.Combine(project, $"{stem}.g.cs"), new CSharpEmitter(plan).Render());
 
-            Console.WriteLine($"  {schema.Describe()} -> {Path.GetRelativePath(repoRoot, file)}  ({rendered.Count(c => c == '\n')} lines)");
+            foreach (var (role, owner) in new[] { ("Client", MethodOwner.Client), ("Agent", MethodOwner.Agent) })
+            {
+                var roleProject = Path.Combine(repoRoot, "src", $"AcpKit.{role}.{line}", "Generated");
+                Directory.CreateDirectory(roleProject);
+                Write(repoRoot, Path.Combine(roleProject, $"{stem}.g.cs"), ConnectionEmitter.Render(plan, owner));
+            }
+
             schema.Dispose();
         }
 
         Console.WriteLine();
         return 0;
+    }
+
+    private static void Write(string repoRoot, string path, string content)
+    {
+        File.WriteAllText(path, content);
+        Console.WriteLine($"  {Path.GetRelativePath(repoRoot, path),-58} {content.Count(c => c == '\n'),6} lines");
     }
 
     /// <summary>Print how one named definition classified, for spot-checking the analysis.</summary>

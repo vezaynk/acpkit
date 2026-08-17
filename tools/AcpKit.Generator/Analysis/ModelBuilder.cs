@@ -55,7 +55,79 @@ internal sealed class ModelBuilder(SchemaSet schema)
             .Select(m => new MethodConstant(Naming.Constant(m.Key), m.Path, m.Side.ToString()))
             .ToList();
 
-        return new EmitPlan(@namespace, contextName, schema.Version, schema.ProtocolVersion, types, methods);
+        return new EmitPlan(@namespace, contextName, schema.Version, schema.ProtocolVersion, types, methods, BuildCallable(types));
+    }
+
+    /// <summary>
+    /// Pair each method with the types carrying its parameters and result.
+    /// </summary>
+    /// <remarks>
+    /// The schema annotates every request and response definition with the method it belongs
+    /// to, so the pairing is read rather than inferred from naming. A method with a request
+    /// but no response is a notification — that is how <c>session/update</c> and
+    /// <c>session/cancel</c> declare themselves, and it is the only signal available.
+    /// </remarks>
+    private IReadOnlyList<MethodModel> BuildCallable(List<EmittedType> types)
+    {
+        // A payload the schema describes only in prose — "any JSON value is valid", which is
+        // how mcp/message declares its response — emits no type of its own. Such methods carry
+        // raw JSON, which is exactly what the schema says they carry.
+        var freeform = types.OfType<AliasType>()
+            .Where(a => a.Underlying.Name == TypeRef.Object.Name)
+            .Select(a => a.Name)
+            .ToHashSet(StringComparer.Ordinal);
+
+        var emitted = types.Select(t => t.Name).ToHashSet(StringComparer.Ordinal);
+        var byMethod = new Dictionary<string, (string? Request, string? Response, string? Docs)>(StringComparer.Ordinal);
+
+        foreach (var (name, definition) in schema.Definitions.OrderBy(d => d.Key, StringComparer.Ordinal))
+        {
+            var method = definition.Text("x-method");
+            if (method is null || !emitted.Contains(Naming.Type(name)))
+            {
+                continue;
+            }
+
+            var csName = Naming.Type(name);
+            byMethod.TryGetValue(method, out var entry);
+
+            if (csName.EndsWith("Response", StringComparison.Ordinal))
+            {
+                entry = entry with { Response = csName };
+            }
+            else
+            {
+                entry = entry with { Request = csName, Docs = entry.Docs ?? definition.Text("description") };
+            }
+
+            byMethod[method] = entry;
+        }
+
+        var callable = new List<MethodModel>();
+
+        foreach (var method in schema.Methods)
+        {
+            // $/cancel_request is answered by the transport itself, not by either side's
+            // handler, so it gets no place in the generated surface.
+            if (method.Side == MethodSide.Protocol)
+            {
+                continue;
+            }
+
+            var entry = byMethod.GetValueOrDefault(method.Path);
+            callable.Add(new MethodModel(
+                Naming.Constant(method.Key),
+                method.Path,
+                method.Side == MethodSide.Agent ? MethodOwner.Agent : MethodOwner.Client,
+                Concrete(entry.Request),
+                Concrete(entry.Response),
+                entry.Docs));
+
+            string? Concrete(string? name) =>
+                name is not null && freeform.Contains(name) ? TypeRef.Object.Name : name;
+        }
+
+        return callable;
     }
 
     /// <summary>

@@ -178,7 +178,36 @@ internal sealed record EmitPlan(
     string SchemaVersion,
     int ProtocolVersion,
     IReadOnlyList<EmittedType> Types,
-    IReadOnlyList<MethodConstant> Methods);
+    IReadOnlyList<MethodConstant> Methods,
+    IReadOnlyList<MethodModel> Callable);
 
 /// <summary>A method name, destined for a constant on the generated method table.</summary>
 internal sealed record MethodConstant(string CsName, string Path, string Side);
+
+/// <summary>
+/// One callable method, with the types carrying its parameters and result.
+/// </summary>
+/// <param name="RequestType">The type sent as <c>params</c>, or null when the method takes none.</param>
+/// <param name="ResponseType">
+/// The type returned as <c>result</c>. Null means the method is a notification: JSON-RPC
+/// defines those as having no reply at all, which is why the schema declares no response type
+/// for <c>session/update</c> or <c>session/cancel</c>.
+/// </param>
+internal sealed record MethodModel(
+    string CsName,
+    string Path,
+    MethodOwner Owner,
+    string? RequestType,
+    string? ResponseType,
+    string? Documentation)
+{
+    /// <summary>Whether this is a one-way notification.</summary>
+    public bool IsNotification => ResponseType is null;
+}
+
+/// <summary>Which side of the connection answers a method.</summary>
+internal enum MethodOwner
+{
+    Agent,
+    Client,
+}

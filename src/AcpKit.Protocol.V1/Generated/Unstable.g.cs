@@ -11222,6 +11222,7 @@ public static class AcpMethods
 [JsonSerializable(typeof(StringPropertySchema))]
 [JsonSerializable(typeof(SuggestNesRequest))]
 [JsonSerializable(typeof(SuggestNesResponse))]
+[JsonSerializable(typeof(System.Text.Json.JsonElement))]
 [JsonSerializable(typeof(Terminal))]
 [JsonSerializable(typeof(TerminalExitStatus))]
 [JsonSerializable(typeof(TerminalId))]

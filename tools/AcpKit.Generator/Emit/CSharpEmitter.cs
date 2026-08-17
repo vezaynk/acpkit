@@ -421,8 +421,15 @@ internal sealed class CSharpEmitter(EmitPlan plan)
             }
         }
 
-        // JsonElement carries raw payloads on unknown variants and _meta; it needs no contract.
         names.Remove(TypeRef.Object.Name);
+
+        // ...except as a payload in its own right. Methods the schema describes only as
+        // "any JSON value" carry JsonElement directly, and those need a contract.
+        if (plan.Callable.Any(m => m.RequestType == TypeRef.Object.Name || m.ResponseType == TypeRef.Object.Name))
+        {
+            names.Add(TypeRef.Object.Name);
+        }
+
         return names;
     }
 
@@ -510,6 +517,19 @@ internal sealed class CSharpEmitter(EmitPlan plan)
 
         builder.Append(indent).Append("/// </summary>\n");
         return builder.ToString();
+    }
+
+    /// <summary>
+    /// The property name a source-generated context exposes for a type.
+    /// </summary>
+    /// <remarks>
+    /// System.Text.Json names the accessor after the simple type name, so a fully-qualified
+    /// reference such as <c>System.Text.Json.JsonElement</c> is reached as <c>.JsonElement</c>.
+    /// </remarks>
+    internal static string ContextMember(string typeName)
+    {
+        var dot = typeName.LastIndexOf('.');
+        return dot < 0 ? typeName : typeName[(dot + 1)..];
     }
 
     internal static string EscapeText(string value) =>

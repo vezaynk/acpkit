@@ -170,6 +170,13 @@ internal sealed class SchemaSet
                 continue;
             }
 
+            // "both" is the schema's own marker for a bidirectional method and agrees with any
+            // table entry by definition.
+            if (string.Equals(side, "both", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
             // Only complain when the schema names a side the table does not know about at
             // all. A bidirectional method legitimately appears under both.
             var sides = declared[method.Path];

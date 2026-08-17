@@ -11,6 +11,8 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/AcpKit.Core/AcpKit.Core.csproj" />
+    <ProjectReference Include="../../src/AcpKit.Client.V2/AcpKit.Client.V2.csproj" />
+    <ProjectReference Include="../../src/AcpKit.Agent.V2/AcpKit.Agent.V2.csproj" />
   </ItemGroup>
 
 </Project>

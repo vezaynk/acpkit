@@ -7,6 +7,7 @@ Console.WriteLine("AcpKit conformance");
 
 var runner = new Runner();
 TransportScenarios.Register(runner);
+ProtocolScenarios.Register(runner);
 
 return await runner.RunAllAsync(TimeSpan.FromSeconds(20)).ConfigureAwait(false);
 

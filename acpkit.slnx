@@ -3,6 +3,10 @@
     <Project Path="src/AcpKit.Core/AcpKit.Core.csproj" />
     <Project Path="src/AcpKit.Protocol.V1/AcpKit.Protocol.V1.csproj" />
     <Project Path="src/AcpKit.Protocol.V2/AcpKit.Protocol.V2.csproj" />
+    <Project Path="src/AcpKit.Client.V1/AcpKit.Client.V1.csproj" />
+    <Project Path="src/AcpKit.Client.V2/AcpKit.Client.V2.csproj" />
+    <Project Path="src/AcpKit.Agent.V1/AcpKit.Agent.V1.csproj" />
+    <Project Path="src/AcpKit.Agent.V2/AcpKit.Agent.V2.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/AcpKit.Generator/AcpKit.Generator.csproj" />
