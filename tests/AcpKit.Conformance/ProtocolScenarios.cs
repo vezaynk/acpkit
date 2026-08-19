@@ -1,4 +1,6 @@
+using System.Text;
 using System.Text.Json;
+using AcpKit;
 using AcpKit.Protocol.V2;
 
 namespace AcpKit.Conformance;
@@ -24,12 +26,17 @@ internal static class ProtocolScenarios
         runner.Add(Area, "session/prompt acknowledges, and the stop reason arrives by notification", StopReasonArrivesLate);
         runner.Add(Area, "a permission request reaches the client and its answer returns", PermissionRoundTrip);
         runner.Add(Area, "an unknown session update survives the round trip", UnknownUpdatePreserved);
+        runner.Add(Area, "a vendor notification reaches the unknown-notification handler", VendorNotificationSurfaces);
+        runner.Add(Area, "a known notification does not reach the unknown-notification handler", KnownNotificationStaysTyped);
+        runner.Add(Area, "Create forwards inbound frames to onFrame", ConnectionForwardsFrames);
         runner.Add(Area, "tool call patch fields distinguish omitted from cleared", PatchSemantics);
         runner.Add(Area, "session/cancel ends the turn with stopReason cancelled", CancelEndsTheTurn);
     }
 
     /// <summary>Stand up both halves and hand back the client's connection.</summary>
-    private static async Task<(AgentConnection Client, FakeAgent Agent, FakeClient Handler, Func<Task> Stop)> ConnectAsync()
+    private static async Task<(AgentConnection Client, FakeAgent Agent, FakeClient Handler, Func<Task> Stop)> ConnectAsync(
+        AcpNotificationHandler? onUnknownNotification = null,
+        AcpFrameHandler? onFrame = null)
     {
         var clientToAgent = new LoopbackStream();
         var agentToClient = new LoopbackStream();
@@ -37,7 +44,12 @@ internal static class ProtocolScenarios
         var handler = new FakeClient();
         var agentImpl = new FakeAgent();
 
-        var client = AgentConnection.Create(agentToClient, clientToAgent, handler);
+        var client = AgentConnection.Create(
+            agentToClient,
+            clientToAgent,
+            handler,
+            onUnknownNotification: onUnknownNotification,
+            onFrame: onFrame);
         var agent = ClientConnection.Create(clientToAgent, agentToClient, agentImpl);
         agentImpl.Attach(agent);
 
@@ -246,6 +258,97 @@ internal static class ProtocolScenarios
             Expect.Equal("_acme_hologram", unknown!.Kind, "the discriminator is preserved");
             Expect.Equal(3, unknown.Raw.GetProperty("payload").GetProperty("depth").GetInt32(),
                 "the payload is preserved verbatim");
+        }
+        finally
+        {
+            await stop();
+        }
+    }
+
+    /// <summary>
+    /// A vendor method is a different method, not an unknown <c>session/update</c> variant.
+    /// The typed handler never sees it; the host that cares supplies the callback.
+    /// </summary>
+    private static async Task VendorNotificationSurfaces(CancellationToken ct)
+    {
+        var seen = new TaskCompletionSource<(string Method, string Json)>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+
+        var (client, agent, handler, stop) = await ConnectAsync(
+            onUnknownNotification: (method, parameters, _) =>
+            {
+                seen.TrySetResult((method, parameters.GetRawText()));
+                return ValueTask.CompletedTask;
+            });
+
+        try
+        {
+            await client.InitializeAsync(NewInitialize(), ct);
+            await agent.SendVendorNotificationAsync(
+                "_vendor/spend",
+                """{"tokens":3}""",
+                ct);
+
+            var (method, json) = await seen.Task.WaitAsync(ct);
+            Expect.Equal("_vendor/spend", method, "vendor method name");
+            Expect.Contains("tokens", json, "vendor payload");
+            Expect.Equal(0, handler.Updates.Count, "typed session/update was not involved");
+        }
+        finally
+        {
+            await stop();
+        }
+    }
+
+    /// <summary>
+    /// The callback is for methods the version does not define. A known method still goes
+    /// to <see cref="IAcpClient"/>, even when the host also asked to see unknowns.
+    /// </summary>
+    private static async Task KnownNotificationStaysTyped(CancellationToken ct)
+    {
+        var unknown = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        var (client, agent, handler, stop) = await ConnectAsync(
+            onUnknownNotification: (method, _, _) =>
+            {
+                unknown.TrySetResult(method);
+                return ValueTask.CompletedTask;
+            });
+
+        try
+        {
+            await client.InitializeAsync(NewInitialize(), ct);
+            await agent.SendRawUpdateAsync(
+                """{"sessionId":"s1","update":{"sessionUpdate":"_acme_hologram","payload":{"depth":3}}}""",
+                ct);
+
+            await handler.WaitForUpdatesAsync(1, ct);
+            Expect.Equal(1, handler.Updates.Count, "the typed handler received the known method");
+            Expect.True(
+                handler.Updates[0].Update is SessionUpdateUnknown,
+                "an unknown variant of a known method still goes to IAcpClient");
+            Expect.True(!unknown.Task.IsCompleted, "a known method must not reach the unknown callback");
+        }
+        finally
+        {
+            await stop();
+        }
+    }
+
+    /// <summary>
+    /// <c>AgentConnection.Create</c> is how a host actually holds a peer, so <c>onFrame</c>
+    /// has to be reachable from there rather than only from <see cref="AcpPeerOptions"/>.
+    /// </summary>
+    private static async Task ConnectionForwardsFrames(CancellationToken ct)
+    {
+        var frames = new List<byte[]>();
+        var (client, _, _, stop) = await ConnectAsync(onFrame: frame => frames.Add(frame.ToArray()));
+        try
+        {
+            await client.InitializeAsync(NewInitialize(), ct);
+            Expect.True(frames.Count > 0, "the initialize exchange produced inbound frames");
+            var text = Encoding.UTF8.GetString(frames[0]);
+            Expect.Contains("\"result\"", text, "the first inbound frame is the initialize response");
         }
         finally
         {

@@ -133,6 +133,17 @@ internal sealed class FakeAgent : IAcpAgent
             AcpJsonContext.Default.JsonElement,
             cancellationToken);
 
+    /// <summary>
+    /// Send a notification this protocol version does not define. The generated agent
+    /// cannot name a vendor method, which is the point of the unknown-notification hook.
+    /// </summary>
+    public Task SendVendorNotificationAsync(string method, string paramsJson, CancellationToken cancellationToken) =>
+        Client.Peer.SendNotificationAsync(
+            method,
+            System.Text.Json.JsonDocument.Parse(paramsJson).RootElement,
+            AcpJsonContext.Default.JsonElement,
+            cancellationToken);
+
     public Task<LoginAuthResponse> AuthLoginAsync(LoginAuthRequest request, CancellationToken cancellationToken) =>
         Task.FromResult(new LoginAuthResponse());
 
