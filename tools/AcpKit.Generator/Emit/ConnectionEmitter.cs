@@ -155,11 +155,23 @@ internal static class ConnectionEmitter
                 /// <param name="output">Where this side's messages go.</param>
                 /// <param name="handler">This side's implementation, which serves inbound calls.</param>
                 /// <param name="onDiagnostic">Receives non-JSON lines and other non-fatal oddities.</param>
+                /// <param name="onUnknownNotification">
+                /// Invoked for inbound notifications this protocol version does not define,
+                /// such as vendor <c>_</c>-prefixed methods. Known notifications still go to
+                /// <see cref="IAcp{{self}}"/>. Null keeps the default: unknown notifications
+                /// are ignored.
+                /// </param>
+                /// <param name="onFrame">
+                /// Invoked with every inbound NDJSON frame, before parse. The memory is
+                /// borrowed for the duration of the call; see <see cref="AcpPeerOptions.OnFrame"/>.
+                /// </param>
                 public static {{other}}Connection Create(
                     Stream input,
                     Stream output,
                     IAcp{{self}} handler,
-                    Action<string>? onDiagnostic = null)
+                    Action<string>? onDiagnostic = null,
+                    AcpNotificationHandler? onUnknownNotification = null,
+                    AcpFrameHandler? onFrame = null)
                 {
                     ArgumentNullException.ThrowIfNull(input);
                     ArgumentNullException.ThrowIfNull(output);
@@ -168,8 +180,9 @@ internal static class ConnectionEmitter
                     var peer = new AcpPeer(input, output, new AcpPeerOptions
                     {
                         RequestHandler = (method, parameters, token) => {{self}}Dispatch.RequestAsync(handler, method, parameters, token),
-                        NotificationHandler = (method, parameters, token) => {{self}}Dispatch.NotifyAsync(handler, method, parameters, token),
+                        NotificationHandler = (method, parameters, token) => {{self}}Dispatch.NotifyAsync(handler, method, parameters, token, onUnknownNotification),
                         OnDiagnostic = onDiagnostic,
+                        OnFrame = onFrame,
                     });
 
                     return new {{other}}Connection(peer);
@@ -236,23 +249,32 @@ internal static class ConnectionEmitter
                 }
 
                 /// <summary>
-                /// Deliver a notification, ignoring any this version does not define.
+                /// Deliver a notification, ignoring any this version does not define unless
+                /// <paramref name="onUnknownNotification"/> is set.
                 /// </summary>
                 /// <remarks>
                 /// Ignoring rather than refusing is required, not lenient: JSON-RPC forbids a
                 /// reply to a notification, so there is nowhere to send a refusal, and a peer
                 /// that tore down the session over an unrecognised update would break against
-                /// every future protocol version.
+                /// every future protocol version. A host that must still see vendor
+                /// <c>_</c>-prefixed methods supplies the callback; known methods never
+                /// reach it.
                 /// </remarks>
                 public static async ValueTask NotifyAsync(
                     IAcp{{self}} handler,
                     string method,
                     JsonElement parameters,
-                    CancellationToken cancellationToken)
+                    CancellationToken cancellationToken,
+                    AcpNotificationHandler? onUnknownNotification = null)
                 {
                     switch (method)
                     {
             {{notifications}}            default:
+                            if (onUnknownNotification is not null)
+                            {
+                                await onUnknownNotification(method, parameters, cancellationToken).ConfigureAwait(false);
+                            }
+
                             return;
                     }
                 }

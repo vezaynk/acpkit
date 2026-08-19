@@ -155,16 +155,29 @@ sealed class MyClient : IAcpClient
 Writing an **agent** is the mirror image: implement `IAcpAgent` and hold a `ClientConnection`.
 
 A host that must keep a verbatim transcript of the agent's stdout cannot reconstruct it from
-decoded messages: banners, blank lines, and parse failures never become typed traffic. Set
-`AcpPeerOptions.OnFrame`. It runs on every inbound NDJSON line, before parse, and the memory
-is borrowed for the duration of the call — copy it to keep it.
+decoded messages: banners, blank lines, and parse failures never become typed traffic. Pass
+`onFrame` to `AgentConnection.Create` (or set `AcpPeerOptions.OnFrame` on a raw peer). It
+runs on every inbound NDJSON line, before parse, and the memory is borrowed for the duration
+of the call — copy it to keep it.
+
+Vendor notifications — `_`-prefixed methods the schema does not define — are ignored by
+default, because JSON-RPC forbids a reply and tearing down the session over one would break
+against every future protocol version. A host that still needs them (spend figures that
+arrive on a vendor method, for example) passes `onUnknownNotification`. Known methods still
+go to `IAcpClient`; the callback never sees `session/update`.
 
 ```csharp
-var peer = new AcpPeer(input, output, new AcpPeerOptions
-{
-    OnFrame = frame => transcript.Write(frame.Span),
-    OnDiagnostic = Console.Error.WriteLine,
-});
+await using var connection = AgentConnection.Create(
+    input,
+    output,
+    handler: new MyClient(),
+    onDiagnostic: Console.Error.WriteLine,
+    onUnknownNotification: (method, parameters, _) =>
+    {
+        if (method == "_vendor/spend") RecordSpend(parameters);
+        return ValueTask.CompletedTask;
+    },
+    onFrame: frame => transcript.Write(frame.Span));
 ```
 
 ## Do not trust the reported protocol version
