@@ -229,6 +229,10 @@ public sealed class AcpPeer : IAsyncDisposable
                 return;
             }
 
+            // Before the empty-skip and before parse, so a recorder sees the stream as the
+            // far side wrote it — including blank lines and banners that are not messages.
+            _options.OnFrame?.Invoke(line.Value);
+
             if (line.Value.IsEmpty)
             {
                 continue;

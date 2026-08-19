@@ -154,6 +154,19 @@ sealed class MyClient : IAcpClient
 
 Writing an **agent** is the mirror image: implement `IAcpAgent` and hold a `ClientConnection`.
 
+A host that must keep a verbatim transcript of the agent's stdout cannot reconstruct it from
+decoded messages: banners, blank lines, and parse failures never become typed traffic. Set
+`AcpPeerOptions.OnFrame`. It runs on every inbound NDJSON line, before parse, and the memory
+is borrowed for the duration of the call — copy it to keep it.
+
+```csharp
+var peer = new AcpPeer(input, output, new AcpPeerOptions
+{
+    OnFrame = frame => transcript.Write(frame.Span),
+    OnDiagnostic = Console.Error.WriteLine,
+});
+```
+
 ## Do not trust the reported protocol version
 
 The obvious way to decide which line an agent speaks is to read `protocolVersion` from the

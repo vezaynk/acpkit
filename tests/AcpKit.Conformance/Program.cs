@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AcpKit;
@@ -67,6 +68,7 @@ namespace AcpKit.Conformance
             runner.Add(Area, "auth_required is recognisable", AuthRequired);
             runner.Add(Area, "a response whose id came back as a string still matches", NumericStringId);
             runner.Add(Area, "a non-JSON line is skipped, not fatal", NonJsonLineTolerated);
+            runner.Add(Area, "every inbound frame is reported before parse", InboundFramesAreReported);
             runner.Add(Area, "CRLF line endings are accepted", CrlfAccepted);
             runner.Add(Area, "a message larger than the read buffer round-trips", LargeMessage);
             runner.Add(Area, "a batch answers with one array and skips notifications", BatchMixed);
@@ -249,6 +251,39 @@ namespace AcpKit.Conformance
             var result = await call;
             Expect.Equal("x", result.Text, "the response after two junk lines");
             Expect.True(diagnostics.Count >= 2, $"both junk lines should be reported, saw {diagnostics.Count}");
+        }
+
+        private static async Task InboundFramesAreReported(CancellationToken ct)
+        {
+            // A host recording a transcript has to see the bytes as they arrived, not as
+            // decoded messages: empty lines, npm banners, and a well-formed reply are all
+            // stdout. OnFrame is that tee, and it runs before parse so a junk line is not
+            // lost to OnDiagnostic's prose.
+            var frames = new List<byte[]>();
+            await using var link = Link.CreateHalf(new AcpPeerOptions
+            {
+                RequestHandler = Echoing().RequestHandler,
+                OnFrame = frame => frames.Add(frame.ToArray()),
+            });
+
+            var call = EchoAsync(link.Left, "x", ct);
+            var request = await link.ReadFromLeftAsync(ct);
+            using var document = JsonDocument.Parse(request);
+            var id = document.RootElement.GetProperty("id").GetInt64();
+
+            link.RightToLeft.WriteRaw("\n");
+            link.RightToLeft.WriteRaw("npm warn Unknown user config \"prefix\"\n");
+            link.RightToLeft.WriteRaw(EchoResponse(id.ToString(), "x") + "\n");
+
+            var result = await call;
+            Expect.Equal("x", result.Text, "the response after empty and junk frames");
+            Expect.Equal(3, frames.Count, "empty, junk, and the response are all reported");
+            Expect.Equal(0, frames[0].Length, "the empty line is reported, not skipped");
+            Expect.Equal(
+                "npm warn Unknown user config \"prefix\"",
+                Encoding.UTF8.GetString(frames[1]),
+                "the junk line is the raw frame, not a diagnostic sentence");
+            Expect.Contains("\"result\"", Encoding.UTF8.GetString(frames[2]), "the response frame");
         }
 
         private static async Task CrlfAccepted(CancellationToken ct)

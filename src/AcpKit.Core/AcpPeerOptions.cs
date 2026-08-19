@@ -23,6 +23,17 @@ public delegate ValueTask AcpNotificationHandler(
     JsonElement parameters,
     CancellationToken cancellationToken);
 
+/// <summary>
+/// Observes one inbound NDJSON frame, without its newline terminator.
+/// </summary>
+/// <remarks>
+/// The memory is borrowed from the reader and is valid only for the duration of the call.
+/// Copy it if it needs to outlive the handler. A host recording a verbatim transcript does
+/// that here, before parse, so a junk banner and a well-formed message are captured the
+/// same way.
+/// </remarks>
+public delegate void AcpFrameHandler(ReadOnlyMemory<byte> frame);
+
 /// <summary>Configuration for an <see cref="AcpPeer"/>.</summary>
 public sealed class AcpPeerOptions
 {
@@ -55,4 +66,17 @@ public sealed class AcpPeerOptions
     /// and skipped.
     /// </remarks>
     public Action<string>? OnDiagnostic { get; init; }
+
+    /// <summary>
+    /// Called with every inbound frame, before it is parsed, including empty lines and
+    /// lines that are not JSON.
+    /// </summary>
+    /// <remarks>
+    /// This is the transcript tee: a host that must keep the agent's stdout verbatim cannot
+    /// reconstruct it from decoded messages, because banners, vendor notifications, and
+    /// parse failures never become typed traffic. The frame does not include the newline
+    /// that delimited it. Throwing from this handler faults the connection, the same as
+    /// <see cref="OnDiagnostic"/>; a capture that must not affect the worker wraps itself.
+    /// </remarks>
+    public AcpFrameHandler? OnFrame { get; init; }
 }
