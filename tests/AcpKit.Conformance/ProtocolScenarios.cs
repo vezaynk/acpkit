@@ -28,7 +28,8 @@ internal static class ProtocolScenarios
         runner.Add(Area, "an unknown session update survives the round trip", UnknownUpdatePreserved);
         runner.Add(Area, "a vendor notification reaches the unknown-notification handler", VendorNotificationSurfaces);
         runner.Add(Area, "a known notification does not reach the unknown-notification handler", KnownNotificationStaysTyped);
-        runner.Add(Area, "Create forwards inbound frames to onFrame", ConnectionForwardsFrames);
+        runner.Add(Area, "Create forwards inbound frames to onInboundFrame", ConnectionForwardsFrames);
+        runner.Add(Area, "Create forwards outbound frames to onOutboundFrame", ConnectionForwardsOutboundFrames);
         runner.Add(Area, "tool call patch fields distinguish omitted from cleared", PatchSemantics);
         runner.Add(Area, "session/cancel ends the turn with stopReason cancelled", CancelEndsTheTurn);
     }
@@ -36,7 +37,8 @@ internal static class ProtocolScenarios
     /// <summary>Stand up both halves and hand back the client's connection.</summary>
     private static async Task<(AgentConnection Client, FakeAgent Agent, FakeClient Handler, Func<Task> Stop)> ConnectAsync(
         AcpNotificationHandler? onUnknownNotification = null,
-        AcpFrameHandler? onFrame = null)
+        AcpFrameHandler? onInboundFrame = null,
+        AcpFrameHandler? onOutboundFrame = null)
     {
         var clientToAgent = new LoopbackStream();
         var agentToClient = new LoopbackStream();
@@ -49,7 +51,8 @@ internal static class ProtocolScenarios
             clientToAgent,
             handler,
             onUnknownNotification: onUnknownNotification,
-            onFrame: onFrame);
+            onInboundFrame: onInboundFrame,
+            onOutboundFrame: onOutboundFrame);
         var agent = ClientConnection.Create(clientToAgent, agentToClient, agentImpl);
         agentImpl.Attach(agent);
 
@@ -336,19 +339,40 @@ internal static class ProtocolScenarios
     }
 
     /// <summary>
-    /// <c>AgentConnection.Create</c> is how a host actually holds a peer, so <c>onFrame</c>
+    /// <c>AgentConnection.Create</c> is how a host actually holds a peer, so <c>onInboundFrame</c>
     /// has to be reachable from there rather than only from <see cref="AcpPeerOptions"/>.
     /// </summary>
     private static async Task ConnectionForwardsFrames(CancellationToken ct)
     {
         var frames = new List<byte[]>();
-        var (client, _, _, stop) = await ConnectAsync(onFrame: frame => frames.Add(frame.ToArray()));
+        var (client, _, _, stop) = await ConnectAsync(onInboundFrame: frame => frames.Add(frame.ToArray()));
         try
         {
             await client.InitializeAsync(NewInitialize(), ct);
             Expect.True(frames.Count > 0, "the initialize exchange produced inbound frames");
             var text = Encoding.UTF8.GetString(frames[0]);
             Expect.Contains("\"result\"", text, "the first inbound frame is the initialize response");
+        }
+        finally
+        {
+            await stop();
+        }
+    }
+
+    /// <summary>
+    /// Outbound frames are a different hook: the client writes initialize, and that JSON
+    /// never appears on <c>onInboundFrame</c>.
+    /// </summary>
+    private static async Task ConnectionForwardsOutboundFrames(CancellationToken ct)
+    {
+        var outbound = new List<byte[]>();
+        var (client, _, _, stop) = await ConnectAsync(onOutboundFrame: frame => outbound.Add(frame.ToArray()));
+        try
+        {
+            await client.InitializeAsync(NewInitialize(), ct);
+            Expect.True(outbound.Count > 0, "the initialize call produced outbound frames");
+            var text = Encoding.UTF8.GetString(outbound[0]);
+            Expect.Contains("\"method\":\"initialize\"", text, "the first outbound frame is the initialize request");
         }
         finally
         {

@@ -69,6 +69,7 @@ namespace AcpKit.Conformance
             runner.Add(Area, "a response whose id came back as a string still matches", NumericStringId);
             runner.Add(Area, "a non-JSON line is skipped, not fatal", NonJsonLineTolerated);
             runner.Add(Area, "every inbound frame is reported before parse", InboundFramesAreReported);
+            runner.Add(Area, "every outbound frame is reported before write", OutboundFramesAreReported);
             runner.Add(Area, "CRLF line endings are accepted", CrlfAccepted);
             runner.Add(Area, "a message larger than the read buffer round-trips", LargeMessage);
             runner.Add(Area, "a batch answers with one array and skips notifications", BatchMixed);
@@ -257,13 +258,13 @@ namespace AcpKit.Conformance
         {
             // A host recording a transcript has to see the bytes as they arrived, not as
             // decoded messages: empty lines, npm banners, and a well-formed reply are all
-            // stdout. OnFrame is that tee, and it runs before parse so a junk line is not
+            // stdout. OnInboundFrame is that tee, and it runs before parse so a junk line is not
             // lost to OnDiagnostic's prose.
             var frames = new List<byte[]>();
             await using var link = Link.CreateHalf(new AcpPeerOptions
             {
                 RequestHandler = Echoing().RequestHandler,
-                OnFrame = frame => frames.Add(frame.ToArray()),
+                OnInboundFrame = frame => frames.Add(frame.ToArray()),
             });
 
             var call = EchoAsync(link.Left, "x", ct);
@@ -284,6 +285,25 @@ namespace AcpKit.Conformance
                 Encoding.UTF8.GetString(frames[1]),
                 "the junk line is the raw frame, not a diagnostic sentence");
             Expect.Contains("\"result\"", Encoding.UTF8.GetString(frames[2]), "the response frame");
+        }
+
+        private static async Task OutboundFramesAreReported(CancellationToken ct)
+        {
+            // OnInboundFrame is inbound-only: it cannot see what this peer writes. A debugger that
+            // wants both directions has to hook OnOutboundFrame, and that hook has to fire
+            // for the overload acpkit actually uses (WriteAsync of ReadOnlyMemory).
+            var outbound = new List<byte[]>();
+            await using var link = Link.Create(right: Echoing(), left: new AcpPeerOptions
+            {
+                OnOutboundFrame = frame => outbound.Add(frame.ToArray()),
+            });
+
+            var result = await EchoAsync(link.Left, "hello", ct);
+            Expect.Equal("hello", result.Text, "echoed text");
+            Expect.True(outbound.Count >= 1, $"expected at least the echo request, saw {outbound.Count}");
+            var first = Encoding.UTF8.GetString(outbound[0]);
+            Expect.Contains("\"method\":\"echo\"", first, "the first outbound frame is the request");
+            Expect.True(!first.Contains('\n'), "the outbound frame does not include the newline");
         }
 
         private static async Task CrlfAccepted(CancellationToken ct)

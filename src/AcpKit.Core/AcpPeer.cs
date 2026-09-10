@@ -231,7 +231,7 @@ public sealed class AcpPeer : IAsyncDisposable
 
             // Before the empty-skip and before parse, so a recorder sees the stream as the
             // far side wrote it — including blank lines and banners that are not messages.
-            _options.OnFrame?.Invoke(line.Value);
+            _options.OnInboundFrame?.Invoke(line.Value);
 
             if (line.Value.IsEmpty)
             {
@@ -588,6 +588,10 @@ public sealed class AcpPeer : IAsyncDisposable
             {
                 write(writer);
             }
+
+            // Before the newline, so the handler sees the same shape as OnInboundFrame: one JSON
+            // object, no delimiter. Borrowed for the duration of the call.
+            _options.OnOutboundFrame?.Invoke(buffer.WrittenMemory);
 
             buffer.WriteByte((byte)'\n');
             await _output.WriteAsync(buffer.WrittenMemory, cancellationToken).ConfigureAwait(false);
