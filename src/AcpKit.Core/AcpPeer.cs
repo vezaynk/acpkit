@@ -589,6 +589,10 @@ public sealed class AcpPeer : IAsyncDisposable
                 write(writer);
             }
 
+            // Before the newline, so the handler sees the same shape as OnFrame: one JSON
+            // object, no delimiter. Borrowed for the duration of the call.
+            _options.OnOutboundFrame?.Invoke(buffer.WrittenMemory);
+
             buffer.WriteByte((byte)'\n');
             await _output.WriteAsync(buffer.WrittenMemory, cancellationToken).ConfigureAwait(false);
             await _output.FlushAsync(cancellationToken).ConfigureAwait(false);

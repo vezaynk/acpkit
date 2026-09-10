@@ -99,12 +99,17 @@ public sealed class AgentConnection : IAsyncDisposable
     /// Invoked with every inbound NDJSON frame, before parse. The memory is
     /// borrowed for the duration of the call; see <see cref="AcpPeerOptions.OnFrame"/>.
     /// </param>
-    public static AgentConnection Create(Stream input, Stream output, IAcpClient handler, Action<string>? onDiagnostic = null, AcpNotificationHandler? onUnknownNotification = null, AcpFrameHandler? onFrame = null)
+    /// <param name="onOutboundFrame">
+    /// Invoked with every outbound NDJSON frame, after serialize and before
+    /// write, without the trailing newline. See
+    /// <see cref="AcpPeerOptions.OnOutboundFrame"/>.
+    /// </param>
+    public static AgentConnection Create(Stream input, Stream output, IAcpClient handler, Action<string>? onDiagnostic = null, AcpNotificationHandler? onUnknownNotification = null, AcpFrameHandler? onFrame = null, AcpFrameHandler? onOutboundFrame = null)
     {
         ArgumentNullException.ThrowIfNull(input);
         ArgumentNullException.ThrowIfNull(output);
         ArgumentNullException.ThrowIfNull(handler);
-        var peer = new AcpPeer(input, output, new AcpPeerOptions { RequestHandler = (method, parameters, token) => ClientDispatch.RequestAsync(handler, method, parameters, token), NotificationHandler = (method, parameters, token) => ClientDispatch.NotifyAsync(handler, method, parameters, token, onUnknownNotification), OnDiagnostic = onDiagnostic, OnFrame = onFrame, });
+        var peer = new AcpPeer(input, output, new AcpPeerOptions { RequestHandler = (method, parameters, token) => ClientDispatch.RequestAsync(handler, method, parameters, token), NotificationHandler = (method, parameters, token) => ClientDispatch.NotifyAsync(handler, method, parameters, token, onUnknownNotification), OnDiagnostic = onDiagnostic, OnFrame = onFrame, OnOutboundFrame = onOutboundFrame, });
         return new AgentConnection(peer);
     }
 

@@ -165,13 +165,19 @@ internal static class ConnectionEmitter
                 /// Invoked with every inbound NDJSON frame, before parse. The memory is
                 /// borrowed for the duration of the call; see <see cref="AcpPeerOptions.OnFrame"/>.
                 /// </param>
+                /// <param name="onOutboundFrame">
+                /// Invoked with every outbound NDJSON frame, after serialize and before
+                /// write, without the trailing newline. See
+                /// <see cref="AcpPeerOptions.OnOutboundFrame"/>.
+                /// </param>
                 public static {{other}}Connection Create(
                     Stream input,
                     Stream output,
                     IAcp{{self}} handler,
                     Action<string>? onDiagnostic = null,
                     AcpNotificationHandler? onUnknownNotification = null,
-                    AcpFrameHandler? onFrame = null)
+                    AcpFrameHandler? onFrame = null,
+                    AcpFrameHandler? onOutboundFrame = null)
                 {
                     ArgumentNullException.ThrowIfNull(input);
                     ArgumentNullException.ThrowIfNull(output);
@@ -183,6 +189,7 @@ internal static class ConnectionEmitter
                         NotificationHandler = (method, parameters, token) => {{self}}Dispatch.NotifyAsync(handler, method, parameters, token, onUnknownNotification),
                         OnDiagnostic = onDiagnostic,
                         OnFrame = onFrame,
+                        OnOutboundFrame = onOutboundFrame,
                     });
 
                     return new {{other}}Connection(peer);
