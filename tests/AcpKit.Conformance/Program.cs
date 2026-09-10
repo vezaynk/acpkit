@@ -77,6 +77,7 @@ namespace AcpKit.Conformance
             runner.Add(Area, "a malformed batch entry answers -32600 against a null id", BatchMalformedEntry);
             runner.Add(Area, "cancelling a caller sends $/cancel_request", CallerCancellationIsAnnounced);
             runner.Add(Area, "an inbound $/cancel_request cancels the handler", InboundCancellation);
+            runner.Add(Area, "an inbound $/cancel_request with legacy params.id still cancels", InboundCancellationLegacyId);
             runner.Add(Area, "a disconnect faults everything in flight", DisconnectFaultsPending);
         }
 
@@ -407,6 +408,7 @@ namespace AcpKit.Conformance
 
             var announcement = await link.ReadFromLeftAsync(ct);
             Expect.Contains("$/cancel_request", announcement, "the far side is told to stop");
+            Expect.Contains("\"requestId\"", announcement, "params use the schema field name, not id");
         }
 
         private static async Task InboundCancellation(CancellationToken ct)
@@ -438,9 +440,43 @@ namespace AcpKit.Conformance
             await started.Task.WaitAsync(ct);
 
             link.RightToLeft.WriteRaw(
-                """{"jsonrpc":"2.0","method":"$/cancel_request","params":{"id":4}}""" + "\n");
+                """{"jsonrpc":"2.0","method":"$/cancel_request","params":{"requestId":4}}""" + "\n");
 
             Expect.True(await observed.Task.WaitAsync(ct), "the handler observed cancellation");
+        }
+
+        private static async Task InboundCancellationLegacyId(CancellationToken ct)
+        {
+            var started = new TaskCompletionSource();
+            var observed = new TaskCompletionSource<bool>();
+            var options = new AcpPeerOptions
+            {
+                RequestHandler = async (_, _, token) =>
+                {
+                    started.TrySetResult();
+                    try
+                    {
+                        await Task.Delay(Timeout.Infinite, token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        observed.TrySetResult(true);
+                        throw;
+                    }
+
+                    return AcpPayload.EmptyObject;
+                },
+            };
+
+            await using var link = Link.CreateHalf(options);
+            link.RightToLeft.WriteRaw(
+                """{"jsonrpc":"2.0","id":4,"method":"slow","params":{}}""" + "\n");
+            await started.Task.WaitAsync(ct);
+
+            link.RightToLeft.WriteRaw(
+                """{"jsonrpc":"2.0","method":"$/cancel_request","params":{"id":4}}""" + "\n");
+
+            Expect.True(await observed.Task.WaitAsync(ct), "legacy params.id still cancels");
         }
 
         private static async Task DisconnectFaultsPending(CancellationToken ct)

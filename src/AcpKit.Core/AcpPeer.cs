@@ -431,11 +431,14 @@ public sealed class AcpPeer : IAsyncDisposable
 
     private void CancelInbound(JsonElement parameters)
     {
+        // Schema and the generated CancelRequestNotification use requestId. Older
+        // transports (including this peer, before 0.0.5) wrote id. Accept both.
         if (parameters.ValueKind != JsonValueKind.Object
-            || !parameters.TryGetProperty("id", out var idElement)
+            || !(parameters.TryGetProperty("requestId", out var idElement)
+                 || parameters.TryGetProperty("id", out idElement))
             || !RequestId.TryRead(idElement, out var id))
         {
-            Diagnostic("Ignoring $/cancel_request with no readable id.");
+            Diagnostic("Ignoring $/cancel_request with no readable requestId.");
             return;
         }
 
@@ -630,7 +633,7 @@ public sealed class AcpPeer : IAsyncDisposable
         w.WriteString("jsonrpc", "2.0");
         w.WriteString("method", "$/cancel_request");
         w.WriteStartObject("params");
-        id.Write(w, "id");
+        id.Write(w, "requestId");
         w.WriteEndObject();
         w.WriteEndObject();
     }
