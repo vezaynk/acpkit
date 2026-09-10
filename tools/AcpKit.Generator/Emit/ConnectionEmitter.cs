@@ -161,9 +161,9 @@ internal static class ConnectionEmitter
                 /// <see cref="IAcp{{self}}"/>. Null keeps the default: unknown notifications
                 /// are ignored.
                 /// </param>
-                /// <param name="onFrame">
+                /// <param name="onInboundFrame">
                 /// Invoked with every inbound NDJSON frame, before parse. The memory is
-                /// borrowed for the duration of the call; see <see cref="AcpPeerOptions.OnFrame"/>.
+                /// borrowed for the duration of the call; see <see cref="AcpPeerOptions.OnInboundFrame"/>.
                 /// </param>
                 /// <param name="onOutboundFrame">
                 /// Invoked with every outbound NDJSON frame, after serialize and before
@@ -176,7 +176,7 @@ internal static class ConnectionEmitter
                     IAcp{{self}} handler,
                     Action<string>? onDiagnostic = null,
                     AcpNotificationHandler? onUnknownNotification = null,
-                    AcpFrameHandler? onFrame = null,
+                    AcpFrameHandler? onInboundFrame = null,
                     AcpFrameHandler? onOutboundFrame = null)
                 {
                     ArgumentNullException.ThrowIfNull(input);
@@ -188,7 +188,7 @@ internal static class ConnectionEmitter
                         RequestHandler = (method, parameters, token) => {{self}}Dispatch.RequestAsync(handler, method, parameters, token),
                         NotificationHandler = (method, parameters, token) => {{self}}Dispatch.NotifyAsync(handler, method, parameters, token, onUnknownNotification),
                         OnDiagnostic = onDiagnostic,
-                        OnFrame = onFrame,
+                        OnInboundFrame = onInboundFrame,
                         OnOutboundFrame = onOutboundFrame,
                     });
 

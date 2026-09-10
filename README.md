@@ -156,10 +156,10 @@ Writing an **agent** is the mirror image: implement `IAcpAgent` and hold a `Clie
 
 A host that must keep a verbatim transcript of the agent's stdout cannot reconstruct it from
 decoded messages: banners, blank lines, and parse failures never become typed traffic. Pass
-`onFrame` to `AgentConnection.Create` (or set `AcpPeerOptions.OnFrame` on a raw peer). It
+`onInboundFrame` to `AgentConnection.Create` (or set `AcpPeerOptions.OnInboundFrame` on a raw peer). It
 runs on every inbound NDJSON line, before parse, and the memory is borrowed for the duration
 of the call — copy it to keep it. Outbound traffic (what this side writes) is a separate
-callback, `onOutboundFrame` / `AcpPeerOptions.OnOutboundFrame`: `OnFrame` cannot see it,
+callback, `onOutboundFrame` / `AcpPeerOptions.OnOutboundFrame`: `OnInboundFrame` cannot see it,
 because the peer does not read its own output. A protocol debugger that wants both
 directions sets both.
 
@@ -180,7 +180,7 @@ await using var connection = AgentConnection.Create(
         if (method == "_vendor/spend") RecordSpend(parameters);
         return ValueTask.CompletedTask;
     },
-    onFrame: frame => transcript.WriteInbound(frame.Span),
+    onInboundFrame: frame => transcript.WriteInbound(frame.Span),
     onOutboundFrame: frame => transcript.WriteOutbound(frame.Span));
 ```
 

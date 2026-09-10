@@ -29,7 +29,7 @@ public delegate ValueTask AcpNotificationHandler(
 /// <remarks>
 /// The memory is borrowed from the reader or the write buffer and is valid only for the
 /// duration of the call. Copy it if it needs to outlive the handler. Used for both
-/// <see cref="AcpPeerOptions.OnFrame"/> (inbound, before parse) and
+/// <see cref="AcpPeerOptions.OnInboundFrame"/> (inbound, before parse) and
 /// <see cref="AcpPeerOptions.OnOutboundFrame"/> (outbound, after serialize).
 /// </remarks>
 public delegate void AcpFrameHandler(ReadOnlyMemory<byte> frame);
@@ -79,18 +79,18 @@ public sealed class AcpPeerOptions
     /// connection, the same as <see cref="OnDiagnostic"/>; a capture that must not affect
     /// the worker wraps itself.
     /// </remarks>
-    public AcpFrameHandler? OnFrame { get; init; }
+    public AcpFrameHandler? OnInboundFrame { get; init; }
 
     /// <summary>
     /// Called with every outbound frame, after it is serialized and before it is written,
     /// without the trailing newline.
     /// </summary>
     /// <remarks>
-    /// The inbound <see cref="OnFrame"/> cannot see what this peer itself writes — there is
+    /// The inbound <see cref="OnInboundFrame"/> cannot see what this peer itself writes — there is
     /// no read of our own output. A host that needs a full-duplex transcript (a protocol
     /// debugger, a proxy that logs both sides) sets this as well. The memory is borrowed
     /// from the write buffer and is valid only for the duration of the call; copy it to
-    /// keep it. Throwing from this handler faults the write, the same as <see cref="OnFrame"/>
+    /// keep it. Throwing from this handler faults the write, the same as <see cref="OnInboundFrame"/>
     /// faults the read.
     /// </remarks>
     public AcpFrameHandler? OnOutboundFrame { get; init; }

@@ -258,13 +258,13 @@ namespace AcpKit.Conformance
         {
             // A host recording a transcript has to see the bytes as they arrived, not as
             // decoded messages: empty lines, npm banners, and a well-formed reply are all
-            // stdout. OnFrame is that tee, and it runs before parse so a junk line is not
+            // stdout. OnInboundFrame is that tee, and it runs before parse so a junk line is not
             // lost to OnDiagnostic's prose.
             var frames = new List<byte[]>();
             await using var link = Link.CreateHalf(new AcpPeerOptions
             {
                 RequestHandler = Echoing().RequestHandler,
-                OnFrame = frame => frames.Add(frame.ToArray()),
+                OnInboundFrame = frame => frames.Add(frame.ToArray()),
             });
 
             var call = EchoAsync(link.Left, "x", ct);
@@ -289,7 +289,7 @@ namespace AcpKit.Conformance
 
         private static async Task OutboundFramesAreReported(CancellationToken ct)
         {
-            // OnFrame is inbound-only: it cannot see what this peer writes. A debugger that
+            // OnInboundFrame is inbound-only: it cannot see what this peer writes. A debugger that
             // wants both directions has to hook OnOutboundFrame, and that hook has to fire
             // for the overload acpkit actually uses (WriteAsync of ReadOnlyMemory).
             var outbound = new List<byte[]>();
