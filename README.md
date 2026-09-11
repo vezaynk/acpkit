@@ -147,7 +147,7 @@ sealed class MyClient : IAcpClient
             },
         });
 
-    // ...the remaining members are fs/* and terminal/* in v1; throw
+    // ...the remaining members are fs/*, terminal/*, and elicitation/* in v1; throw
     // AcpException(AcpErrorCode.MethodNotFound, ...) for any you do not offer.
 }
 ```

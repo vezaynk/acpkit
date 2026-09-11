@@ -260,5 +260,10 @@ namespace AcpKit.Live
         public Task<KillTerminalResponse> TerminalKillAsync(KillTerminalRequest request, CancellationToken cancellationToken) =>
             throw new AcpException(AcpErrorCode.MethodNotFound, "This client does not expose terminals.");
 
+        public Task<CreateElicitationResponse> ElicitationCreateAsync(CreateElicitationRequest request, CancellationToken cancellationToken) =>
+            throw new AcpException(AcpErrorCode.MethodNotFound, "This client does not expose elicitation.");
+
+        public Task ElicitationCompleteAsync(CompleteElicitationNotification request, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
     }
 }

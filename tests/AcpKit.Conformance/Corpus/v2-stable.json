@@ -1,5 +1,5 @@
 {
-  "schema": "refs/tags/schema-v2.0.0-alpha.2",
+  "schema": "refs/tags/schema-v2.0.0-alpha.3",
   "namespace": "AcpKit.Protocol.V2",
   "methods": [
     {
@@ -64,6 +64,16 @@
     },
     {
       "path": "session/update",
+      "owner": "Client",
+      "notification": true
+    },
+    {
+      "path": "elicitation/create",
+      "owner": "Client",
+      "notification": false
+    },
+    {
+      "path": "elicitation/complete",
       "owner": "Client",
       "notification": true
     }
@@ -241,6 +251,45 @@
       }
     },
     {
+      "type": "AuthCapabilities",
+      "label": "AuthCapabilities",
+      "payload": {
+        "terminal": {
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "AuthMethod",
+      "label": "AuthMethod:terminal",
+      "payload": {
+        "methodId": "acpkit",
+        "name": "acpkit",
+        "description": "acpkit",
+        "args": [
+          "acpkit"
+        ],
+        "env": [
+          {
+            "name": "acpkit",
+            "value": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "terminal"
+      }
+    },
+    {
       "type": "AuthMethod",
       "label": "AuthMethod:agent",
       "payload": {
@@ -269,6 +318,30 @@
       "type": "AuthMethodId",
       "label": "AuthMethodId",
       "payload": "acpkit"
+    },
+    {
+      "type": "AuthMethodTerminal",
+      "label": "AuthMethodTerminal",
+      "payload": {
+        "methodId": "acpkit",
+        "name": "acpkit",
+        "description": "acpkit",
+        "args": [
+          "acpkit"
+        ],
+        "env": [
+          {
+            "name": "acpkit",
+            "value": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
     },
     {
       "type": "AvailableCommand",
@@ -337,6 +410,18 @@
       }
     },
     {
+      "type": "BooleanPropertySchema",
+      "label": "BooleanPropertySchema",
+      "payload": {
+        "title": "acpkit",
+        "description": "acpkit",
+        "default": true,
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
       "type": "CancelRequestNotification",
       "label": "CancelRequestNotification",
       "payload": {
@@ -360,6 +445,31 @@
       "type": "ClientCapabilities",
       "label": "ClientCapabilities",
       "payload": {
+        "auth": {
+          "terminal": {
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "elicitation": {
+          "form": {
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "url": {
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "_meta": {
+            "probe": "meta"
+          }
+        },
         "_meta": {
           "probe": "meta"
         }
@@ -392,6 +502,16 @@
         "cwd": "acpkit",
         "toolCallId": "acpkit",
         "terminalId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "CompleteElicitationNotification",
+      "label": "CompleteElicitationNotification",
+      "payload": {
+        "elicitationId": "acpkit",
         "_meta": {
           "probe": "meta"
         }
@@ -624,6 +744,83 @@
       }
     },
     {
+      "type": "CreateElicitationRequest",
+      "label": "CreateElicitationRequest:form",
+      "payload": {
+        "requestedSchema": {
+          "type": "object",
+          "title": "acpkit",
+          "properties": {
+            "probe": "meta"
+          },
+          "required": [
+            "acpkit"
+          ],
+          "description": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "sessionId": "acpkit",
+        "toolCallId": "acpkit",
+        "requestId": 1,
+        "mode": "form",
+        "message": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "CreateElicitationRequest",
+      "label": "CreateElicitationRequest:url",
+      "payload": {
+        "elicitationId": "acpkit",
+        "url": "acpkit",
+        "sessionId": "acpkit",
+        "toolCallId": "acpkit",
+        "requestId": 1,
+        "mode": "url",
+        "message": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "CreateElicitationResponse",
+      "label": "CreateElicitationResponse:accept",
+      "payload": {
+        "content": {
+          "probe": "meta"
+        },
+        "action": "accept",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "CreateElicitationResponse",
+      "label": "CreateElicitationResponse:decline",
+      "payload": {
+        "action": "decline",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "CreateElicitationResponse",
+      "label": "CreateElicitationResponse:cancel",
+      "payload": {
+        "action": "cancel",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
       "type": "DeleteSessionRequest",
       "label": "DeleteSessionRequest",
       "payload": {
@@ -792,6 +989,238 @@
       }
     },
     {
+      "type": "ElicitationAcceptAction",
+      "label": "ElicitationAcceptAction",
+      "payload": {
+        "content": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ElicitationCapabilities",
+      "label": "ElicitationCapabilities",
+      "payload": {
+        "form": {
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "url": {
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ElicitationContentValue",
+      "label": "ElicitationContentValue",
+      "payload": "acpkit"
+    },
+    {
+      "type": "ElicitationFormCapabilities",
+      "label": "ElicitationFormCapabilities",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ElicitationFormMode",
+      "label": "ElicitationFormMode",
+      "payload": {
+        "requestedSchema": {
+          "type": "object",
+          "title": "acpkit",
+          "properties": {
+            "probe": "meta"
+          },
+          "required": [
+            "acpkit"
+          ],
+          "description": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          }
+        },
+        "sessionId": "acpkit",
+        "toolCallId": "acpkit",
+        "requestId": 1
+      }
+    },
+    {
+      "type": "ElicitationId",
+      "label": "ElicitationId",
+      "payload": "acpkit"
+    },
+    {
+      "type": "ElicitationPropertySchema",
+      "label": "ElicitationPropertySchema:string",
+      "payload": {
+        "title": "acpkit",
+        "description": "acpkit",
+        "minLength": 1,
+        "maxLength": 1,
+        "pattern": "acpkit",
+        "format": "email",
+        "default": "acpkit",
+        "enum": [
+          "acpkit"
+        ],
+        "oneOf": [
+          {
+            "const": "acpkit",
+            "title": "acpkit",
+            "description": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "string"
+      }
+    },
+    {
+      "type": "ElicitationPropertySchema",
+      "label": "ElicitationPropertySchema:number",
+      "payload": {
+        "title": "acpkit",
+        "description": "acpkit",
+        "minimum": 1.5,
+        "maximum": 1.5,
+        "default": 1.5,
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "number"
+      }
+    },
+    {
+      "type": "ElicitationPropertySchema",
+      "label": "ElicitationPropertySchema:integer",
+      "payload": {
+        "title": "acpkit",
+        "description": "acpkit",
+        "minimum": 1,
+        "maximum": 1,
+        "default": 1,
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "integer"
+      }
+    },
+    {
+      "type": "ElicitationPropertySchema",
+      "label": "ElicitationPropertySchema:boolean",
+      "payload": {
+        "title": "acpkit",
+        "description": "acpkit",
+        "default": true,
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "boolean"
+      }
+    },
+    {
+      "type": "ElicitationPropertySchema",
+      "label": "ElicitationPropertySchema:array",
+      "payload": {
+        "title": "acpkit",
+        "description": "acpkit",
+        "minItems": 1,
+        "maxItems": 1,
+        "items": {
+          "enum": [
+            "acpkit"
+          ],
+          "_meta": {
+            "probe": "meta"
+          },
+          "type": "string"
+        },
+        "default": [
+          "acpkit"
+        ],
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "type": "ElicitationRequestScope",
+      "label": "ElicitationRequestScope",
+      "payload": {
+        "requestId": 1
+      }
+    },
+    {
+      "type": "ElicitationSchema",
+      "label": "ElicitationSchema",
+      "payload": {
+        "type": "object",
+        "title": "acpkit",
+        "properties": {
+          "probe": "meta"
+        },
+        "required": [
+          "acpkit"
+        ],
+        "description": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ElicitationSchemaType",
+      "label": "ElicitationSchemaType:object",
+      "payload": "object"
+    },
+    {
+      "type": "ElicitationSchemaType",
+      "label": "ElicitationSchemaType:_extension",
+      "payload": "_acpkit_probe"
+    },
+    {
+      "type": "ElicitationSessionScope",
+      "label": "ElicitationSessionScope",
+      "payload": {
+        "sessionId": "acpkit",
+        "toolCallId": "acpkit"
+      }
+    },
+    {
+      "type": "ElicitationUrlCapabilities",
+      "label": "ElicitationUrlCapabilities",
+      "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "ElicitationUrlMode",
+      "label": "ElicitationUrlMode",
+      "payload": {
+        "elicitationId": "acpkit",
+        "url": "acpkit",
+        "sessionId": "acpkit",
+        "toolCallId": "acpkit",
+        "requestId": 1
+      }
+    },
+    {
       "type": "EmbeddedResource",
       "label": "EmbeddedResource",
       "payload": {
@@ -837,6 +1266,18 @@
         "blob": "acpkit",
         "uri": "acpkit",
         "mimeType": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "EnumOption",
+      "label": "EnumOption",
+      "payload": {
+        "const": "acpkit",
+        "title": "acpkit",
+        "description": "acpkit",
         "_meta": {
           "probe": "meta"
         }
@@ -1005,6 +1446,31 @@
           }
         },
         "capabilities": {
+          "auth": {
+            "terminal": {
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "elicitation": {
+            "form": {
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "url": {
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "_meta": {
+              "probe": "meta"
+            }
+          },
           "_meta": {
             "probe": "meta"
           }
@@ -1092,12 +1558,38 @@
             "methodId": "acpkit",
             "name": "acpkit",
             "description": "acpkit",
+            "args": [
+              "acpkit"
+            ],
+            "env": [
+              {
+                "name": "acpkit",
+                "value": "acpkit",
+                "_meta": {
+                  "probe": "meta"
+                }
+              }
+            ],
             "_meta": {
               "probe": "meta"
             },
-            "type": "agent"
+            "type": "terminal"
           }
         ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "IntegerPropertySchema",
+      "label": "IntegerPropertySchema",
+      "payload": {
+        "title": "acpkit",
+        "description": "acpkit",
+        "minimum": 1,
+        "maximum": 1,
+        "default": 1,
         "_meta": {
           "probe": "meta"
         }
@@ -1311,6 +1803,44 @@
       "payload": "acpkit"
     },
     {
+      "type": "MultiSelectItems",
+      "label": "MultiSelectItems:string",
+      "payload": {
+        "enum": [
+          "acpkit"
+        ],
+        "_meta": {
+          "probe": "meta"
+        },
+        "type": "string"
+      }
+    },
+    {
+      "type": "MultiSelectPropertySchema",
+      "label": "MultiSelectPropertySchema",
+      "payload": {
+        "title": "acpkit",
+        "description": "acpkit",
+        "minItems": 1,
+        "maxItems": 1,
+        "items": {
+          "enum": [
+            "acpkit"
+          ],
+          "_meta": {
+            "probe": "meta"
+          },
+          "type": "string"
+        },
+        "default": [
+          "acpkit"
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
       "type": "NewSessionRequest",
       "label": "NewSessionRequest",
       "payload": {
@@ -1370,6 +1900,20 @@
             }
           }
         ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "NumberPropertySchema",
+      "label": "NumberPropertySchema",
+      "payload": {
+        "title": "acpkit",
+        "description": "acpkit",
+        "minimum": 1.5,
+        "maximum": 1.5,
+        "default": 1.5,
         "_meta": {
           "probe": "meta"
         }
@@ -2793,10 +3337,85 @@
       "payload": "_acpkit_probe"
     },
     {
+      "type": "StringFormat",
+      "label": "StringFormat:email",
+      "payload": "email"
+    },
+    {
+      "type": "StringFormat",
+      "label": "StringFormat:uri",
+      "payload": "uri"
+    },
+    {
+      "type": "StringFormat",
+      "label": "StringFormat:date",
+      "payload": "date"
+    },
+    {
+      "type": "StringFormat",
+      "label": "StringFormat:date-time",
+      "payload": "date-time"
+    },
+    {
+      "type": "StringFormat",
+      "label": "StringFormat:_extension",
+      "payload": "_acpkit_probe"
+    },
+    {
+      "type": "StringMultiSelectItems",
+      "label": "StringMultiSelectItems",
+      "payload": {
+        "enum": [
+          "acpkit"
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "StringPropertySchema",
+      "label": "StringPropertySchema",
+      "payload": {
+        "title": "acpkit",
+        "description": "acpkit",
+        "minLength": 1,
+        "maxLength": 1,
+        "pattern": "acpkit",
+        "format": "email",
+        "default": "acpkit",
+        "enum": [
+          "acpkit"
+        ],
+        "oneOf": [
+          {
+            "const": "acpkit",
+            "title": "acpkit",
+            "description": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
       "type": "Terminal",
       "label": "Terminal",
       "payload": {
         "terminalId": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "TerminalAuthCapabilities",
+      "label": "TerminalAuthCapabilities",
+      "payload": {
         "_meta": {
           "probe": "meta"
         }
@@ -2901,6 +3520,25 @@
         "text": "acpkit",
         "uri": "acpkit",
         "mimeType": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "TitledMultiSelectItems",
+      "label": "TitledMultiSelectItems",
+      "payload": {
+        "anyOf": [
+          {
+            "const": "acpkit",
+            "title": "acpkit",
+            "description": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            }
+          }
+        ],
         "_meta": {
           "probe": "meta"
         }

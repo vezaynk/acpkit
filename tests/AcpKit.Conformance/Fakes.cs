@@ -219,6 +219,12 @@ internal sealed class FakeClient : IAcpClient
         return Task.CompletedTask;
     }
 
+    public Task<CreateElicitationResponse> ElicitationCreateAsync(CreateElicitationRequest request, CancellationToken cancellationToken) =>
+        Task.FromResult<CreateElicitationResponse>(new CreateElicitationResponseCancel());
+
+    public Task ElicitationCompleteAsync(CompleteElicitationNotification request, CancellationToken cancellationToken) =>
+        Task.CompletedTask;
+
     /// <summary>Wait until at least <paramref name="count"/> updates have arrived.</summary>
     public async Task WaitForUpdatesAsync(int count, CancellationToken cancellationToken)
     {
