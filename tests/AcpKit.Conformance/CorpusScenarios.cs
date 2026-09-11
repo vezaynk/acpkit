@@ -140,6 +140,7 @@ internal static class CorpusScenarios
         ["session/close"] = "needs a lifecycle fixture beyond a single turn",
         ["session/set_config_option"] = "needs a fixture advertising config options",
         ["elicitation/create"] = "client-answered; needs an elicitation fixture",
+        ["elicitation/complete"] = "paired with elicitation/create",
     };
 
     private static Task EveryMethodExercised(string path)

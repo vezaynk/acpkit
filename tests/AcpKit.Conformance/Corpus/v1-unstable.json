@@ -1,5 +1,5 @@
 {
-  "schema": "refs/tags/schema-v1.20.0",
+  "schema": "refs/tags/schema-v1.21.0",
   "namespace": "AcpKit.Protocol.V1.Unstable",
   "methods": [
     {
@@ -441,44 +441,6 @@
       }
     },
     {
-      "type": "AuthEnvVar",
-      "label": "AuthEnvVar",
-      "payload": {
-        "name": "acpkit",
-        "label": "acpkit",
-        "secret": true,
-        "optional": true,
-        "_meta": {
-          "probe": "meta"
-        }
-      }
-    },
-    {
-      "type": "AuthMethod",
-      "label": "AuthMethod:env_var",
-      "payload": {
-        "id": "acpkit",
-        "name": "acpkit",
-        "description": "acpkit",
-        "vars": [
-          {
-            "name": "acpkit",
-            "label": "acpkit",
-            "secret": true,
-            "optional": true,
-            "_meta": {
-              "probe": "meta"
-            }
-          }
-        ],
-        "link": "acpkit",
-        "_meta": {
-          "probe": "meta"
-        },
-        "type": "env_var"
-      }
-    },
-    {
       "type": "AuthMethod",
       "label": "AuthMethod:terminal",
       "payload": {
@@ -504,30 +466,6 @@
         "id": "acpkit",
         "name": "acpkit",
         "description": "acpkit",
-        "_meta": {
-          "probe": "meta"
-        }
-      }
-    },
-    {
-      "type": "AuthMethodEnvVar",
-      "label": "AuthMethodEnvVar",
-      "payload": {
-        "id": "acpkit",
-        "name": "acpkit",
-        "description": "acpkit",
-        "vars": [
-          {
-            "name": "acpkit",
-            "label": "acpkit",
-            "secret": true,
-            "optional": true,
-            "_meta": {
-              "probe": "meta"
-            }
-          }
-        ],
-        "link": "acpkit",
         "_meta": {
           "probe": "meta"
         }
@@ -692,6 +630,7 @@
         },
         "terminal": true,
         "session": {
+          "compaction": {},
           "configOptions": {
             "boolean": {
               "_meta": {
@@ -788,6 +727,7 @@
       "type": "ClientSessionCapabilities",
       "label": "ClientSessionCapabilities",
       "payload": {
+        "compaction": {},
         "configOptions": {
           "boolean": {
             "_meta": {
@@ -836,6 +776,99 @@
       "type": "CloseSessionResponse",
       "label": "CloseSessionResponse",
       "payload": {
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "CompactionCapabilities",
+      "label": "CompactionCapabilities",
+      "payload": {}
+    },
+    {
+      "type": "CompactionId",
+      "label": "CompactionId",
+      "payload": "acpkit"
+    },
+    {
+      "type": "CompactionStatus",
+      "label": "CompactionStatus:in_progress",
+      "payload": "in_progress"
+    },
+    {
+      "type": "CompactionStatus",
+      "label": "CompactionStatus:completed",
+      "payload": "completed"
+    },
+    {
+      "type": "CompactionStatus",
+      "label": "CompactionStatus:failed",
+      "payload": "failed"
+    },
+    {
+      "type": "CompactionStatus",
+      "label": "CompactionStatus:cancelled",
+      "payload": "cancelled"
+    },
+    {
+      "type": "CompactionStatus",
+      "label": "CompactionStatus:_extension",
+      "payload": "_acpkit_probe"
+    },
+    {
+      "type": "CompactionSummaryChunk",
+      "label": "CompactionSummaryChunk",
+      "payload": {
+        "compactionId": "acpkit",
+        "content": {
+          "annotations": {
+            "audience": [
+              "assistant"
+            ],
+            "lastModified": "acpkit",
+            "priority": 1.5,
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "text": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          },
+          "type": "text"
+        },
+        "_meta": {
+          "probe": "meta"
+        }
+      }
+    },
+    {
+      "type": "CompactionUpdate",
+      "label": "CompactionUpdate",
+      "payload": {
+        "compactionId": "acpkit",
+        "status": "in_progress",
+        "summary": [
+          {
+            "annotations": {
+              "audience": [
+                "assistant"
+              ],
+              "lastModified": "acpkit",
+              "priority": 1.5,
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "text": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            },
+            "type": "text"
+          }
+        ],
+        "error": "acpkit",
         "_meta": {
           "probe": "meta"
         }
@@ -1906,6 +1939,7 @@
           },
           "terminal": true,
           "session": {
+            "compaction": {},
             "configOptions": {
               "boolean": {
                 "_meta": {
@@ -2148,22 +2182,16 @@
             "id": "acpkit",
             "name": "acpkit",
             "description": "acpkit",
-            "vars": [
-              {
-                "name": "acpkit",
-                "label": "acpkit",
-                "secret": true,
-                "optional": true,
-                "_meta": {
-                  "probe": "meta"
-                }
-              }
+            "args": [
+              "acpkit"
             ],
-            "link": "acpkit",
+            "env": {
+              "probe": "meta"
+            },
             "_meta": {
               "probe": "meta"
             },
-            "type": "env_var"
+            "type": "terminal"
           }
         ],
         "agentInfo": {
@@ -5057,6 +5085,66 @@
           "probe": "meta"
         },
         "sessionUpdate": "usage_update"
+      }
+    },
+    {
+      "type": "SessionUpdate",
+      "label": "SessionUpdate:compaction_update",
+      "payload": {
+        "compactionId": "acpkit",
+        "status": "in_progress",
+        "summary": [
+          {
+            "annotations": {
+              "audience": [
+                "assistant"
+              ],
+              "lastModified": "acpkit",
+              "priority": 1.5,
+              "_meta": {
+                "probe": "meta"
+              }
+            },
+            "text": "acpkit",
+            "_meta": {
+              "probe": "meta"
+            },
+            "type": "text"
+          }
+        ],
+        "error": "acpkit",
+        "_meta": {
+          "probe": "meta"
+        },
+        "sessionUpdate": "compaction_update"
+      }
+    },
+    {
+      "type": "SessionUpdate",
+      "label": "SessionUpdate:compaction_summary_chunk",
+      "payload": {
+        "compactionId": "acpkit",
+        "content": {
+          "annotations": {
+            "audience": [
+              "assistant"
+            ],
+            "lastModified": "acpkit",
+            "priority": 1.5,
+            "_meta": {
+              "probe": "meta"
+            }
+          },
+          "text": "acpkit",
+          "_meta": {
+            "probe": "meta"
+          },
+          "type": "text"
+        },
+        "_meta": {
+          "probe": "meta"
+        },
+        "sessionUpdate": "compaction_summary_chunk"
       }
     },
     {
