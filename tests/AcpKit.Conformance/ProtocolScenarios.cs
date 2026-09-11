@@ -30,6 +30,7 @@ internal static class ProtocolScenarios
         runner.Add(Area, "a known notification does not reach the unknown-notification handler", KnownNotificationStaysTyped);
         runner.Add(Area, "Create forwards inbound frames to onInboundFrame", ConnectionForwardsFrames);
         runner.Add(Area, "Create forwards outbound frames to onOutboundFrame", ConnectionForwardsOutboundFrames);
+        runner.Add(Area, "Create disposes streams unless leaveOpen", CreateClosesStreamsByDefault);
         runner.Add(Area, "tool call patch fields distinguish omitted from cleared", PatchSemantics);
         runner.Add(Area, "session/cancel ends the turn with stopReason cancelled", CancelEndsTheTurn);
     }
@@ -52,8 +53,9 @@ internal static class ProtocolScenarios
             handler,
             onUnknownNotification: onUnknownNotification,
             onInboundFrame: onInboundFrame,
-            onOutboundFrame: onOutboundFrame);
-        var agent = ClientConnection.Create(clientToAgent, agentToClient, agentImpl);
+            onOutboundFrame: onOutboundFrame,
+            leaveOpen: true);
+        var agent = ClientConnection.Create(clientToAgent, agentToClient, agentImpl, leaveOpen: true);
         agentImpl.Attach(agent);
 
         var shutdown = new CancellationTokenSource();
@@ -378,6 +380,18 @@ internal static class ProtocolScenarios
         {
             await stop();
         }
+    }
+
+    private static async Task CreateClosesStreamsByDefault(CancellationToken ct)
+    {
+        var input = new LoopbackStream();
+        var output = new LoopbackStream();
+        var client = AgentConnection.Create(input, output, new FakeClient());
+        await client.DisposeAsync();
+
+        var buffer = new byte[16];
+        var read = await output.ReadAsync(buffer, ct);
+        Expect.Equal(0, read, "Create(leaveOpen: false) EOFs the write stream on dispose");
     }
 
     /// <summary>

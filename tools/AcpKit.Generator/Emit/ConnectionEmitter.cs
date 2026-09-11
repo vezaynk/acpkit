@@ -170,6 +170,11 @@ internal static class ConnectionEmitter
                 /// write, without the trailing newline. See
                 /// <see cref="AcpPeerOptions.OnOutboundFrame"/>.
                 /// </param>
+                /// <param name="leaveOpen">
+                /// When true, disposing the connection does not dispose the streams.
+                /// Default false: hang-up closes the agent's stdin. See
+                /// <see cref="AcpPeerOptions.LeaveOpen"/>.
+                /// </param>
                 public static {{other}}Connection Create(
                     Stream input,
                     Stream output,
@@ -177,7 +182,8 @@ internal static class ConnectionEmitter
                     Action<string>? onDiagnostic = null,
                     AcpNotificationHandler? onUnknownNotification = null,
                     AcpFrameHandler? onInboundFrame = null,
-                    AcpFrameHandler? onOutboundFrame = null)
+                    AcpFrameHandler? onOutboundFrame = null,
+                    bool leaveOpen = false)
                 {
                     ArgumentNullException.ThrowIfNull(input);
                     ArgumentNullException.ThrowIfNull(output);
@@ -190,6 +196,7 @@ internal static class ConnectionEmitter
                         OnDiagnostic = onDiagnostic,
                         OnInboundFrame = onInboundFrame,
                         OnOutboundFrame = onOutboundFrame,
+                        LeaveOpen = leaveOpen,
                     });
 
                     return new {{other}}Connection(peer);

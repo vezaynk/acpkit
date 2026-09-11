@@ -88,6 +88,8 @@ await using var connection = AgentConnection.Create(
     output: agent.StandardInput.BaseStream,
     handler: new MyClient(),
     onDiagnostic: Console.Error.WriteLine);
+// Disposing the connection closes those streams (EOF on the agent's stdin).
+// Pass leaveOpen: true if the streams are shared or outlive the connection.
 
 // The pump must be running before you call anything: responses arrive on it.
 var pump = connection.RunAsync();

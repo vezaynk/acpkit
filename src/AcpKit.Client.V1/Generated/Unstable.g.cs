@@ -143,12 +143,17 @@ public sealed class AgentConnection : IAsyncDisposable
     /// write, without the trailing newline. See
     /// <see cref="AcpPeerOptions.OnOutboundFrame"/>.
     /// </param>
-    public static AgentConnection Create(Stream input, Stream output, IAcpClient handler, Action<string>? onDiagnostic = null, AcpNotificationHandler? onUnknownNotification = null, AcpFrameHandler? onInboundFrame = null, AcpFrameHandler? onOutboundFrame = null)
+    /// <param name="leaveOpen">
+    /// When true, disposing the connection does not dispose the streams.
+    /// Default false: hang-up closes the agent's stdin. See
+    /// <see cref="AcpPeerOptions.LeaveOpen"/>.
+    /// </param>
+    public static AgentConnection Create(Stream input, Stream output, IAcpClient handler, Action<string>? onDiagnostic = null, AcpNotificationHandler? onUnknownNotification = null, AcpFrameHandler? onInboundFrame = null, AcpFrameHandler? onOutboundFrame = null, bool leaveOpen = false)
     {
         ArgumentNullException.ThrowIfNull(input);
         ArgumentNullException.ThrowIfNull(output);
         ArgumentNullException.ThrowIfNull(handler);
-        var peer = new AcpPeer(input, output, new AcpPeerOptions { RequestHandler = (method, parameters, token) => ClientDispatch.RequestAsync(handler, method, parameters, token), NotificationHandler = (method, parameters, token) => ClientDispatch.NotifyAsync(handler, method, parameters, token, onUnknownNotification), OnDiagnostic = onDiagnostic, OnInboundFrame = onInboundFrame, OnOutboundFrame = onOutboundFrame, });
+        var peer = new AcpPeer(input, output, new AcpPeerOptions { RequestHandler = (method, parameters, token) => ClientDispatch.RequestAsync(handler, method, parameters, token), NotificationHandler = (method, parameters, token) => ClientDispatch.NotifyAsync(handler, method, parameters, token, onUnknownNotification), OnDiagnostic = onDiagnostic, OnInboundFrame = onInboundFrame, OnOutboundFrame = onOutboundFrame, LeaveOpen = leaveOpen, });
         return new AgentConnection(peer);
     }
 
