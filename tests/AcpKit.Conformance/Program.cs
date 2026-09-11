@@ -79,6 +79,7 @@ namespace AcpKit.Conformance
             runner.Add(Area, "an inbound $/cancel_request cancels the handler", InboundCancellation);
             runner.Add(Area, "an inbound $/cancel_request with legacy params.id still cancels", InboundCancellationLegacyId);
             runner.Add(Area, "a disconnect faults everything in flight", DisconnectFaultsPending);
+            runner.Add(Area, "disposing the peer EOFs the output stream", DisposeClosesOutput);
         }
 
         private static AcpPeerOptions Echoing(Action<string>? diagnostic = null) => new()
@@ -491,6 +492,25 @@ namespace AcpKit.Conformance
 
             await Expect.ThrowsAsync<AcpException>(() => call, "a call in flight when the peer vanished");
             await link.DisposeAsync();
+        }
+
+        private static async Task DisposeClosesOutput(CancellationToken ct)
+        {
+            // A subprocess agent sees EOF on stdin when the client hangs up. That is
+            // DisposeAsync closing the write stream, not a separate close the host has to
+            // remember. LeaveOpen is for shared streams (the loopback in these tests).
+            var input = new LoopbackStream();
+            var output = new LoopbackStream();
+            var peer = new AcpPeer(input, output);
+            var pump = peer.RunAsync(ct);
+
+            await peer.DisposeAsync();
+
+            var buffer = new byte[16];
+            var read = await output.ReadAsync(buffer, ct);
+            Expect.Equal(0, read, "the far side sees EOF on the write stream");
+
+            await Task.WhenAny(pump, Task.Delay(500, ct));
         }
     }
 }

@@ -208,6 +208,16 @@ internal sealed class LoopbackStream : Stream
     public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
 
     public override void SetLength(long value) => throw new NotSupportedException();
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            Finish();
+        }
+
+        base.Dispose(disposing);
+    }
 }
 
 /// <summary>A pair of peers wired to each other, plus the raw wire for hand-written traffic.</summary>
@@ -233,14 +243,28 @@ internal sealed class Link : IAsyncDisposable
 
     public Task RightPump { get; private set; } = Task.CompletedTask;
 
+    /// <summary>
+    /// Loopback streams are shared by both peers, so neither peer owns them. Same as
+    /// <c>leaveOpen: true</c> on a <see cref="StreamReader"/>.
+    /// </summary>
+    private static AcpPeerOptions Shared(AcpPeerOptions? options) => new()
+    {
+        RequestHandler = options?.RequestHandler,
+        NotificationHandler = options?.NotificationHandler,
+        OnDiagnostic = options?.OnDiagnostic,
+        OnInboundFrame = options?.OnInboundFrame,
+        OnOutboundFrame = options?.OnOutboundFrame,
+        LeaveOpen = true,
+    };
+
     public static Link Create(AcpPeerOptions? left = null, AcpPeerOptions? right = null)
     {
         var leftToRight = new LoopbackStream();
         var rightToLeft = new LoopbackStream();
         var link = new Link(leftToRight, rightToLeft)
         {
-            Left = new AcpPeer(rightToLeft, leftToRight, left),
-            Right = new AcpPeer(leftToRight, rightToLeft, right),
+            Left = new AcpPeer(rightToLeft, leftToRight, Shared(left)),
+            Right = new AcpPeer(leftToRight, rightToLeft, Shared(right)),
         };
 
         link.LeftPump = link.Left.RunAsync(link._shutdown.Token);
@@ -255,7 +279,7 @@ internal sealed class Link : IAsyncDisposable
         var rightToLeft = new LoopbackStream();
         var link = new Link(leftToRight, rightToLeft)
         {
-            Left = new AcpPeer(rightToLeft, leftToRight, left),
+            Left = new AcpPeer(rightToLeft, leftToRight, Shared(left)),
         };
 
         link.LeftPump = link.Left.RunAsync(link._shutdown.Token);

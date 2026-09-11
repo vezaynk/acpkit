@@ -704,6 +704,35 @@ public sealed class AcpPeer : IAsyncDisposable
         FailPending(new ObjectDisposedException(nameof(AcpPeer)));
         _lifetime.Dispose();
         _writeLock.Dispose();
+
+        if (_options.LeaveOpen)
+        {
+            return;
+        }
+
+        // Output first: that is EOF on a subprocess agent's stdin. Input next, unless it
+        // is the same stream. Already-disposed streams are ignored — two peers can share
+        // a loopback and both run this path.
+        try
+        {
+            await _output.DisposeAsync().ConfigureAwait(false);
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+
+        if (ReferenceEquals(_input, _output))
+        {
+            return;
+        }
+
+        try
+        {
+            await _input.DisposeAsync().ConfigureAwait(false);
+        }
+        catch (ObjectDisposedException)
+        {
+        }
     }
 
     private readonly record struct Reply(string Payload);

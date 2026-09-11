@@ -94,4 +94,17 @@ public sealed class AcpPeerOptions
     /// faults the read.
     /// </remarks>
     public AcpFrameHandler? OnOutboundFrame { get; init; }
+
+    /// <summary>
+    /// When true, <see cref="AcpPeer.DisposeAsync"/> does not dispose the input and output
+    /// streams. Default is false: disposing the peer closes the write stream (EOF to a
+    /// subprocess agent) and the read stream.
+    /// </summary>
+    /// <remarks>
+    /// Set this when the streams are shared — an in-process loopback, a connection that
+    /// outlives the peer, the same pattern as <see cref="StreamReader"/>'s <c>leaveOpen</c>.
+    /// A host that spawned the agent and handed its stdin/stdout to the peer leaves this
+    /// false so <c>await using</c> the connection is enough to hang up.
+    /// </remarks>
+    public bool LeaveOpen { get; init; }
 }
